@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>A new civic destination for San Francisco at the Palace of Fine Arts</title>
+<meta name="description" content="A new civic destination for San Francisco at the Palace of Fine Arts.">
+<meta name="theme-color" content="#1c1610">
+
+<meta property="og:type" content="website">
+<meta property="og:title" content="A new civic destination for San Francisco at the Palace of Fine Arts">
+<meta property="og:description" content="A new civic destination for San Francisco at the Palace of Fine Arts.">
+<meta property="og:image" content="og-image.svg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:type" content="image/svg+xml">
+<meta name="twitter:card" content="summary_large_image">
+
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="preload" as="image" href="arrive.jpeg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- ============================================================
+     Reusable corner-flourish SVG (referenced by <use> in frames)
+     ============================================================ -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="corner-flourish" viewBox="0 0 60 60">
+      <g fill="none" stroke="currentColor" stroke-width="0.7" stroke-linecap="round" stroke-linejoin="round">
+        <!-- outer L tracing the corner, inset slightly -->
+        <path d="M 60 6 L 28 6 C 16 6 6 16 6 28 L 6 60" />
+        <!-- inner parallel arc -->
+        <path d="M 60 12 L 32 12 C 22 12 12 22 12 32 L 12 60" opacity="0.55" />
+        <!-- small spiral inside the corner -->
+        <path d="M 22 22 C 22 18 26 16 28 18 C 30 20 30 24 26 24 C 22 24 22 20 24 20" opacity="0.85" />
+      </g>
+    </symbol>
+  </defs>
+</svg>
+
+<main>
+
+  <!-- =========================================================
+       SCENE 1 — Hero (full bleed)
+       ========================================================= -->
+  <section class="scene scene--hero" aria-labelledby="hero-title">
+    <div class="hero__image" aria-hidden="true">
+      <span class="placeholder placeholder--hero">Hero image</span>
+    </div>
+    <div class="hero__veil" aria-hidden="true"></div>
+    <div class="hero__inner">
+      <h1 id="hero-title" class="hero__title">A new civic destination for San Francisco at the Palace of Fine Arts</h1>
+    </div>
+    <div class="hero__chevron" aria-hidden="true">
+      <span></span>
+    </div>
+  </section>
+
+  <!-- =========================================================
+       SCENE 2 — Standalone text over blurred hero
+       ========================================================= -->
+  <section class="scene scene--blur" id="scene-blur">
+    <div class="blur__sticky">
+      <div class="blur__bg" aria-hidden="true">
+        <span class="placeholder placeholder--hero placeholder--blurred">Hero image</span>
+      </div>
+      <div class="blur__veil" aria-hidden="true"></div>
+      <div class="blur__inner">
+        <p class="blur__text">
+          <span class="blur__line">A place you can visit with your kids, family, and friends</span>
+          <span class="blur__line">to experience beauty, wonder, and hope for the future.</span>
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================
+       SCENE 3 — Progressive line reveal (the question)
+       ========================================================= -->
+  <section class="scene scene--reveal" id="scene-reveal">
+    <div class="reveal__sticky">
+      <div class="reveal__layout">
+        <div class="reveal__stack">
+          <p class="reveal__line" data-line="0">Here in the Bay Area, the most extraordinary innovations on earth are being built.</p>
+          <p class="reveal__line" data-line="1">Cures for diseases, machines that think, robots that build, energy that will cleanly power the world.</p>
+          <p class="reveal__line" data-line="2">For most people, there&rsquo;s no place to see this.</p>
+          <p class="reveal__line" data-line="3">Without access to the future, people aren&rsquo;t inspired to build it.</p>
+          <p class="reveal__line" data-line="4">If we want an incredible future, we need a home for that optimism.</p>
+        </div>
+        <div class="reveal__innovations" aria-hidden="true">
+          <figure class="reveal__inno" data-inno="0">
+            <div class="reveal__inno-image"><img src="images/sight.jpg" alt="Cures for diseases" loading="lazy"></div>
+            <figcaption>Biotech &middot; South San Francisco</figcaption>
+          </figure>
+          <figure class="reveal__inno" data-inno="1">
+            <div class="reveal__inno-image"><img src="images/zio.webp" alt="Machines that think" loading="lazy"></div>
+            <figcaption>AI &middot; San Francisco</figcaption>
+          </figure>
+          <figure class="reveal__inno" data-inno="2">
+            <div class="reveal__inno-image"><img src="images/airships.webp" alt="Robots that build" loading="lazy"></div>
+            <figcaption>Robotics &middot; Bay Area</figcaption>
+          </figure>
+          <figure class="reveal__inno" data-inno="3">
+            <div class="reveal__inno-image"><img src="images/oceans.jpg" alt="Energy to power the world" loading="lazy"></div>
+            <figcaption>Clean energy &middot; East Bay</figcaption>
+          </figure>
+        </div>
+      </div>
+      <div class="reveal__climax-hold">
+        <p class="reveal__line reveal__line--climax" data-line="5">What if San Francisco had a place where the future felt exciting again?</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================
+       SCENE 4 — PPIE history: sticky landscape image (right),
+       text cycles within fixed box (left). Triggers below.
+       ========================================================= -->
+  <section class="scene scene--ppie" id="scene-ppie">
+    <div class="ppie__sticky">
+      <div class="ppie__grid">
+        <div class="ppie__text">
+          <p class="ppie__line is-active" data-line="0">In 1915, San Francisco opened its doors to the world, inviting millions to witness a city rebuilt from rubble.</p>
+          <p class="ppie__line" data-line="1">This World&rsquo;s Fair captured our spirit of possibility and put San Francisco on the world stage.</p>
+          <p class="ppie__line" data-line="2">The last building standing from that World&rsquo;s Fair is the Palace of Fine Arts.</p>
+          <p class="ppie__line" data-line="3">It needs a new purpose &mdash; a steward for the next 100 years.</p>
+          <p class="ppie__line" data-line="4">We imagine a home for San Francisco&rsquo;s spirit of innovation.</p>
+        </div>
+        <div class="ppie__media">
+          <figure class="frame frame--light frame--landscape">
+<div class="frame__inner">
+              <img src="Flickr_-_...trialsanderrors_-_Panama-Pacific_International_Exposition,_San_Francisco,_aeroplane_view,_1915.jpg" alt="The Panama-Pacific International Exposition, San Francisco, 1915" class="ppie__image">
+            </div>
+          </figure>
+        </div>
+      </div>
+    </div>
+    <div class="ppie__triggers" aria-hidden="true">
+      <div class="ppie__trigger" data-line="0"></div>
+      <div class="ppie__trigger" data-line="1"></div>
+      <div class="ppie__trigger" data-line="2"></div>
+      <div class="ppie__trigger" data-line="3"></div>
+      <div class="ppie__trigger" data-line="4"></div>
+    </div>
+  </section>
+
+  <!-- =========================================================
+       SCENE 5 — Establishing moment: "Welcome to the Future"
+       Plain centered text on paper — no frame, no card.
+       ========================================================= -->
+  <section class="scene scene--establish">
+    <div class="establish__hold">
+      <h2 class="establish__h">Welcome to the Future</h2>
+      <p class="establish__sub">Our vision for San Francisco&rsquo;s new home of progress.</p>
+      <p class="establish__year">Palace of Fine Arts &middot; 2030</p>
+    </div>
+  </section>
+
+  <!-- =========================================================
+       SCENE 6 — A day at the Palace (crossfading beats)
+       ========================================================= -->
+  <section class="scene scene--day" id="scene-day">
+    <div class="day__sticky">
+      <div class="day__stage">
+
+        <!-- Persistent site plan. Starts as beat 0's hero image,
+             scrolls down into a corner companion for beats 1–6. -->
+        <div class="day__map" aria-hidden="true">
+          <svg class="day__map-svg" viewBox="0 0 600 480" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <pattern id="day-map-grid" width="40" height="40" patternUnits="userSpaceOnUse">
+                <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(26,22,18,0.05)" stroke-width="0.5"/>
+              </pattern>
+            </defs>
+            <rect width="600" height="480" fill="url(#day-map-grid)"/>
+
+            <!-- Grounds: outer rounded rectangle -->
+            <rect class="atlas__zone" data-zone="grounds"
+                  x="40" y="40" width="520" height="400" rx="8"/>
+
+            <!-- Lagoon (semicircle pond out front) -->
+            <path class="atlas__zone" data-zone="lagoon"
+                  d="M 160 360 Q 300 440 440 360 Q 300 410 160 360 Z"/>
+
+            <!-- West colonnade segment — World's Fare -->
+            <rect class="atlas__zone" data-zone="fare"
+                  x="90" y="150" width="130" height="56" rx="4"
+                  transform="rotate(-10 155 178)"/>
+
+            <!-- Central exhibition pavilion — Tour into Tomorrow -->
+            <rect class="atlas__zone" data-zone="tour"
+                  x="237" y="138" width="126" height="56" rx="4"/>
+
+            <!-- East colonnade segment — Future Lab -->
+            <rect class="atlas__zone" data-zone="lab"
+                  x="380" y="150" width="130" height="56" rx="4"
+                  transform="rotate(10 445 178)"/>
+
+            <!-- Rotunda (visual landmark) -->
+            <g class="atlas__rotunda">
+              <circle cx="300" cy="280" r="60" fill="rgba(26,22,18,0.02)"
+                      stroke="rgba(26,22,18,0.18)" stroke-width="0.7"/>
+              <circle cx="300" cy="280" r="44" fill="none"
+                      stroke="rgba(26,22,18,0.12)" stroke-width="0.5"/>
+              <circle cx="300" cy="280" r="26" fill="none"
+                      stroke="rgba(26,22,18,0.16)" stroke-width="0.5"/>
+              <circle cx="300" cy="280" r="2.5" fill="rgba(26,22,18,0.35)"/>
+              <text class="day__map-label" x="300" y="256" text-anchor="middle" font-size="9"
+                    fill="rgba(26,22,18,0.40)" font-family="Inter, sans-serif"
+                    letter-spacing="0.3em">ROTUNDA</text>
+            </g>
+
+            <!-- Footpaths -->
+            <g class="atlas__paths" stroke="rgba(26,22,18,0.10)" stroke-width="0.6"
+               stroke-dasharray="2 3" fill="none">
+              <path d="M 300 420 Q 300 360 300 340"/>
+              <path d="M 150 420 Q 220 360 290 305"/>
+              <path d="M 450 420 Q 380 360 310 305"/>
+            </g>
+
+            <!-- Compass -->
+            <g class="day__map-label atlas__compass" transform="translate(545, 60)">
+              <circle cx="0" cy="0" r="11" fill="none"
+                      stroke="rgba(26,22,18,0.30)" stroke-width="0.6"/>
+              <path d="M 0 -7 L 2.6 3.5 L 0 1 L -2.6 3.5 Z"
+                    fill="rgba(26,22,18,0.55)"/>
+              <text x="0" y="-15" text-anchor="middle" font-size="8"
+                    fill="rgba(26,22,18,0.50)" font-family="Inter, sans-serif"
+                    letter-spacing="0.3em">N</text>
+            </g>
+
+            <!-- Scale bar -->
+            <g class="day__map-label atlas__scale" transform="translate(50, 450)">
+              <line x1="0" y1="0" x2="70" y2="0"
+                    stroke="rgba(26,22,18,0.25)" stroke-width="0.6"/>
+              <line x1="0" y1="-3" x2="0" y2="3"
+                    stroke="rgba(26,22,18,0.25)" stroke-width="0.6"/>
+              <line x1="70" y1="-3" x2="70" y2="3"
+                    stroke="rgba(26,22,18,0.25)" stroke-width="0.6"/>
+              <text x="35" y="14" text-anchor="middle" font-size="7.5"
+                    fill="rgba(26,22,18,0.35)" font-family="Inter, sans-serif"
+                    letter-spacing="0.3em">200 FT</text>
+            </g>
+          </svg>
+        </div>
+
+        <!-- Beat 0: just a caption — the map is the visual -->
+        <div class="day__layer day__layer--map" data-beat="0">
+          <p class="day__caption">Palace of Fine Arts &mdash; the site, at a glance.</p>
+        </div>
+
+        <!-- Beats 1-6: the tour, with the map persisting in the corner. -->
+        <div class="day__layer" data-beat="1">
+          <figure class="day__frame">
+            <img src="arrive.jpeg" alt="Arrival on Palace Drive" class="day__image" loading="eager" decoding="async">
+          </figure>
+          <p class="day__caption">Step out of your Waymo onto Palace drive.</p>
+        </div>
+
+        <div class="day__layer" data-beat="2">
+          <figure class="day__frame">
+            <img src="grounds.jpeg" alt="Landscaped grounds" class="day__image" loading="lazy" decoding="async">
+          </figure>
+          <p class="day__caption">Wander through beautifully landscaped grounds filled with statues of history&rsquo;s greatest innovators.</p>
+        </div>
+
+        <div class="day__layer" data-beat="3">
+          <figure class="day__frame">
+            <img src="lunch.jpeg" alt="World&rsquo;s Fare food hall" class="day__image" loading="lazy" decoding="async">
+          </figure>
+          <p class="day__caption">Meet friends at the World&rsquo;s Fare, grabbing a bite to eat in one of the 60+ food stalls serving global and innovative dishes.</p>
+        </div>
+
+        <div class="day__layer" data-beat="4">
+          <figure class="day__frame">
+            <img src="tour.jpeg" alt="Tour into Tomorrow" class="day__image" loading="lazy" decoding="async">
+          </figure>
+          <p class="day__caption">Bring your kids on a Tour into Tomorrow, stepping into a story about the incredible future that&rsquo;s ahead.</p>
+        </div>
+
+        <div class="day__layer" data-beat="5">
+          <figure class="day__frame">
+            <img src="talks.jpeg" alt="Talks and workshops" class="day__image" loading="lazy" decoding="async">
+          </figure>
+          <p class="day__caption">Join for a talk and workshop to learn about the incredible work being done today to build the future, and find a way to get involved.</p>
+        </div>
+
+        <div class="day__layer" data-beat="6">
+          <figure class="day__frame">
+            <img src="lagoon.jpeg" alt="Evening fountain show on the lagoon" class="day__image" loading="lazy" decoding="async">
+          </figure>
+          <p class="day__caption">End your evening with a beautiful fountain show before heading home with a renewed sense of wonder.</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================
+       SCENE 7 — Impact statement — word-by-word reveal on scroll
+       ========================================================= -->
+  <section class="scene scene--impact" id="scene-impact">
+    <div class="impact__sticky">
+      <div class="impact__inner">
+        <p class="impact__line" aria-label="The Palace of Fine Arts will once again capture our spirit of innovation, serving as a testament to human potential.">
+          <span class="impact__w">The</span> <span class="impact__w">Palace</span> <span class="impact__w">of</span> <span class="impact__w">Fine</span> <span class="impact__w">Arts</span> <span class="impact__w">will</span> <span class="impact__w">once</span> <span class="impact__w">again</span> <span class="impact__w">capture</span> <span class="impact__w">our</span> <span class="impact__w">spirit</span> <span class="impact__w">of</span> <span class="impact__w">innovation,</span> <span class="impact__w">serving</span> <span class="impact__w">as</span> <span class="impact__w">a</span> <span class="impact__w">testament</span> <span class="impact__w">to</span> <span class="impact__w">human</span> <span class="impact__w">potential.</span>
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================
+       SCENE 9 — Closing letter. No frame — plain centered text on
+       paper, integrated as the page's final paragraph.
+       ========================================================= -->
+  <section class="scene scene--letter" id="scene-letter">
+    <div class="letter__hold">
+      <h2 class="letter__h">Help write the next chapter in the story of San Francisco.</h2>
+      <div class="letter__body">
+        <p class="letter__p">This is a once-in-a-generation opportunity to build a new institution for San Francisco.</p>
+        <p class="letter__p">I&rsquo;m assembling a coalition of funders, founders, and civic leaders who share my belief in the future to make it happen.</p>
+        <p class="letter__p">If that&rsquo;s you, I&rsquo;d love to meet you.</p>
+      </div>
+      <div class="letter__sign">
+        <img class="letter__signature" src="Cameron Wiese Signature.png" alt="Cameron Wiese" width="932" height="630">
+        <p class="letter__name">Cameron Wiese</p>
+        <p class="letter__phone"><a href="tel:+13603180000">360-318-0000</a></p>
+        <p class="letter__cta"><a href="mailto:camwiese@gmail.com?subject=I%27d%20love%20to%20learn%20more">Get in touch &middot; Book a tour</a></p>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <p class="footer__line">World&rsquo;s Fair Company &copy; 2026 &middot; Confidential</p>
+  </footer>
+
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+<script src="script.js"></script>
+
+</body>
+</html>

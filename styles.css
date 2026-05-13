@@ -1,0 +1,1136 @@
+/* ============================================================
+   Future Palace — light editorial scrollytelling
+   ============================================================ */
+
+:root {
+  /* ── Palette: paper / ink ─────────────────────────────────── */
+  --paper:        #f5f2ec;       /* page background */
+  --paper-2:      #efeae0;       /* alt surface (image placeholders) */
+  --paper-3:      #e7e0d2;       /* deeper paper */
+  --ink:          #1a1612;       /* primary text */
+  --ink-soft:     rgba(26, 22, 18, 0.78);
+  --ink-muted:    rgba(26, 22, 18, 0.55);
+  --ink-faint:    rgba(26, 22, 18, 0.32);
+  --ink-ghost:    rgba(26, 22, 18, 0.14);
+  --rule:         rgba(26, 22, 18, 0.16);
+  --rule-strong:  rgba(26, 22, 18, 0.30);
+
+  /* Dark inset for ornate frames (Scenes 5, 9) */
+  --noir:         #0e0b08;
+  --noir-2:       #16110b;
+  --ivory:        #f1ece1;
+  --ivory-soft:   rgba(241, 236, 225, 0.78);
+  --ivory-muted:  rgba(241, 236, 225, 0.52);
+  --ivory-faint:  rgba(241, 236, 225, 0.28);
+  --gilt:         #c9a35c;
+  --gilt-soft:    rgba(201, 163, 92, 0.55);
+
+  /* Editorial accent — used on small moments (date, hover, signature) */
+  --accent:       #8e2832;
+  --accent-soft:  rgba(142, 40, 50, 0.40);
+
+  /* Typography */
+  --font-display: 'Fraunces', 'Cormorant Garamond', Georgia, serif;
+  --font-sans:    'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+  /* Measure / spacing */
+  --measure:      62ch;
+  --measure-wide: 78ch;
+  --gutter:       clamp(1.25rem, 4vw, 2.5rem);
+  --pad-section:  clamp(4rem, 12vh, 8rem);
+  --frame-radius: 2px;
+}
+
+/* ── Resets ───────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+html, body, h1, h2, h3, h4, h5, h6, p, ul, ol, li, figure { margin: 0; padding: 0; }
+ul, ol { list-style: none; }
+a  { color: inherit; text-decoration: none; }
+img { max-width: 100%; display: block; }
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  scroll-behavior: auto; /* let Lenis handle smoothing on non-touch */
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 1.0625rem;
+  line-height: 1.6;
+  font-weight: 300;
+  overflow-x: hidden;
+  font-feature-settings: "ss01", "kern";
+  min-height: 100vh;
+}
+
+/* ============================================================
+   Reveal helper — used by GSAP / IntersectionObserver
+   ============================================================ */
+
+.reveal-init {
+  opacity: 0;
+  transform: translateY(14px);
+}
+.reveal-in {
+  opacity: 1;
+  transform: none;
+  transition: opacity 1s ease, transform 1s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+/* ============================================================
+   Placeholders (CSS-only image stand-ins)
+   Until real assets are dropped in
+   ============================================================ */
+
+.placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background:
+    repeating-linear-gradient(
+      45deg,
+      transparent 0 14px,
+      rgba(26,22,18,0.06) 14px 15px
+    ),
+    var(--paper-3);
+  color: var(--ink-muted);
+  font-family: var(--font-sans);
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  text-align: center;
+  padding: 1.25rem;
+  border: 1px solid transparent;
+}
+
+.placeholder--hero {
+  background:
+    radial-gradient(ellipse 70% 80% at 50% 40%, rgba(60,40,20,0.15) 0%, rgba(0,0,0,0.55) 100%),
+    repeating-linear-gradient(45deg, rgba(255,255,255,0.02) 0 12px, rgba(0,0,0,0.04) 12px 13px),
+    #2a2218;
+  color: rgba(241, 236, 225, 0.55);
+}
+
+.placeholder--blurred {
+  filter: blur(24px) saturate(0.85);
+  transform: scale(1.08);
+}
+
+/* ============================================================
+   FRAME — reusable ornate container
+   Modifiers: --light (paper) | --dark (noir)
+   Modifiers: --portrait | --landscape | --map | --establish | --letter | --day
+   ============================================================ */
+
+.frame {
+  position: relative;
+  background: var(--paper-2);
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--frame-radius);
+  display: flex;
+  flex-direction: column;
+  isolation: isolate;
+}
+
+.frame--light {
+  background: var(--paper-2);
+  color: var(--ink);
+  border-color: rgba(26, 22, 18, 0.32);
+}
+
+/* Cream — a subtler off-white surface used for the establishing /
+   letter frames so they feel distinct from the page yet on the same palette. */
+.frame--cream {
+  background: #faf6ed;
+  color: var(--ink);
+  border-color: rgba(26, 22, 18, 0.22);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.6) inset,
+    0 22px 60px -30px rgba(26, 22, 18, 0.18);
+}
+
+.frame__inner {
+  position: relative;
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 0;
+}
+
+/* Corner flourishes — SVG version (Scenes 4, 6 day-flow image frames) */
+.frame__corner {
+  position: absolute;
+  width: 38px;
+  height: 38px;
+  color: currentColor;
+  opacity: 0.75;
+  pointer-events: none;
+  z-index: 2;
+}
+.frame--light .frame__corner { opacity: 0.55; }
+.frame--cream .frame__corner { color: var(--ink); opacity: 0.42; }
+
+.frame__corner--tl { top: -1px; left: -1px; }
+.frame__corner--tr { top: -1px; right: -1px; transform: scaleX(-1); }
+.frame__corner--bl { bottom: -1px; left: -1px; transform: scaleY(-1); }
+.frame__corner--br { bottom: -1px; right: -1px; transform: scale(-1, -1); }
+
+/* Ornate Nouveau corner PNG flourishes — used on cream frames (Scenes 5, 9).
+   PNG ratio is 600:338 ≈ 1.77:1. Sized to roughly 14% of frame width.
+   Filter darkens the silver/chrome ornament so it reads cleanly on cream paper. */
+.frame__corner--png {
+  position: absolute;
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position: center;
+  pointer-events: none;
+  z-index: 2;
+  width: clamp(80px, 14%, 140px);
+  aspect-ratio: 600 / 338;
+  opacity: 0.85;
+  filter: brightness(0.18) saturate(0);
+}
+.frame__corner--png.frame__corner--tl {
+  top: -1px; left: -1px;
+  background-image: url("nouveau-corner-chrome-tl.png");
+}
+.frame__corner--png.frame__corner--tr {
+  top: -1px; right: -1px;
+  background-image: url("nouveau-corner-chrome-tr.png");
+  transform: none;
+}
+.frame__corner--png.frame__corner--bl {
+  bottom: -1px; left: -1px;
+  background-image: url("nouveau-corner-chrome-bl.png");
+  transform: none;
+}
+.frame__corner--png.frame__corner--br {
+  bottom: -1px; right: -1px;
+  background-image: url("nouveau-corner-chrome-br.png");
+  transform: none;
+}
+
+/* Top / bottom labels (break the rule like in the PDF references) */
+.frame__top-label,
+.frame__bottom-label {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(0.9rem, 1.2vw, 1.05rem);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  padding: 0 1.5em;
+  z-index: 3;
+}
+.frame--cream .frame__top-label,
+.frame--cream .frame__bottom-label {
+  background: #faf6ed;
+  color: var(--ink-soft);
+}
+.frame--light .frame__top-label,
+.frame--light .frame__bottom-label {
+  background: var(--paper-2);
+  color: var(--ink-soft);
+}
+.frame__top-label    { top: -0.7em; }
+.frame__bottom-label { bottom: -0.7em; }
+
+/* Frame size variants */
+.frame--portrait  { aspect-ratio: 4 / 5;  }
+.frame--landscape { aspect-ratio: 16 / 10; }
+.frame--day       { aspect-ratio: 16 / 10; }
+.frame--map       { aspect-ratio: 5 / 4;  }
+.frame--establish { aspect-ratio: 4 / 3;  }
+.frame--letter    { aspect-ratio: auto;    }
+
+/* ============================================================
+   SCENE 1 — Hero
+   ============================================================ */
+
+.scene--hero {
+  position: relative;
+  min-height: 100svh;
+  min-height: 100vh;
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+  background: #1c1610;
+}
+
+.hero__image {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+.hero__image .placeholder {
+  height: 100%;
+}
+
+.hero__veil {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background:
+    linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0) 40%, rgba(0,0,0,0.55) 100%),
+    linear-gradient(to right, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0) 60%);
+  pointer-events: none;
+}
+
+.hero__inner {
+  position: relative;
+  z-index: 2;
+  padding: 0 clamp(1.5rem, 6vw, 5rem) clamp(3rem, 7vh, 5rem);
+  max-width: 1060px;
+  width: 100%;
+  margin: 0 auto;
+  color: var(--ivory);
+}
+
+.hero__title {
+  font-family: var(--font-display);
+  font-weight: 350;
+  font-size: clamp(1.65rem, 3.4vw, 2.85rem);
+  line-height: 1.12;
+  letter-spacing: -0.01em;
+  max-width: 24ch;
+  color: var(--ivory);
+  opacity: 0;
+  transform: translateY(14px);
+  animation: heroIn 1.4s ease 0.4s forwards;
+  text-wrap: balance;
+}
+
+@keyframes heroIn {
+  to { opacity: 1; transform: none; }
+}
+
+.hero__chevron {
+  position: absolute;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  width: 28px;
+  height: 28px;
+  opacity: 0;
+  animation: heroIn 1s ease 1.2s forwards, chevronBob 2.2s ease-in-out 1.6s infinite;
+}
+.hero__chevron span {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-right: 1px solid rgba(241,236,225,0.5);
+  border-bottom: 1px solid rgba(241,236,225,0.5);
+  transform: rotate(45deg) translate(-2px, -2px);
+}
+@keyframes chevronBob {
+  0%, 100% { transform: translate(-50%, 0); }
+  50%      { transform: translate(-50%, 6px); }
+}
+
+/* ============================================================
+   SCENE 2 — Blurred standalone (text reveals on scroll, then fades)
+   Tall section with a sticky stage; JS scrubs text opacity.
+   ============================================================ */
+
+.scene--blur {
+  position: relative;
+  min-height: 200vh;
+  background: #1c1610;
+}
+
+.blur__sticky {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100svh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.blur__bg {
+  position: absolute;
+  inset: -4%;
+  z-index: 0;
+}
+.blur__bg .placeholder { height: 100%; }
+
+.blur__veil {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 50%, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.55) 100%);
+  pointer-events: none;
+}
+
+.blur__inner {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 72ch;
+  margin: 0 auto;
+  padding: 0 clamp(1.5rem, 6vw, 4rem);
+  text-align: center;
+  color: var(--ivory);
+}
+
+.blur__text {
+  font-family: var(--font-display);
+  font-weight: 350;
+  font-size: clamp(1.15rem, 2.1vw, 1.75rem);
+  line-height: 1.35;
+  letter-spacing: -0.003em;
+  display: block;
+  text-wrap: balance;
+}
+
+.blur__line {
+  display: block;
+  opacity: 0;
+  transform: translateY(10px);
+  will-change: opacity, transform;
+}
+
+/* ============================================================
+   SCENE 3 — Progressive line reveal (the question)
+   ============================================================ */
+
+.scene--reveal {
+  position: relative;
+  /* tall scroll container so timeline can scrub */
+}
+
+.reveal__sticky {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100svh;
+  display: grid;
+  place-items: center;
+  padding: 0 clamp(1.5rem, 6vw, 3rem);
+}
+
+/* Two-column layout: text reveal on left, innovation stack on right */
+.reveal__layout {
+  grid-area: 1 / 1;
+  width: 100%;
+  max-width: 980px;
+  display: grid;
+  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+  gap: clamp(2rem, 5vw, 4rem);
+  align-items: center;
+}
+
+.reveal__stack {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(1rem, 2.2vh, 1.8rem);
+  max-width: min(48ch, 100%);
+}
+
+.reveal__climax-hold {
+  grid-area: 1 / 1;
+  width: 100%;
+  max-width: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  text-align: center;
+}
+
+.reveal__line {
+  font-family: var(--font-display);
+  font-weight: 350;
+  font-size: clamp(1.05rem, 1.55vw, 1.35rem);
+  line-height: 1.45;
+  color: var(--ink);
+  opacity: 0;
+  transform: translateY(10px);
+  will-change: opacity, transform;
+  text-wrap: balance;
+}
+
+.reveal__line--climax {
+  font-size: clamp(1.8rem, 4vw, 3rem);
+  line-height: 1.16;
+  font-weight: 350;
+  letter-spacing: -0.012em;
+  color: var(--ink);
+  max-width: 28ch;
+  margin: 0 auto;
+  text-wrap: balance;
+}
+
+/* Innovation card stack — polaroid-on-a-table layout.
+   4 cards, each tilted at a small angle, stacking with subtle offsets.
+   Each card animates in as the corresponding setup line is revealed. */
+.reveal__innovations {
+  position: relative;
+  width: 100%;
+  height: clamp(320px, 55vh, 520px);
+  perspective: 1200px;
+}
+
+.reveal__inno {
+  position: absolute;
+  width: clamp(220px, 28vw, 320px);
+  margin: 0;
+  background: var(--paper-2);
+  border: 1px solid rgba(26, 22, 18, 0.10);
+  padding: clamp(0.45rem, 0.9vw, 0.6rem) clamp(0.45rem, 0.9vw, 0.6rem) clamp(0.7rem, 1.4vw, 0.9rem);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.6) inset,
+    0 14px 40px -18px rgba(26, 22, 18, 0.45),
+    0 2px 6px -2px rgba(26, 22, 18, 0.15);
+  opacity: 0;
+  will-change: opacity, transform;
+  /* GSAP scrub owns opacity + transform — no CSS transition or it chases the target */
+}
+/* Position per card — staggered like dropped polaroids.
+   Rotation + opacity owned by GSAP (so scrub can interpolate cleanly). */
+.reveal__inno[data-inno="0"] { top: 0%;  left: 0%;  }
+.reveal__inno[data-inno="1"] { top: 4%;  left: 42%; }
+.reveal__inno[data-inno="2"] { top: 48%; left: 6%;  }
+.reveal__inno[data-inno="3"] { top: 52%; left: 48%; }
+
+.reveal__inno-image {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  background: var(--paper-3);
+  overflow: hidden;
+}
+.reveal__inno-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.reveal__inno figcaption {
+  display: block;
+  margin-top: 0.55rem;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 350;
+  font-size: 0.84rem;
+  color: var(--ink-soft);
+  text-align: center;
+}
+
+/* ============================================================
+   SCENE 4 — PPIE history
+   Sticky stage. On desktop: text-left cycles through 5 lines while
+   landscape image stays put on the right. Triggers below provide
+   scroll length, one per line.
+   ============================================================ */
+
+.scene--ppie {
+  position: relative;
+  background: var(--paper);
+}
+
+.ppie__sticky {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100svh;
+  display: flex;
+  align-items: center;
+  z-index: 1;
+}
+
+/* Single column on every viewport: image on top, text below — matched widths. */
+.ppie__grid {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(1.25rem, 3vh, 2rem);
+  width: 100%;
+  max-width: 720px;            /* shared column width */
+  margin: 0 auto;
+  padding: 0 clamp(1.5rem, 5vw, 3rem);
+}
+
+.ppie__media {
+  width: 100%;
+  order: 1;                    /* image on top */
+}
+.ppie__text {
+  order: 2;                    /* text below */
+}
+.ppie__media .frame {
+  width: 100%;
+}
+
+.ppie__text {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  min-height: 5em;
+}
+
+.ppie__line {
+  grid-area: 1 / 1;
+  font-family: var(--font-display);
+  font-weight: 350;
+  font-size: clamp(1.15rem, 1.7vw, 1.5rem);
+  line-height: 1.35;
+  letter-spacing: -0.005em;
+  color: var(--ink);
+  text-align: center;
+  max-width: 100%;             /* matches the image column width */
+  opacity: 0;
+  text-wrap: balance;
+  will-change: opacity, transform;
+  /* GSAP scrub owns motion. */
+}
+
+.ppie__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 10% 40%;   /* start showing left side of panorama */
+  display: block;
+  will-change: transform, object-position;
+  transform-origin: center center;
+}
+
+.ppie__triggers { position: relative; }
+.ppie__trigger {
+  height: 75vh;
+  height: 75svh;
+}
+
+/* ============================================================
+   SCENE 5 — Establishing frame ("Welcome to the Future")
+   ============================================================ */
+
+.scene--establish {
+  position: relative;
+  min-height: 160vh;
+  background: var(--paper);
+}
+
+.establish__hold {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100svh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: clamp(3rem, 8vh, 6rem) clamp(1.5rem, 6vw, 4rem);
+  width: 100%;
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.establish__h {
+  font-family: var(--font-display);
+  font-weight: 350;
+  font-size: clamp(2rem, 4.4vw, 3.2rem);
+  line-height: 1.1;
+  letter-spacing: -0.005em;
+  color: var(--ink);
+  text-align: center;
+  margin: 0;
+  text-wrap: balance;
+  opacity: 0;
+  will-change: opacity, transform;
+}
+
+.establish__sub {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 350;
+  font-size: clamp(1.05rem, 1.6vw, 1.35rem);
+  line-height: 1.4;
+  color: var(--ink-soft);
+  max-width: 38ch;
+  margin-top: clamp(0.85rem, 2vh, 1.35rem);
+  text-wrap: balance;
+  opacity: 0;
+  will-change: opacity, transform;
+}
+
+.establish__year {
+  font-family: var(--font-sans);
+  font-style: normal;
+  font-weight: 500;
+  font-size: 0.78rem;
+  line-height: 1;
+  color: var(--ink-muted);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  margin-top: clamp(1.75rem, 4vh, 2.75rem);
+  opacity: 0;
+  will-change: opacity, transform;
+}
+
+/* ============================================================
+   SCENE 6 — A day at the Palace (cinematic stage).
+   Sticky 100vh stage holds one image+caption at a time. GSAP scrubs
+   each beat through drift-in-from-below + fade, hold with slow scale,
+   drift-up + fade — all tied to scroll position.
+   ============================================================ */
+
+.scene--day {
+  position: relative;
+  min-height: 750vh;         /* 7 beats × ~93vh + sticky */
+  background: var(--paper);
+}
+
+.day__sticky {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100svh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(2rem, 6vh, 4rem) clamp(1.5rem, 5vw, 3rem);
+}
+
+.day__stage {
+  position: relative;
+  width: 100%;
+  max-width: 720px;
+  /* Grid stack: every layer occupies the same cell — natural content
+     defines the stage's height, opacity controls visibility. */
+  display: grid;
+  place-items: center;
+}
+
+.day__layer {
+  grid-area: 1 / 1;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(1.25rem, 3vh, 1.75rem);
+  opacity: 0;
+  will-change: opacity, transform;
+}
+
+/* Beat 0 — map-as-hero. No image frame; the persistent .day__map
+   element fills the hero spot at beat 0 and shrinks into the corner
+   for beats 1–6. The layer itself only holds the caption. */
+.day__layer--map {
+  /* The actual hero size is set by the .day__map element below;
+     this layer just needs enough vertical space for the caption
+     to read beneath the (initially hero-sized) map. */
+  min-height: 60vh;
+  justify-content: flex-end;
+}
+
+/* The persistent site plan. Starts as the beat-0 hero (fills the
+   day__stage's grid cell), then scrolls/scales into the corner
+   via GSAP scrub. Position is transform-driven so motion is smooth. */
+.day__map {
+  grid-area: 1 / 1;
+  position: relative;
+  width: 100%;
+  aspect-ratio: 5 / 4;          /* matches SVG viewBox 600x480 */
+  background: var(--paper-2);
+  border: 1px solid rgba(26, 22, 18, 0.10);
+  z-index: 5;                    /* sits above all photo layers */
+  transform-origin: top left;
+  will-change: transform;
+  /* GSAP scrub animates scale + x/y to send this into the top-right corner */
+}
+.day__map-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.day__frame {
+  width: 100%;
+  margin: 0;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  border: 1px solid rgba(26, 22, 18, 0.10);
+  background: var(--paper-2);
+}
+
+.day__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  will-change: transform;
+}
+
+.day__caption {
+  width: 100%;
+  text-align: center;
+  font-family: var(--font-display);
+  font-weight: 350;
+  font-size: clamp(1.15rem, 1.7vw, 1.5rem);
+  line-height: 1.35;
+  letter-spacing: -0.005em;
+  color: var(--ink);
+  text-wrap: balance;
+}
+
+/* ============================================================
+   SCENE 7 — Impact statement
+   ============================================================ */
+
+.scene--impact {
+  position: relative;
+  background: var(--paper);
+}
+
+.impact__sticky {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100svh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(2rem, 6vh, 4rem) clamp(1.5rem, 6vw, 4rem);
+}
+
+.impact__inner {
+  max-width: 42ch;
+  text-align: center;
+}
+
+.impact__line {
+  font-family: var(--font-display);
+  font-weight: 350;
+  font-style: italic;
+  font-size: clamp(1.6rem, 3.4vw, 2.6rem);
+  line-height: 1.28;
+  letter-spacing: -0.005em;
+  color: var(--ink);
+  text-wrap: balance;
+}
+
+/* Each word starts hidden and resolves to ink as scroll advances.
+   Stays invisible while neighbouring scenes are still on-screen. */
+.impact__w {
+  display: inline-block;
+  opacity: 0;
+  will-change: opacity;
+}
+
+/* Atlas zone styles (kept — the site plan now lives inside Scene 6
+   as the day__map companion). Default subtle, .is-active solid. */
+.atlas__zone {
+  fill: rgba(26, 22, 18, 0.05);
+  stroke: rgba(26, 22, 18, 0.30);
+  stroke-width: 0.7;
+  transition: fill 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+              stroke 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.atlas__zone.is-active {
+  fill: rgba(26, 22, 18, 0.55);
+  stroke: rgba(26, 22, 18, 0.85);
+}
+
+/* ============================================================
+   SCENE 9 — Letter
+   ============================================================ */
+
+/* Frameless closing letter — integrated into the page as a final paragraph */
+.scene--letter {
+  position: relative;
+  min-height: 100vh;     /* exactly one viewport — no excess scroll past content */
+  background: var(--paper);
+}
+
+.letter__hold {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100svh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(2.5rem, 8vh, 5rem) clamp(1.5rem, 6vw, 4rem);
+  width: 100%;
+  max-width: 540px;          /* tight editorial measure */
+  margin: 0 auto;
+  text-align: center;
+}
+
+.letter__h {
+  font-family: var(--font-display);
+  font-weight: 350;
+  font-size: clamp(1.55rem, 2.6vw, 2.1rem);
+  line-height: 1.2;
+  letter-spacing: -0.008em;
+  color: var(--ink);
+  margin: 0 0 clamp(1.75rem, 4.5vh, 2.5rem);
+  text-align: center;
+  text-wrap: balance;
+  max-width: 22ch;
+  opacity: 0;
+  transform: translateY(10px);
+  will-change: opacity, transform;
+}
+
+.letter__body {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-width: 44ch;
+  margin: 0 auto clamp(1.5rem, 3.5vh, 2.25rem);
+}
+
+.letter__p {
+  font-family: var(--font-display);
+  font-weight: 350;
+  font-size: clamp(1.05rem, 1.35vw, 1.2rem);
+  line-height: 1.55;
+  color: var(--ink);
+  text-align: center;
+  text-wrap: balance;
+  opacity: 0;
+  transform: translateY(8px);
+  will-change: opacity, transform;
+}
+
+.letter__sign {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  margin-top: 0.5rem;
+  opacity: 0;
+  transform: translateY(8px);
+  will-change: opacity, transform;
+}
+
+.letter__signature {
+  display: block;
+  width: clamp(150px, 20vw, 200px);
+  height: auto;
+  margin: 0 auto 0.4rem;       /* centered with the rest */
+  /* Strip white background, keep just the ink strokes */
+  mix-blend-mode: multiply;
+  user-select: none;
+}
+
+.letter__name,
+.letter__phone,
+.letter__cta {
+  font-family: var(--font-sans);
+  font-size: 0.88rem;
+  font-weight: 400;
+  color: var(--ink-muted);
+  letter-spacing: 0.02em;
+}
+.letter__name { color: var(--ink-soft); font-weight: 500; }
+.letter__phone a,
+.letter__cta a {
+  color: inherit;
+  border-bottom: 1px solid var(--ink-faint);
+  display: inline-block;
+  min-height: 44px;
+  line-height: 44px;
+  padding: 0 0.15rem;
+  transition: color 0.3s ease, border-color 0.3s ease;
+}
+.letter__phone a:hover,
+.letter__cta a:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+.letter__cta {
+  margin-top: 0.85rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+/* Visible focus rings on all interactive elements */
+a:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+
+.footer {
+  display: flex;
+  justify-content: center;
+  padding: clamp(2.5rem, 6vh, 4rem) clamp(1.5rem, 5vw, 3rem);
+  background: var(--paper);
+}
+
+.footer__line {
+  width: 100%;
+  max-width: 640px;
+  text-align: center;
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
+  font-weight: 400;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--ink-ghost);
+}
+
+/* ============================================================
+   RESPONSIVE — Mobile
+   ============================================================ */
+
+@media (max-width: 860px) {
+  body { font-size: 1rem; }
+
+  /* Scene 1 hero */
+  .hero__inner { padding-bottom: clamp(3.5rem, 12vh, 6rem); }
+  .hero__title { font-size: clamp(2rem, 8vw, 2.6rem); max-width: 18ch; }
+
+  /* Scene 2 blur */
+  .blur__text { font-size: clamp(1.2rem, 4.6vw, 1.55rem); }
+
+  /* Scene 3 reveal — single column on mobile, innovation stack below text */
+  .reveal__layout {
+    grid-template-columns: 1fr;
+    gap: clamp(1rem, 3vh, 1.5rem);
+  }
+  .reveal__stack { max-width: 92vw; }
+  .reveal__line { font-size: clamp(1rem, 4vw, 1.2rem); }
+  .reveal__line--climax {
+    font-size: clamp(1.55rem, 6.5vw, 2rem);
+    max-width: 92vw;
+  }
+  .reveal__innovations {
+    height: clamp(180px, 28vh, 240px);
+  }
+  .reveal__inno {
+    width: clamp(140px, 42vw, 200px);
+  }
+  .reveal__inno[data-inno="0"] { top: 2%;  left: 4%;  }
+  .reveal__inno[data-inno="1"] { top: 8%;  left: 48%; }
+  .reveal__inno[data-inno="2"] { top: 44%; left: 16%; }
+  .reveal__inno[data-inno="3"] { top: 50%; left: 52%; }
+  .reveal__inno figcaption { font-size: 0.74rem; }
+
+  /* Scene 4 PPIE — same single-column pattern, mobile-tightened */
+  .ppie__sticky {
+    padding: 1rem 0 1.5rem;
+    gap: 0.85rem;
+    height: 100vh;
+    height: 100svh;
+  }
+  .ppie__grid {
+    gap: 1rem;
+    padding: 0 clamp(1rem, 4vw, 1.5rem);
+  }
+  .ppie__text { min-height: 5em; }
+  .ppie__line {
+    font-size: clamp(1.05rem, 4vw, 1.35rem);
+  }
+  .ppie__trigger { height: 70vh; }
+
+  /* Scene 5 — establishing frame */
+  .establish__h { font-size: clamp(1.6rem, 6.2vw, 2.05rem); }
+  .establish__sub {
+    font-size: clamp(0.95rem, 3.8vw, 1.1rem);
+    margin-top: 0.75rem;
+  }
+  .establish__year {
+    font-size: 0.7rem;
+    letter-spacing: 0.18em;
+    margin-top: 1.5rem;
+  }
+  .frame__top-label, .frame__bottom-label {
+    font-size: clamp(0.78rem, 3.4vw, 0.95rem);
+  }
+  .frame--establish .frame__inner {
+    padding: clamp(2.5rem, 8vh, 4rem) clamp(1.5rem, 5vw, 2.5rem);
+  }
+
+  /* Scene 6 day-flow — sticky stage, mobile-tightened */
+  .day__sticky {
+    padding: 1rem clamp(0.75rem, 4vw, 1.5rem);
+  }
+  .day__stage { max-width: 100%; }
+  .day__layer { gap: 0.85rem; }
+  .day__frame {
+    aspect-ratio: 4 / 5;
+    width: min(96%, calc(72vh * 4 / 5));
+    margin: 0 auto;
+  }
+  .day__caption {
+    font-size: clamp(1rem, 4vw, 1.25rem);
+    padding: 0 0.5rem;
+  }
+
+  /* Scene 7 impact */
+  .scene--impact {
+    padding: clamp(2.5rem, 6vh, 4rem) clamp(1.5rem, 5vw, 2.5rem);
+    min-height: auto;
+  }
+  .impact__line { font-size: clamp(1.35rem, 6vw, 1.75rem); }
+
+  /* Scene 6 day-map labels hidden on mobile (they'd be illegible at corner scale) */
+  .day__map .day__map-label { display: none; }
+
+  /* Scene 9 letter */
+  .letter__hold {
+    max-width: 100%;
+    padding: clamp(2rem, 8vh, 3.5rem) clamp(1.25rem, 5vw, 2rem);
+  }
+  .letter__h { font-size: clamp(1.4rem, 5.8vw, 1.8rem); }
+  .letter__p { font-size: clamp(1rem, 4vw, 1.1rem); }
+  .letter__signature { width: clamp(130px, 36vw, 180px); }
+
+  /* Footer — avoid uppercase wrap at narrow widths */
+  .footer__line { letter-spacing: 0.18em; }
+
+  .frame__corner { width: 28px; height: 28px; }
+}
+
+/* ============================================================
+   Reduced motion — short-circuit all scrubs / transitions
+   ============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .reveal__line, .reveal__inno, .letter__h, .letter__p, .letter__sign, .blur__line, .impact__line, .impact__w {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  .day__layer { opacity: 0; }
+  .day__layer[data-beat="0"] { opacity: 1; transform: none !important; }
+  .ppie__line { opacity: 0; }
+  .ppie__line.is-active { opacity: 1; }
+  .hero__chevron, .hero__chevron span { animation: none !important; }
+  .hero__chevron { display: none; }
+}
