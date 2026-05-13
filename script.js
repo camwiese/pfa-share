@@ -317,12 +317,14 @@
     tl.to(yr,  { opacity: 1, y: 0, duration: 0.25, ease: 'power3.out' }, 0.32);
     if (art) tl.to(art, { opacity: 1, y: 0, duration: 0.35, ease: 'power3.out' }, 0.48);
 
-    /* Linger — fully visible */
+    /* Long linger — Welcome holds for a real beat before fading. */
     const linger = art ? [h, sub, yr, art] : [h, sub, yr];
-    tl.to(linger, { opacity: 1, duration: 0.7 }, 0.95);
+    tl.to(linger, { opacity: 1, duration: 1.6 }, 0.95);
 
-    /* Fade everything out before Scene 6. */
-    tl.to(linger, { opacity: 0, y: -12, duration: 0.4, ease: 'power2.in' }, 1.70);
+    /* Fade everything out late in the scroll — the section visibly
+       empties as the reader continues toward Scene 6, giving a clean
+       break between Welcome and the visions tour. */
+    tl.to(linger, { opacity: 0, y: -12, duration: 0.5, ease: 'power2.in' }, 2.70);
   })();
 
   /* =============================================================
@@ -352,20 +354,11 @@
       },
     });
 
-    /* ── Image pan only (no zoom): drift across the panorama from
-       the far-left water through to the Palace rotunda on the right. */
+    /* ── Image stays static. The earlier pan/zoom proved too busy
+       against the cycling captions; the panorama reads better held. */
     if (image) {
-      image.style.objectPosition = '0% 50%';
+      image.style.objectPosition = '50% 50%';
       image.style.transform = 'none';
-      const panProxy = { x: 0 };
-      tl.to(panProxy, {
-        x: 100,
-        duration: 0.65,             /* finishes early; image holds for the closing text */
-        ease: 'power1.inOut',       /* gentle start, settled finish */
-        onUpdate: function () {
-          image.style.objectPosition = panProxy.x + '% 50%';
-        },
-      }, 0);
     }
 
     /* ── Text line cycling ──
@@ -411,6 +404,11 @@
   (function scene6_day() {
     const section = document.getElementById('scene-day');
     if (!section) return;
+    /* On mobile we drop the sticky crossfade and let the reader scroll
+       naturally through every beat — each image renders statically at
+       the same landscape size as the PPIE panorama. The CSS in the
+       max-width:860px query handles the layout reset. */
+    if (window.matchMedia('(max-width: 860px)').matches) return;
     const layers = Array.from(section.querySelectorAll('.day__layer'));
     const N = layers.length;
     if (!N) return;
