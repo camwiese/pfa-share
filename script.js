@@ -1,6 +1,17 @@
-/* ============================================================
+/* =============================================================
    Future Palace — scrollytelling
-   ============================================================ */
+   -------------------------------------------------------------
+   Each scene is its own IIFE below, prefixed with a banner.
+   Scenes (top → bottom of page):
+     SCENE 1  Hero            (CSS only)
+     SCENE 2  Blur reveal     "A place you can visit..."
+     SCENE 3  Innovations     Bay Area lines + 3 polaroids
+     SCENE 4  PPIE history    1915 panorama pan + zoom
+     SCENE 5  Establish       "Welcome to the Future" + plate
+     SCENE 6  Day-flow        6 photo beats + plate corner inset
+     SCENE 7  Impact          Word-by-word reveal
+     SCENE 9  Letter          Closing CTA cascade
+   ============================================================= */
 
 (function () {
   'use strict';
@@ -49,11 +60,18 @@
     return; /* Do not initialise any scroll-driven scenes */
   }
 
-  /* ============================================================
-     Scene 2 — each line reveals on its own scroll beat. The two
-     lines don't appear together; line 2 only joins as the user keeps
-     scrolling. Both then linger, then both fade out cleanly.
-     ============================================================ */
+  /* =============================================================
+     SCENE 2 — "A place you can visit…"
+     Each line reveals on its own scroll beat. The two lines never
+     appear together; there's a real scroll gap before line 2 joins.
+     Then both hold, then both fade out cleanly.
+     Timeline (scrub-driven, 0–3.0):
+       0.20–0.55  line 1 fades in
+       0.55–1.10  hold line 1 alone (reader beat)
+       1.10–1.45  line 2 fades in
+       1.45–2.40  hold both
+       2.40–2.80  both fade out
+     ============================================================= */
   (function scene2_reveal() {
     const section = document.getElementById('scene-blur');
     if (!section) return;
@@ -65,50 +83,53 @@
         trigger: section,
         start: 'top top',
         end: 'bottom top',
-        scrub: 0.6,
+        scrub: 0.8,
       },
     });
 
-    /* Line 1 reveals as the user begins to scroll */
-    tl.to(lines[0], {
-      opacity: 1, y: 0,
-      duration: 0.25,
-      ease: 'power2.out',
-    }, 0.05);
+    /* Line 1 fades in. */
+    tl.fromTo(lines[0],
+      { opacity: 0, y: 10 },
+      { opacity: 1, y: 0, duration: 0.35, ease: 'power2.out' },
+      0.20
+    );
 
-    /* Line 2 holds back — only joins after the reader has had time
-       to read line 1 (a meaningful scroll beat later) */
+    /* Hold line 1 alone — meaningful scroll beat for the reader. */
+    tl.to(lines[0], { opacity: 1, duration: 0.55 }, 0.55);
+
+    /* Line 2 finally joins. */
     if (lines[1]) {
-      tl.to(lines[1], {
-        opacity: 1, y: 0,
-        duration: 0.25,
-        ease: 'power2.out',
-      }, 0.45);
+      tl.fromTo(lines[1],
+        { opacity: 0, y: 10 },
+        { opacity: 1, y: 0, duration: 0.35, ease: 'power2.out' },
+        1.10
+      );
     }
 
-    /* Both lines hold across the middle of the section */
-    tl.to(lines, { opacity: 1, duration: 0.8 }, 0.7);
+    /* Hold both. */
+    tl.to(lines, { opacity: 1, duration: 0.95 }, 1.45);
 
-    /* Fade out cleanly before Scene 3 */
+    /* Fade out cleanly before Scene 3. */
     tl.to(lines, {
-      opacity: 0,
-      y: -8,
+      opacity: 0, y: -8,
       duration: 0.4,
       ease: 'power2.in',
-    }, 1.5);
+    }, 2.40);
   })();
 
-  /* ============================================================
-     Scene 3 — progressive line reveal w/ lingering climax
-     Section scrolls 7 viewport-heights tall so each beat breathes.
-     Timeline beats:
-       0.0–2.0   setup lines 0..3 reveal (each at i*0.5),
-                 previous fades to 0.35
-       2.4       all setup lines fade to 0
-       2.5–3.0   climax fades in + scales up
-       3.0–5.0   climax lingers (no animation)
-       5.0–5.6   climax fades out cleanly before Scene 4
-     ============================================================ */
+  /* =============================================================
+     SCENE 3 — "The future is already being built here"
+     Setup lines reveal sequentially (each dimming the previous),
+     three polaroid cards appear alongside, then everything hands
+     off to the climax line. Cards linger past the text, then fade
+     cleanly before Scene 4 begins.
+     Timeline layout:
+       0.0–0.6   breathing room (paper alone, anticipation)
+       0.6+      setup lines arrive on a 0.4 cadence
+       handoff   setup fades, climax appears with cards still on
+       linger    climax holds; cards then fade out
+       exit      climax fades cleanly before Scene 4
+     ============================================================= */
   (function scene3_reveal() {
     const section = document.getElementById('scene-reveal');
     if (!section) return;
@@ -118,132 +139,134 @@
     const setup = Array.from(lines).filter(l => !l.classList.contains('reveal__line--climax'));
     const climax = section.querySelector('.reveal__line--climax');
 
-    /* Tight total scroll — about 55vh per setup line plus handoff + climax linger */
-    section.style.minHeight = (setup.length * 55 + 140) + 'vh';
+    /* Section length: a little more breathing room before & after the text. */
+    section.style.minHeight = (setup.length * 60 + 180) + 'vh';
 
     const tl = gsap.timeline({
       scrollTrigger: {
         trigger: section,
         start: 'top top',
         end: 'bottom bottom',
-        scrub: 0.6,
+        scrub: 0.8,
       },
     });
 
-    /* Innovation polaroid stack — appears as Bay Area lines are revealed */
+    /* Innovation polaroid stack (no captions, just photos) */
     const innos = section.querySelectorAll('.reveal__inno');
     const innoRot = [-4, 4, -2];   /* final tilt per card (deg), three cards */
 
-    /* Set initial state for each card so scrub interpolates cleanly */
+    /* Initial card state — hidden, slightly down, slightly small */
     innos.forEach((inno, i) => {
       gsap.set(inno, { opacity: 0, rotation: innoRot[i] || 0, y: 22, scale: 0.96 });
     });
 
-    /* Setup lines reveal sequentially, each dimming the previous */
+    /* Pre-roll: breathing room so paper sits alone before text arrives. */
+    const PREROLL = 0.6;
+
+    /* Setup lines reveal sequentially, each dimming the previous. */
     const SETUP_STEP = 0.4;
     setup.forEach((line, i) => {
       tl.to(line, {
-        opacity: 1,
-        y: 0,
-        duration: 0.32,
-        ease: 'power2.out',
-      }, i * SETUP_STEP);
+        opacity: 1, y: 0,
+        duration: 0.36,
+        ease: 'power3.out',
+      }, PREROLL + i * SETUP_STEP);
       if (i > 0) {
         tl.to(setup[i - 1], {
           opacity: 0.30,
           duration: 0.32,
-        }, i * SETUP_STEP);
+        }, PREROLL + i * SETUP_STEP);
       }
     });
 
-    /* Innovation cards drop in — staggered across the first two setup beats */
+    /* Cards drop in — staggered across the first couple of setup beats. */
     innos.forEach((inno, i) => {
       tl.to(inno, {
-        opacity: 1,
-        y: 0,
-        scale: 1,
+        opacity: 1, y: 0, scale: 1,
         rotation: innoRot[i] || 0,
-        duration: 0.5,
-        ease: 'power2.out',
-      }, i * 0.22 + 0.1);
+        duration: 0.55,
+        ease: 'power3.out',
+      }, PREROLL + 0.1 + i * 0.22);
     });
 
-    /* Hand off — fade setup lines out first; the cards keep lingering */
-    const setupEndsAt = (setup.length - 1) * SETUP_STEP + 0.4;          /* last setup fully shown */
-    const handoffAt   = setupEndsAt + 0.4;                              /* text fade-out begins after dwell */
+    /* Handoff: setup lines fade out first; cards keep lingering briefly. */
+    const setupEndsAt = PREROLL + (setup.length - 1) * SETUP_STEP + 0.4;
+    const handoffAt   = setupEndsAt + 0.4;
     tl.to(setup, { opacity: 0, y: -10, duration: 0.5, ease: 'power2.out' }, handoffAt);
 
+    /* Cards fade out earlier than before — well before Scene 4 starts. */
+    tl.to(innos, {
+      opacity: 0, y: -10, scale: 0.97,
+      duration: 0.55,
+      ease: 'power2.in',
+    }, handoffAt + 0.3);
+
     if (climax) {
-      /* Breathing room before climax appears */
+      /* Breathing room, then climax appears. */
       tl.to(climax, {
-        opacity: 1,
-        y: 0,
-        scale: 1.05,
-        duration: 0.65,
-        ease: 'power2.out',
-      }, handoffAt + 0.9);
-      /* Climax lingers */
-      tl.to(climax, {
-        opacity: 1,
-        duration: 1.2,
-      }, handoffAt + 1.6);
-      /* Cards finally fade — after text climax has held; lets them linger */
-      tl.to(innos, {
-        opacity: 0,
-        y: -10,
+        opacity: 1, y: 0, scale: 1.05,
         duration: 0.7,
-        ease: 'power2.in',
-      }, handoffAt + 2.4);
-      /* Clean exit before Scene 4 */
+        ease: 'power3.out',
+      }, handoffAt + 0.95);
+      /* Climax lingers. */
+      tl.to(climax, { opacity: 1, duration: 1.3 }, handoffAt + 1.7);
+      /* Clean exit well before Scene 4. */
       tl.to(climax, {
-        opacity: 0,
-        y: -14,
+        opacity: 0, y: -14,
         duration: 0.55,
         ease: 'power2.in',
-      }, handoffAt + 2.9);
+      }, handoffAt + 3.0);
     }
   })();
 
-  /* ============================================================
-     Scene 5 — Welcome to the Future: fade IN as you scroll into the
-     section, linger, then fade OUT before the day-flow images begin.
-     ============================================================ */
+  /* =============================================================
+     SCENE 5 — "Welcome to the Future"
+     Fades in as the reader scrolls into the section, lingers,
+     then fades out before the day-flow begins.
+     ============================================================= */
   (function scene5_establish() {
     const section = document.querySelector('.scene--establish');
     if (!section) return;
-    const h   = section.querySelector('.establish__h');
-    const sub = section.querySelector('.establish__sub');
-    const yr  = section.querySelector('.establish__year');
+    const h     = section.querySelector('.establish__h');
+    const sub   = section.querySelector('.establish__sub');
+    const yr    = section.querySelector('.establish__year');
+    const plate = section.querySelector('.establish__plate');
     if (!h) return;
 
     gsap.set([h, sub, yr], { y: 14 });
+    if (plate) gsap.set(plate, { opacity: 0, y: 18 });
 
     const tl = gsap.timeline({
       scrollTrigger: {
         trigger: section,
         start: 'top top',
         end: 'bottom top',
-        scrub: 0.6,
+        scrub: 0.8,
       },
     });
 
-    /* Reveal stack at start (0.0 – 0.6 of timeline) */
-    tl.to(h,   { opacity: 1, y: 0, duration: 0.25, ease: 'power2.out' }, 0.0);
-    tl.to(sub, { opacity: 1, y: 0, duration: 0.25, ease: 'power2.out' }, 0.15);
-    tl.to(yr,  { opacity: 1, y: 0, duration: 0.25, ease: 'power2.out' }, 0.30);
+    /* Reveal stack — heading, sub, year, plate */
+    tl.to(h,   { opacity: 1, y: 0, duration: 0.25, ease: 'power3.out' }, 0.00);
+    tl.to(sub, { opacity: 1, y: 0, duration: 0.25, ease: 'power3.out' }, 0.18);
+    tl.to(yr,  { opacity: 1, y: 0, duration: 0.25, ease: 'power3.out' }, 0.32);
+    if (plate) tl.to(plate, { opacity: 1, y: 0, duration: 0.35, ease: 'power3.out' }, 0.48);
 
-    /* Linger 0.6 – 1.4 — fully visible */
-    tl.to([h, sub, yr], { opacity: 1, duration: 0.8 }, 0.6);
+    /* Linger — fully visible */
+    tl.to([h, sub, yr, plate].filter(Boolean), { opacity: 1, duration: 0.7 }, 0.85);
 
-    /* Fade out cleanly before day-flow images begin */
-    tl.to([h, sub, yr], { opacity: 0, y: -12, duration: 0.4, ease: 'power2.in' }, 1.5);
+    /* Fade text out before Scene 6; the plate keeps going (it
+       continues into Scene 6 as the corner inset). */
+    tl.to([h, sub, yr], { opacity: 0, y: -12, duration: 0.4, ease: 'power2.in' }, 1.55);
   })();
 
-  /* ============================================================
-     Scene 4 — PPIE: scrub-driven smooth reveal.
-     Image stays pinned; text fades in/out as scroll passes each line.
-     Reverse scroll reverses the reveal.
-     ============================================================ */
+  /* =============================================================
+     SCENE 4 — PPIE history (1915 panorama)
+     Image frame stays pinned. The wide panorama pans left → right
+     and zooms gently, ending on the Palace rotunda. Five text
+     lines cycle through, timed so the "Palace of Fine Arts" line
+     lands as the rotunda settles, and the closing lines read
+     against the held Palace shot.
+     ============================================================= */
   (function scene4_ppie() {
     const section = document.getElementById('scene-ppie');
     if (!section) return;
@@ -313,110 +336,108 @@
     });
   })();
 
-  /* ============================================================
-     Scene 6 — Day flow crossfade
-     ============================================================ */
-  /* ============================================================
-     Scene 6 — Day flow: cinematic sticky stage with integrated map.
-     Beat 0 shows the site plan filling the stage. Between beats
-     0 and 1 the map scales down + translates to the top-right corner
-     and stays there as a spatial companion. For each of beats 1–6
-     the corresponding zone highlights on the now-corner-sized map.
-     ============================================================ */
+  /* =============================================================
+     SCENE 6 — A day at the Palace
+     Cinematic sticky stage. Beat 0 shows the line-drawing plate
+     filling the stage. Between beats 0 → 1 the plate shrinks and
+     anchors flush at the TOP-RIGHT of each photo frame, riding
+     along as a spatial companion. Beats 1–6 are the photo tour,
+     crossfading on pure opacity. Captions reveal word-by-word
+     as each beat scrolls into view.
+     ============================================================= */
   (function scene6_day() {
     const section = document.getElementById('scene-day');
     if (!section) return;
-    const layers  = Array.from(section.querySelectorAll('.day__layer'));
-    const map     = section.querySelector('.day__map');
-    const overlay = section.querySelector('.day__map-overlay');
-    const stage   = section.querySelector('.day__stage');
+    const layers = Array.from(section.querySelectorAll('.day__layer'));
+    const map    = section.querySelector('.day__map');
+    const stage  = section.querySelector('.day__stage');
     const N = layers.length;
     if (!N || !map || !stage) return;
 
-    /* Beat-to-zone mapping. Beat 0 = no zone (map is the hero). */
-    const beatZones = ['', 'grounds', 'grounds', 'fare', 'tour', 'lab', 'lagoon'];
+    /* Split each caption into word spans so they can reveal one at a time. */
+    layers.forEach((layer) => {
+      const cap = layer.querySelector('.day__caption');
+      if (!cap || cap.dataset.split === '1') return;
+      const text = cap.getAttribute('data-caption') || cap.textContent;
+      cap.innerHTML = '';
+      const words = text.split(/\s+/);
+      words.forEach((w, i) => {
+        const span = document.createElement('span');
+        span.className = 'day__caption-w';
+        span.innerHTML = w;
+        cap.appendChild(span);
+        if (i < words.length - 1) cap.appendChild(document.createTextNode(' '));
+      });
+      cap.dataset.split = '1';
+    });
 
     /* Initial layer state — beat 0 visible, others invisible.
-       No y-translation: pure opacity crossfade so beats dissolve. */
+       Pure opacity crossfade — no y-translate, so beats dissolve smoothly. */
     gsap.set(layers[0], { opacity: 1 });
-    for (let i = 1; i < N; i++) {
-      gsap.set(layers[i], { opacity: 0 });
-    }
+    for (let i = 1; i < N; i++) gsap.set(layers[i], { opacity: 0 });
+
+    /* Each layer's caption words start hidden — they'll reveal during the beat. */
+    layers.forEach((layer) => {
+      gsap.set(layer.querySelectorAll('.day__caption-w'), { opacity: 0, y: 4 });
+    });
+
+    /* Image Ken Burns reset. */
     layers.forEach(layer => {
       const img = layer.querySelector('.day__image');
       if (img) gsap.set(img, { scale: 1 });
     });
 
-    /* Map starts at hero size (transform identity) — CSS gives it
-       width: 100% of stage. GSAP will scale + translate it to the
-       bottom-right corner during the beat 0 → 1 handoff. */
-    gsap.set(map, { x: 0, y: 0, scale: 1, transformOrigin: 'bottom right' });
+    /* Plate: starts hero-sized (transform identity). It will scale toward
+       its TOP-RIGHT corner so the small inset sits flush at the top-right
+       of the photo frame (same top-right point as the stage in this layout). */
+    gsap.set(map, { x: 0, y: 0, scale: 1, transformOrigin: 'top right' });
 
-    /* Corner-target values are recomputed on each ScrollTrigger refresh
-       (init + window resize). Stored on a state object so the tween
-       can read fresh values when re-evaluated. Bottom-right anchor:
-       with transformOrigin: 'bottom right', x:0 y:0 keeps the bottom-right
-       corner pinned through the scale — so the map shrinks INTO that corner. */
-    const mapState = { scale: 0.3 };
+    /* Corner-target scale: small inset that fits at the top-right of each
+       photo. Recomputed on every ScrollTrigger refresh (resize). */
+    const mapState = { scale: 0.18 };
     function refreshCornerTarget() {
       const stageW = stage.offsetWidth || 720;
-      const cornerW = Math.max(120, Math.min(200, stageW * 0.26));
+      const cornerW = Math.max(100, Math.min(160, stageW * 0.20));
       mapState.scale = cornerW / stageW;
     }
     refreshCornerTarget();
-
-    let lastZone = '__none__';
-    function setZone(zone) {
-      if (!overlay) return;
-      if (zone === lastZone) return;
-      lastZone = zone;
-      overlay.querySelectorAll('.atlas__zone').forEach((el) => {
-        el.classList.toggle('is-active', !!zone && el.dataset.zone === zone);
-      });
-    }
 
     const tl = gsap.timeline({
       scrollTrigger: {
         trigger: section,
         start: 'top top',
         end: 'bottom bottom',
-        scrub: 0.6,
+        scrub: 0.8,
         invalidateOnRefresh: true,
         onRefresh: refreshCornerTarget,
-        onUpdate: (self) => {
-          /* Sync zone highlight to the active beat. */
-          const i = Math.min(N - 1, Math.floor(self.progress * N));
-          setZone(beatZones[i] || '');
-        },
       },
     });
 
     const SLOT = 1 / N;
-    /* Generous crossfade: ~65% of each slot is transition, so the
-       previous beat is still partly visible as the next one arrives —
-       a true dissolve, not a swap. */
-    const FADE = SLOT * 0.65;
+    /* Generous crossfade: previous beat dissolves into the next within
+       a fade window that overlaps with the next beat's enter. */
+    const FADE = SLOT * 0.55;
     const HOLD = SLOT - FADE;
 
-    /* Map shrink-to-corner — smooth transition during beat 0 → 1 */
+    /* Plate shrink-to-corner during beat 0 → 1. */
     const mapShrinkStart = SLOT - FADE;
-    const mapShrinkDur   = FADE * 2;
+    const mapShrinkDur   = FADE * 1.8;
     tl.to(map, {
       scale: () => mapState.scale,
       duration: mapShrinkDur,
       ease: 'power3.inOut',
     }, mapShrinkStart);
 
-    /* Layer crossfade — pure opacity dissolve with a slow Ken Burns push-in.
-       No y-translation; the previous beat fades out while the next fades in,
-       overlapping inside the FADE window for a true cinematic dissolve. */
+    /* Per-layer choreography: enter (opacity) → word-by-word caption
+       reveal during the hold → Ken Burns through the whole beat →
+       gentle opacity exit overlapping with the next beat's enter. */
     layers.forEach((layer, i) => {
       const slotStart = i * SLOT;
-      const img = layer.querySelector('.day__image');
+      const img   = layer.querySelector('.day__image');
+      const words = layer.querySelectorAll('.day__caption-w');
 
-      /* Enter: dissolve in (opacity only) */
+      /* Layer enter (opacity only). */
       if (i > 0) {
-        gsap.set(layer, { opacity: 0 });
         tl.to(layer, {
           opacity: 1,
           duration: FADE,
@@ -424,33 +445,55 @@
         }, slotStart);
       }
 
-      /* Ken Burns: gentle slow push-in for the duration of the beat */
+      /* Caption words reveal one at a time across the hold window. */
+      if (words.length) {
+        const captionStart = slotStart + FADE * 0.85;
+        const captionEnd   = slotStart + FADE + HOLD * 0.85;
+        const captionDur   = Math.max(0.001, captionEnd - captionStart);
+        const stepDur      = captionDur / words.length;
+        words.forEach((w, wi) => {
+          tl.to(w, {
+            opacity: 1, y: 0,
+            duration: Math.min(0.18, stepDur * 1.4),
+            ease: 'power2.out',
+          }, captionStart + wi * stepDur);
+        });
+      }
+
+      /* Ken Burns push-in across the beat. */
       if (img) {
-        const kbStart = slotStart;
-        const kbDur   = SLOT + FADE;     /* run through enter + hold */
         tl.fromTo(img,
           { scale: 1 },
-          { scale: 1.04, duration: kbDur, ease: 'none' },
-          kbStart
+          { scale: 1.04, duration: SLOT + FADE, ease: 'none' },
+          slotStart
         );
       }
 
-      /* Exit: dissolve out — overlaps with next beat's enter */
+      /* Layer exit — overlaps with the next beat's enter. */
       if (i < N - 1) {
         tl.to(layer, {
           opacity: 0,
           duration: FADE,
           ease: 'sine.inOut',
         }, slotStart + HOLD);
+        /* Caption words exit with the layer. */
+        if (words.length) {
+          tl.to(words, {
+            opacity: 0,
+            duration: FADE,
+            ease: 'sine.inOut',
+          }, slotStart + HOLD);
+        }
       }
     });
   })();
 
-  /* ============================================================
-     Scene 7 — Impact: word-by-word reveal driven by scroll.
-     Words stay hidden until the user is fully inside the section
-     (so they don't bleed into Scene 6 below or Scene 8 above).
-     ============================================================ */
+  /* =============================================================
+     SCENE 7 — Impact statement
+     Word-by-word reveal as the reader scrolls through. Words stay
+     hidden until fully inside the section, then resolve one at a
+     time and fade out cleanly before the closing letter.
+     ============================================================= */
   (function scene7_impact() {
     const section = document.getElementById('scene-impact');
     if (!section) return;
@@ -494,13 +537,14 @@
   /* Scene 8 has been folded into Scene 6 — the site plan now rides
      alongside the day-flow as a corner companion. */
 
-  /* ============================================================
-     Scene 9 — Letter: scrub-driven line-by-line reveal.
-     Section is 220vh tall with a sticky stage. As the user scrolls
-     into the section, each piece appears on its own beat — heading,
-     each paragraph, signature, CTAs, then footer. When the cascade
-     finishes the user is exactly at the page bottom (no further scroll).
-     ============================================================ */
+  /* =============================================================
+     SCENE 9 — Closing letter
+     Scrub-driven cascade across a 220vh sticky section. As the
+     reader scrolls in, each element flows in on its own beat:
+     heading → 3 paragraphs → signature/name/phone → 2 text CTAs
+     → HR rule → footer. When the cascade completes the user is
+     at the page bottom (no further scroll possible).
+     ============================================================= */
   (function scene9_letter() {
     const section = document.getElementById('scene-letter');
     if (!section) return;
@@ -508,6 +552,7 @@
     const paragraphs = section.querySelectorAll('.letter__p');
     const sign       = section.querySelector('.letter__sign');
     const ctas       = section.querySelector('.letter__ctas');
+    const rule       = section.querySelector('.letter__rule');
     const footer     = section.querySelector('.letter__footer');
     if (!heading || !paragraphs.length) return;
 
@@ -516,29 +561,23 @@
         trigger: section,
         start: 'top top',
         end: 'bottom bottom',
-        scrub: 0.8,
+        scrub: 1.1,           /* generous scrub for a flowing cascade */
       },
     });
 
-    /* Cascade timing across the 0–1 scrub range. Each piece arrives
-       on its own scroll beat; later pieces overlap slightly so the
-       cascade flows rather than ticking. */
-    tl.to(heading, { opacity: 1, y: 0, duration: 0.18, ease: 'power2.out' }, 0.00);
+    const E = 'power3.out';
+    const D = 0.22;            /* per-piece reveal duration */
 
+    /* Cascade — each element overlaps the next so motion never stops. */
+    tl.to(heading, { opacity: 1, y: 0, duration: D, ease: E }, 0.00);
     paragraphs.forEach((p, i) => {
-      tl.to(p, { opacity: 1, y: 0, duration: 0.14, ease: 'power2.out' },
-        0.18 + i * 0.14);
+      tl.to(p, { opacity: 1, y: 0, duration: D, ease: E }, 0.16 + i * 0.12);
     });
 
-    if (sign) {
-      tl.to(sign, { opacity: 1, y: 0, duration: 0.16, ease: 'power2.out' }, 0.62);
-    }
-    if (ctas) {
-      tl.to(ctas, { opacity: 1, y: 0, duration: 0.16, ease: 'power2.out' }, 0.78);
-    }
-    if (footer) {
-      tl.to(footer, { opacity: 1, duration: 0.12, ease: 'power2.out' }, 0.92);
-    }
+    if (sign)   tl.to(sign,   { opacity: 1, y: 0, duration: D + 0.05, ease: E }, 0.60);
+    if (ctas)   tl.to(ctas,   { opacity: 1, y: 0, duration: D,        ease: E }, 0.74);
+    if (rule)   tl.to(rule,   { opacity: 1,        duration: 0.16,    ease: E }, 0.85);
+    if (footer) tl.to(footer, { opacity: 1,        duration: 0.16,    ease: E }, 0.90);
   })();
 
   /* ============================================================

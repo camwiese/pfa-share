@@ -1,6 +1,23 @@
-/* ============================================================
+/* =============================================================
    Future Palace — light editorial scrollytelling
-   ============================================================ */
+   -------------------------------------------------------------
+   File layout:
+     :root          design tokens (palette, type, spacing)
+     resets         resets + base
+     reveal helper  reveal-init / reveal-in
+     placeholders
+     FRAME          reusable ornate container
+     SCENE 1        Hero
+     SCENE 2        Blur reveal
+     SCENE 3        Innovations
+     SCENE 4        PPIE history
+     SCENE 5        "Welcome to the Future" + plate
+     SCENE 6        Day-flow + corner plate + caption words
+     SCENE 7        Impact statement
+     SCENE 9        Letter / CTA / HR / footer
+     responsive     mobile overrides
+     reduced motion
+   ============================================================= */
 
 :root {
   /* ── Palette: paper / ink ─────────────────────────────────── */
@@ -522,16 +539,7 @@ body {
   display: block;
 }
 
-.reveal__inno figcaption {
-  display: block;
-  margin-top: 0.55rem;
-  font-family: var(--font-display);
-  font-style: italic;
-  font-weight: 350;
-  font-size: 0.84rem;
-  color: var(--ink-soft);
-  text-align: center;
-}
+/* (Card captions removed — images alone carry the visual.) */
 
 /* ============================================================
    SCENE 4 — PPIE history
@@ -690,6 +698,29 @@ body {
   will-change: opacity, transform;
 }
 
+/* Square line-drawing plate (placeholder for now — a real SVG line
+   drawing will be dropped in later). Appears beneath the year line. */
+.establish__plate {
+  margin-top: clamp(1.5rem, 4vh, 2.5rem);
+  width: clamp(220px, 38vw, 380px);
+  aspect-ratio: 1 / 1;
+  background: var(--paper-3);
+  border: 1px solid var(--rule);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  will-change: opacity, transform;
+}
+.establish__plate-label {
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
 /* ============================================================
    SCENE 6 — A day at the Palace (cinematic stage).
    Sticky 100vh stage holds one image+caption at a time. GSAP scrubs
@@ -746,33 +777,44 @@ body {
   justify-content: flex-end;
 }
 
-/* The persistent 3D site model. Starts as the beat-0 hero (fills the
-   day__stage's grid cell), then scrolls/scales into the bottom-right
-   corner via GSAP scrub. Position is transform-driven so motion is smooth. */
+/* The persistent line-drawing plate. Starts as the beat-0 hero
+   (fills the day__stage's grid cell). GSAP scrub then scales it
+   toward its TOP-RIGHT corner so the small inset sits flush at
+   the top-right of each photo frame (since the frame and stage
+   share the same top-right point in this layout). */
 .day__map {
   grid-area: 1 / 1;
   position: relative;
   width: 100%;
-  aspect-ratio: 4 / 3;          /* matches palace-3d-model.png 1600×1200 */
-  z-index: 5;                    /* sits above all photo layers */
-  transform-origin: bottom right;
+  aspect-ratio: 1 / 1;            /* square plate */
+  /* Center the square inside the stage grid cell — top-right corner
+     of the plate then aligns with stage's right edge. */
+  justify-self: center;
+  z-index: 5;                     /* sits above all photo layers */
+  transform-origin: top right;
   will-change: transform;
-  /* GSAP scrub animates scale + x/y to send this into the bottom-right corner */
+  /* When scaled small via GSAP, the plate becomes a flush corner inset
+     pinned to the top-right of the photo frame. */
 }
-.day__map-img {
+
+/* The square plate itself — placeholder until a real line drawing
+   is dropped in. Light grey paper, faint rule, centered label. */
+.day__map-plate {
   width: 100%;
   height: 100%;
-  display: block;
-  object-fit: contain;
-  user-select: none;
-  -webkit-user-drag: none;
+  background: var(--paper-3);
+  border: 1px solid var(--rule);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
-.day__map-overlay {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
+.day__map-plate-label {
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
 }
 
 .day__frame {
@@ -802,6 +844,14 @@ body {
   letter-spacing: -0.005em;
   color: var(--ink);
   text-wrap: balance;
+}
+
+/* Each caption word is its own span so JS can reveal them one at
+   a time as the beat scrolls into view. */
+.day__caption-w {
+  display: inline-block;
+  opacity: 0;
+  will-change: opacity, transform;
 }
 
 /* ============================================================
@@ -848,21 +898,9 @@ body {
   will-change: opacity;
 }
 
-/* Atlas zone styles (overlay on top of the 3D palace render).
-   Invisible by default; the matching zone glows warm gilt when its
-   beat is active. Polygons live in a 1600×1200 viewBox. */
-.atlas__zone {
-  fill: transparent;
-  stroke: transparent;
-  stroke-width: 6;
-  stroke-linejoin: round;
-  transition: fill 0.55s cubic-bezier(0.4, 0, 0.2, 1),
-              stroke 0.55s cubic-bezier(0.4, 0, 0.2, 1);
-}
-.atlas__zone.is-active {
-  fill: rgba(201, 163, 92, 0.28);          /* warm gilt glow */
-  stroke: rgba(201, 163, 92, 0.95);
-}
+/* (Zone-glow overlay removed — the plate is decorative for now.
+   When a real line drawing is dropped in, zone polygons can be
+   re-added on top of it.) */
 
 /* ============================================================
    SCENE 9 — Letter
@@ -932,17 +970,15 @@ body {
   will-change: opacity, transform;
 }
 
+/* Signature block — no rule above, no rule below; sits inline
+   with the rest of the cascade. The HR rule moves to below the
+   CTAs (between CTAs and footer). */
 .letter__sign {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 0.1rem;
   margin: 0;
-  /* Divider above the signature — replaces the prior block margin
-     so the rule and "Get in Touch" stay close together. */
-  padding-top: clamp(0.8rem, 1.8vh, 1.1rem);
-  border-top: 1px solid var(--ink-ghost);
-  width: min(280px, 70%);
   opacity: 0;
   transform: translateY(8px);
   will-change: opacity, transform;
@@ -976,47 +1012,46 @@ body {
 }
 .letter__phone a:hover { color: var(--accent); }
 
-/* Split CTAs — two side-by-side buttons (stacks on narrow screens) */
+/* Plain-text CTAs — two understated links separated by a middle
+   dot. Small uppercase letter-spaced caps. Burgundy on hover. */
 .letter__ctas {
-  display: flex;
-  flex-direction: row;
-  gap: 0.75rem;
-  justify-content: center;
-  flex-wrap: wrap;
-  margin-top: 0.25rem;
+  margin: 0.25rem 0 0;
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  line-height: 1.6;
+  text-align: center;
   opacity: 0;
   transform: translateY(8px);
   will-change: opacity, transform;
 }
-
 .letter__cta {
-  font-family: var(--font-sans);
-  font-size: 0.74rem;
-  font-weight: 500;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
   color: var(--ink-soft);
-  border: 1px solid var(--ink-faint);
-  padding: 0.85rem 1.4rem;
-  min-height: 44px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  transition: color 0.3s ease, border-color 0.3s ease, background-color 0.3s ease;
+  border-bottom: 1px solid var(--ink-faint);
+  padding: 0.1rem 0.05rem;
+  transition: color 0.3s ease, border-color 0.3s ease;
 }
 .letter__cta:hover {
   color: var(--accent);
   border-color: var(--accent);
 }
-.letter__cta--primary {
-  background: var(--ink);
-  color: var(--paper);
-  border-color: var(--ink);
+.letter__cta-sep {
+  display: inline-block;
+  margin: 0 0.6em;
+  color: var(--ink-faint);
 }
-.letter__cta--primary:hover {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: var(--paper);
+
+/* HR rule — sits between the CTAs and the footer. */
+.letter__rule {
+  width: min(260px, 60%);
+  margin: clamp(1.25rem, 3vh, 1.75rem) auto 0;
+  border: 0;
+  border-top: 1px solid var(--ink-ghost);
+  opacity: 0;
+  will-change: opacity;
 }
 
 .letter__footer {
@@ -1026,7 +1061,7 @@ body {
   letter-spacing: 0.22em;
   text-transform: uppercase;
   color: var(--ink-faint);
-  margin: clamp(1.25rem, 3vh, 2rem) 0 0;
+  margin: clamp(0.85rem, 2vh, 1.25rem) 0 0;
   opacity: 0;
   will-change: opacity;
 }
@@ -1145,12 +1180,11 @@ a:focus-visible {
   .letter__p { font-size: clamp(0.95rem, 3.8vw, 1.05rem); }
   .letter__signature { width: clamp(90px, 26vw, 120px); }
   .letter__ctas {
-    flex-direction: column;
-    gap: 0.5rem;
-    width: 100%;
-    max-width: 280px;
+    font-size: 0.66rem;
+    letter-spacing: 0.18em;
   }
-  .letter__cta { width: 100%; }
+  .letter__cta-sep { margin: 0 0.4em; }
+  .letter__rule { width: min(220px, 70%); }
   .letter__footer { letter-spacing: 0.18em; }
 
   .frame__corner { width: 28px; height: 28px; }
@@ -1166,7 +1200,7 @@ a:focus-visible {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
-  .reveal__line, .reveal__inno, .letter__h, .letter__p, .letter__sign, .letter__ctas, .letter__footer, .blur__line, .impact__line, .impact__w {
+  .reveal__line, .reveal__inno, .letter__h, .letter__p, .letter__sign, .letter__ctas, .letter__rule, .letter__footer, .blur__line, .impact__line, .impact__w, .establish__plate, .day__caption-w {
     opacity: 1 !important;
     transform: none !important;
   }
