@@ -87,27 +87,23 @@
       <div class="reveal__layout">
         <div class="reveal__stack">
           <p class="reveal__line" data-line="0">Here in the Bay Area, the most extraordinary innovations on earth are being built.</p>
-          <p class="reveal__line" data-line="1">Cures for diseases, machines that think, robots that build, energy that will cleanly power the world.</p>
+          <p class="reveal__line" data-line="1">Cures for blindness, delivering livesaving medical equipment, and restoring our coral reefs.</p>
           <p class="reveal__line" data-line="2">For most people, there&rsquo;s no place to see this.</p>
           <p class="reveal__line" data-line="3">Without access to the future, people aren&rsquo;t inspired to build it.</p>
           <p class="reveal__line" data-line="4">If we want an incredible future, we need a home for that optimism.</p>
         </div>
         <div class="reveal__innovations" aria-hidden="true">
           <figure class="reveal__inno" data-inno="0">
-            <div class="reveal__inno-image"><img src="images/sight.jpg" alt="Cures for diseases" loading="lazy"></div>
-            <figcaption>Biotech &middot; South San Francisco</figcaption>
+            <div class="reveal__inno-image"><img src="images/sight.jpg" alt="Cures for blindness" loading="lazy"></div>
+            <figcaption>Science</figcaption>
           </figure>
           <figure class="reveal__inno" data-inno="1">
-            <div class="reveal__inno-image"><img src="images/zio.webp" alt="Machines that think" loading="lazy"></div>
-            <figcaption>AI &middot; San Francisco</figcaption>
+            <div class="reveal__inno-image"><img src="images/zio.webp" alt="Delivering livesaving medical equipment" loading="lazy"></div>
+            <figcaption>Medical Delivery</figcaption>
           </figure>
           <figure class="reveal__inno" data-inno="2">
-            <div class="reveal__inno-image"><img src="images/airships.webp" alt="Robots that build" loading="lazy"></div>
-            <figcaption>Robotics &middot; Bay Area</figcaption>
-          </figure>
-          <figure class="reveal__inno" data-inno="3">
-            <div class="reveal__inno-image"><img src="images/oceans.jpg" alt="Energy to power the world" loading="lazy"></div>
-            <figcaption>Clean energy &middot; East Bay</figcaption>
+            <div class="reveal__inno-image"><img src="images/oceans.jpg" alt="Restoring our coral reefs" loading="lazy"></div>
+            <figcaption>Ocean Stewardship</figcaption>
           </figure>
         </div>
       </div>
@@ -168,84 +164,32 @@
     <div class="day__sticky">
       <div class="day__stage">
 
-        <!-- Persistent site plan. Starts as beat 0's hero image,
-             scrolls down into a corner companion for beats 1–6. -->
+        <!-- Persistent 3D site model. Starts as beat 0's hero,
+             scales + translates into the bottom-right corner for beats 1–6.
+             A transparent SVG overlay highlights the matching zone per beat. -->
         <div class="day__map" aria-hidden="true">
-          <svg class="day__map-svg" viewBox="0 0 600 480" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <pattern id="day-map-grid" width="40" height="40" patternUnits="userSpaceOnUse">
-                <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(26,22,18,0.05)" stroke-width="0.5"/>
-              </pattern>
-            </defs>
-            <rect width="600" height="480" fill="url(#day-map-grid)"/>
+          <img class="day__map-img" src="palace-3d-model.png" alt="Palace of Fine Arts site model">
+          <svg class="day__map-overlay" viewBox="0 0 1600 1200" xmlns="http://www.w3.org/2000/svg"
+               preserveAspectRatio="xMidYMid meet">
+            <!-- Grounds: outer boundary covering the full footprint -->
+            <polygon class="atlas__zone" data-zone="grounds"
+                     points="170,420 1430,400 1450,1010 150,1020"/>
 
-            <!-- Grounds: outer rounded rectangle -->
-            <rect class="atlas__zone" data-zone="grounds"
-                  x="40" y="40" width="520" height="400" rx="8"/>
+            <!-- Tour Into Tomorrow: the long exhibition pavilion (upper-left structure) -->
+            <polygon class="atlas__zone" data-zone="tour"
+                     points="280,430 990,400 1050,560 380,610"/>
 
-            <!-- Lagoon (semicircle pond out front) -->
-            <path class="atlas__zone" data-zone="lagoon"
-                  d="M 160 360 Q 300 440 440 360 Q 300 410 160 360 Z"/>
+            <!-- World's Fare: west portion of the curved colonnade -->
+            <polygon class="atlas__zone" data-zone="fare"
+                     points="180,620 480,610 540,930 200,950"/>
 
-            <!-- West colonnade segment — World's Fare -->
-            <rect class="atlas__zone" data-zone="fare"
-                  x="90" y="150" width="130" height="56" rx="4"
-                  transform="rotate(-10 155 178)"/>
+            <!-- Future Lab: east portion of the curved colonnade -->
+            <polygon class="atlas__zone" data-zone="lab"
+                     points="970,560 1360,520 1430,860 1020,920"/>
 
-            <!-- Central exhibition pavilion — Tour into Tomorrow -->
-            <rect class="atlas__zone" data-zone="tour"
-                  x="237" y="138" width="126" height="56" rx="4"/>
-
-            <!-- East colonnade segment — Future Lab -->
-            <rect class="atlas__zone" data-zone="lab"
-                  x="380" y="150" width="130" height="56" rx="4"
-                  transform="rotate(10 445 178)"/>
-
-            <!-- Rotunda (visual landmark) -->
-            <g class="atlas__rotunda">
-              <circle cx="300" cy="280" r="60" fill="rgba(26,22,18,0.02)"
-                      stroke="rgba(26,22,18,0.18)" stroke-width="0.7"/>
-              <circle cx="300" cy="280" r="44" fill="none"
-                      stroke="rgba(26,22,18,0.12)" stroke-width="0.5"/>
-              <circle cx="300" cy="280" r="26" fill="none"
-                      stroke="rgba(26,22,18,0.16)" stroke-width="0.5"/>
-              <circle cx="300" cy="280" r="2.5" fill="rgba(26,22,18,0.35)"/>
-              <text class="day__map-label" x="300" y="256" text-anchor="middle" font-size="9"
-                    fill="rgba(26,22,18,0.40)" font-family="Inter, sans-serif"
-                    letter-spacing="0.3em">ROTUNDA</text>
-            </g>
-
-            <!-- Footpaths -->
-            <g class="atlas__paths" stroke="rgba(26,22,18,0.10)" stroke-width="0.6"
-               stroke-dasharray="2 3" fill="none">
-              <path d="M 300 420 Q 300 360 300 340"/>
-              <path d="M 150 420 Q 220 360 290 305"/>
-              <path d="M 450 420 Q 380 360 310 305"/>
-            </g>
-
-            <!-- Compass -->
-            <g class="day__map-label atlas__compass" transform="translate(545, 60)">
-              <circle cx="0" cy="0" r="11" fill="none"
-                      stroke="rgba(26,22,18,0.30)" stroke-width="0.6"/>
-              <path d="M 0 -7 L 2.6 3.5 L 0 1 L -2.6 3.5 Z"
-                    fill="rgba(26,22,18,0.55)"/>
-              <text x="0" y="-15" text-anchor="middle" font-size="8"
-                    fill="rgba(26,22,18,0.50)" font-family="Inter, sans-serif"
-                    letter-spacing="0.3em">N</text>
-            </g>
-
-            <!-- Scale bar -->
-            <g class="day__map-label atlas__scale" transform="translate(50, 450)">
-              <line x1="0" y1="0" x2="70" y2="0"
-                    stroke="rgba(26,22,18,0.25)" stroke-width="0.6"/>
-              <line x1="0" y1="-3" x2="0" y2="3"
-                    stroke="rgba(26,22,18,0.25)" stroke-width="0.6"/>
-              <line x1="70" y1="-3" x2="70" y2="3"
-                    stroke="rgba(26,22,18,0.25)" stroke-width="0.6"/>
-              <text x="35" y="14" text-anchor="middle" font-size="7.5"
-                    fill="rgba(26,22,18,0.35)" font-family="Inter, sans-serif"
-                    letter-spacing="0.3em">200 FT</text>
-            </g>
+            <!-- Lagoon: front / lower arc where the lagoon sits -->
+            <polygon class="atlas__zone" data-zone="lagoon"
+                     points="380,880 1100,860 1180,1020 320,1030"/>
           </svg>
         </div>
 
@@ -315,8 +259,8 @@
   </section>
 
   <!-- =========================================================
-       SCENE 9 — Closing letter. No frame — plain centered text on
-       paper, integrated as the page's final paragraph.
+       SCENE 9 — Closing letter. Sticky stage; cascade reveals
+       line-by-line as the user scrolls into the section.
        ========================================================= -->
   <section class="scene scene--letter" id="scene-letter">
     <div class="letter__hold">
@@ -330,14 +274,14 @@
         <img class="letter__signature" src="Cameron Wiese Signature.png" alt="Cameron Wiese" width="932" height="630">
         <p class="letter__name">Cameron Wiese</p>
         <p class="letter__phone"><a href="tel:+13603180000">360-318-0000</a></p>
-        <p class="letter__cta"><a href="mailto:camwiese@gmail.com?subject=I%27d%20love%20to%20learn%20more">Get in touch &middot; Book a tour</a></p>
       </div>
+      <div class="letter__ctas">
+        <a class="letter__cta letter__cta--primary" href="mailto:cam@worldsfair.co?subject=Yes%2C%20I%27d%20love%20to%20meet&body=I%27d%20love%20to%20learn%20more%20about%20Future%20Palace.">Get in Touch</a>
+        <a class="letter__cta letter__cta--tertiary" href="mailto:cam@worldsfair.co?subject=I%27d%20love%20to%20visit%20the%20preview%20center&body=I%27d%20love%20to%20visit%20the%20preview%20center%20and%20learn%20more%20about%20Future%20Palace.">Visit Preview Center</a>
+      </div>
+      <p class="letter__footer">World&rsquo;s Fair Company &middot; Confidential</p>
     </div>
   </section>
-
-  <footer class="footer">
-    <p class="footer__line">World&rsquo;s Fair Company &copy; 2026 &middot; Confidential</p>
-  </footer>
 
 </main>
 
