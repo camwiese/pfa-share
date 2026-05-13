@@ -81,6 +81,9 @@ html {
      (so scrub animations stay smooth as the reader scans through);
      it only kicks in when the reader pauses near a scene edge. */
   scroll-snap-type: y proximity;
+  /* Lock to the vertical narrative — accidental horizontal swipes
+     shouldn't interrupt scroll on touch devices. */
+  touch-action: pan-y;
 }
 
 /* Every top-level scene is a snap target — its top edge is what the
@@ -1098,9 +1101,14 @@ a:focus-visible {
 @media (max-width: 860px) {
   body { font-size: 1rem; }
 
+  /* Hard snap on mobile — momentum flicks land on scene boundaries
+     instead of overshooting whole sections. Desktop keeps proximity
+     so scrub-driven scenes stay free-scrollable internally. */
+  html { scroll-snap-type: y mandatory; }
+
   /* Scene 1 hero */
   .hero__inner { padding-bottom: clamp(3.5rem, 12vh, 6rem); }
-  .hero__title { font-size: clamp(2rem, 8vw, 2.6rem); max-width: 18ch; }
+  .hero__title { font-size: clamp(2rem, 8vw, 2.6rem); max-width: 22ch; }
 
   /* Scene 2 blur */
   .blur__text { font-size: clamp(1.2rem, 4.6vw, 1.55rem); }
@@ -1141,7 +1149,7 @@ a:focus-visible {
   .ppie__line {
     font-size: clamp(1.05rem, 4vw, 1.35rem);
   }
-  .ppie__trigger { height: calc(var(--vh) * 70); }
+  .ppie__trigger { height: calc(var(--vh) * 95); }
 
   /* Scene 5 — establishing frame */
   .establish__h { font-size: clamp(1.6rem, 6.2vw, 2.05rem); }
@@ -1161,43 +1169,40 @@ a:focus-visible {
     padding: clamp(2.5rem, 8vh, 4rem) clamp(1.5rem, 5vw, 2.5rem);
   }
 
-  /* Scene 6 day-flow — on mobile we drop the sticky/crossfade
-     choreography entirely and let the reader scroll naturally
-     through every beat. Each image matches PPIE's landscape size
-     so the vision tour feels consistent with the 1915 panorama. */
-  .scene--day { min-height: 0; }
+  /* Scene 6 day-flow — sticky stage with opacity-only crossfades.
+     No scale, no translate, no will-change:transform — keeps the
+     cinematic rhythm without iOS Safari compositing judder. */
+  .scene--day { min-height: calc(var(--vh) * 720); }
   .day__sticky {
-    position: static;
-    height: auto;
-    padding: clamp(2rem, 5vh, 3rem) clamp(1rem, 4vw, 1.5rem);
+    position: sticky;
+    top: 0;
+    height: calc(var(--vh) * 100);
+    padding: clamp(1.5rem, 5vh, 2.5rem) clamp(1rem, 4vw, 1.5rem);
   }
   .day__stage {
-    display: flex;
-    flex-direction: column;
-    gap: clamp(2.5rem, 6vh, 4rem);
+    display: grid;
+    place-items: center;
     width: 100%;
-    max-width: min(92vw, 540px);
+    max-width: min(92vw, 480px);
     margin: 0 auto;
   }
   .day__layer {
-    grid-area: auto;
-    opacity: 1 !important;
-    transform: none !important;
+    grid-area: 1 / 1;
     gap: clamp(0.85rem, 2vh, 1.25rem);
+    will-change: opacity;
   }
   .day__frame {
+    width: min(92vw, 480px);
     aspect-ratio: 16 / 10;
-    width: 100%;
     margin: 0 auto;
   }
   .day__image {
-    transform: none !important;
+    will-change: auto;
   }
   .day__caption {
-    opacity: 1 !important;
-    transform: none !important;
-    font-size: clamp(1rem, 4vw, 1.25rem);
-    padding: 0 0.5rem;
+    font-size: clamp(1rem, 4.2vw, 1.25rem);
+    padding: 0 1rem;
+    will-change: opacity;
   }
 
   /* Tighten total scroll length for the heavy scrub scenes on mobile */
