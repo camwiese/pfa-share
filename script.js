@@ -330,14 +330,20 @@
     tl.to(yr,  { opacity: 1, y: 0, duration: 0.25, ease: 'power3.out' }, 0.32);
     if (art) tl.to(art, { opacity: 1, y: 0, duration: 0.35, ease: 'power3.out' }, 0.48);
 
-    /* Long linger — Welcome holds for a real beat before fading. */
+    /* Hold the welcome at full opacity for a real beat. */
     const linger = art ? [h, sub, yr, art] : [h, sub, yr];
-    tl.to(linger, { opacity: 1, duration: 1.6 }, 0.95);
+    tl.to(linger, { opacity: 1, duration: 0.45 }, 0.95);
 
-    /* Fade everything out late in the scroll — the section visibly
-       empties as the reader continues toward Scene 6, giving a clean
-       break between Welcome and the visions tour. */
-    tl.to(linger, { opacity: 0, y: -12, duration: 0.5, ease: 'power2.in' }, 2.70);
+    /* Fade out while the sticky stage is still pinned — by the time
+       the reader continues into Scene 6, the welcome is already gone
+       and the stage scrolls away empty. */
+    tl.to(linger, { opacity: 0, y: -12, duration: 0.4, ease: 'power2.in' }, 1.40);
+
+    /* Pad the timeline tail with a no-op so the fade-out completes
+       at ~40% of trigger progress (= ~72vh into the 180vh section,
+       before the sticky unsticks at 80vh). The remaining ~60% of
+       scroll is silent dead-space carrying the empty stage out. */
+    tl.to({}, { duration: 2.7 }, 1.80);
   })();
 
   /* =============================================================

@@ -75,12 +75,9 @@ html {
   text-size-adjust: 100%;
   /* clip (not hidden) on html avoids breaking position:sticky on iOS Safari */
   overflow-x: clip;
-  /* Soft snap pulls scenes together at their boundaries so a fast
-     flick lands on the next scene's start instead of flying past
-     whole sections. `proximity` leaves free scroll inside a scene
-     (so scrub animations stay smooth as the reader scans through);
-     it only kicks in when the reader pauses near a scene edge. */
-  scroll-snap-type: y proximity;
+  /* Snap is mobile-only (mandatory, set inside the max-width:860px
+     media query). Desktop stays fully smooth so Lenis-driven wheel
+     and trackpad scrolling glides through the whole narrative. */
   /* Lock to the vertical narrative — accidental horizontal swipes
      shouldn't interrupt scroll on touch devices. */
   touch-action: pan-y;
@@ -669,7 +666,10 @@ body {
 
 .scene--establish {
   position: relative;
-  min-height: calc(var(--vh) * 220);
+  /* 180vh = 80vh of sticky-pinned welcome (fade-in / linger / fade-out)
+     followed by 100vh of dead-scroll so the empty stage clears the
+     viewport before Scene 6 begins. */
+  min-height: calc(var(--vh) * 180);
   background: var(--paper);
 }
 
@@ -684,7 +684,11 @@ body {
   text-align: center;
   padding: clamp(3rem, 8vh, 6rem) clamp(1.5rem, 6vw, 4rem);
   width: 100%;
-  max-width: 720px;
+  /* 880px art + 2×64px max horizontal padding needs at least 1008px
+     of container to sit fully centered (flexbox doesn't pull
+     oversized children back into the parent's center). Text
+     elements have their own narrower max-widths. */
+  max-width: 1040px;
   margin: 0 auto;
 }
 
