@@ -338,16 +338,44 @@ body {
   background: #1c1610 url("images/header-image.png") center 35% / cover no-repeat;
   will-change: opacity;
 }
+
+/* Full-viewport blur + dim overlay. Sits immediately in front of the
+   hero image but behind every scene's content (the title in Scene 1
+   and the body copy in Scene 2 both paint on top). JS scrubs
+   --blur-px and the dim alpha from 0 → max as the reader scrolls
+   from Scene 1 into Scene 2, so the image appears to blur in place
+   instead of getting covered by a layer rising up from below.
+   backdrop-filter is GPU-compositor accelerated (unlike `filter:
+   blur()` on the image itself, which has historically been a source
+   of iOS Safari judder), so this stays smooth under scrub-driven
+   scrolling. */
+.hero__blur {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  --blur-px: 0px;
+  --dim-alpha: 0;
+  background-color: rgba(0, 0, 0, var(--dim-alpha));
+  -webkit-backdrop-filter: blur(var(--blur-px));
+          backdrop-filter: blur(var(--blur-px));
+  will-change: backdrop-filter, background-color, opacity;
+}
 .hero__image .placeholder { height: 100%; }
 
 .hero__veil {
-  position: absolute;
+  /* Fixed (not absolute inside Scene 1) so the veil stays anchored
+     to the viewport and doesn't scroll up with the section — which
+     was producing a horizontal "band" mid-transition. JS fades this
+     out alongside the title as the reader leaves Scene 1. */
+  position: fixed;
   inset: 0;
   z-index: 1;
   background:
     linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0) 40%, rgba(0,0,0,0.55) 100%),
     linear-gradient(to right, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0) 60%);
   pointer-events: none;
+  will-change: opacity;
 }
 
 .hero__inner {
@@ -434,23 +462,10 @@ body {
   /* Empty — the fixed .hero__image renders behind everything. */
 }
 
-.blur__veil {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  /* Subtle uniform dim — just enough that white text reads cleanly.
-     The real visual focus on the text comes from the blur on the
-     image behind, not from a heavy gradient "covering" it.
-     --blur-px is scrubbed by JS from 0 → 16 as Scene 2 enters, so
-     on first arrival the image is crisp; the blur ramps up only as
-     the Scene 2 copy reveals. */
-  --blur-px: 0px;
-  background: rgba(0, 0, 0, 0.32);
-  -webkit-backdrop-filter: blur(var(--blur-px));
-          backdrop-filter: blur(var(--blur-px));
-  pointer-events: none;
-  will-change: backdrop-filter;
-}
+/* .blur__veil removed — the fixed .hero__blur above now handles
+   both the image blur and the dim overlay for Scene 2. Keeping no
+   per-section veil means there's no "horizontal band" of blur
+   sliding up from below as the section scrolls into view. */
 
 .blur__inner {
   position: relative;
@@ -551,7 +566,9 @@ body {
 }
 
 .reveal__line--climax {
-  font-size: clamp(1.8rem, 4vw, 3rem);
+  /* Match the Scene 1 hero title size so the two anchor statements
+     read as a pair across the narrative. */
+  font-size: clamp(1.65rem, 3.4vw, 2.85rem);
   line-height: 1.16;
   font-weight: 350;
   letter-spacing: -0.012em;
@@ -717,129 +734,21 @@ body {
 }
 
 /* ============================================================
-   SCENE 5 — Establishing frame ("Welcome to the Future")
+   SCENE 5/6 — Vision (Welcome + A day at the Palace).
+   One sticky stage, 7 stacked layers. A single GSAP scrub
+   timeline drives a continuous crossfade across all of them
+   so the whole section reads as one uninterrupted scroll.
    ============================================================ */
 
-.scene--establish {
+.scene--vision {
   position: relative;
-  /* 200vh = 100vh sticky-pinned welcome + 100vh of post-unstick scroll.
-     Scene 6 is pulled up by -130vh (see .scene--day margin-top) so
-     it starts pinning 30vh BEFORE Scene 5's sticky un-pins,
-     creating a real overlap window where the welcome fade-out and
-     the first vision beat fade-in cross simultaneously. */
-  min-height: calc(var(--vh) * 200);
+  /* 7 layers × ~200vh of scroll per slot — generous dwell time
+     so each beat lingers visible for a real reading moment. */
+  min-height: calc(var(--vh) * 1400);
   background: var(--paper);
 }
 
-.establish__hold {
-  position: sticky;
-  top: 0;
-  height: calc(var(--vh) * 100);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: clamp(3rem, 8vh, 6rem) clamp(1.5rem, 6vw, 4rem);
-  width: 100%;
-  /* 880px art + 2×64px max horizontal padding needs at least 1008px
-     of container to sit fully centered (flexbox doesn't pull
-     oversized children back into the parent's center). Text
-     elements have their own narrower max-widths. */
-  max-width: 1040px;
-  margin: 0 auto;
-}
-
-.establish__h {
-  font-family: var(--font-display);
-  font-weight: 350;
-  font-size: clamp(2rem, 4.4vw, 3.2rem);
-  line-height: 1.1;
-  letter-spacing: -0.005em;
-  color: var(--ink);
-  text-align: center;
-  margin: 0;
-  text-wrap: balance;
-  opacity: 0;
-  will-change: opacity, transform;
-}
-
-.establish__sub {
-  font-family: var(--font-display);
-  font-style: italic;
-  font-weight: 350;
-  font-size: clamp(1.05rem, 1.6vw, 1.35rem);
-  line-height: 1.4;
-  color: var(--ink-soft);
-  max-width: 38ch;
-  margin-top: clamp(0.85rem, 2vh, 1.35rem);
-  text-wrap: balance;
-  opacity: 0;
-  will-change: opacity, transform;
-}
-
-.establish__year {
-  font-family: var(--font-sans);
-  font-style: normal;
-  font-weight: 500;
-  font-size: 0.78rem;
-  line-height: 1;
-  color: var(--ink-muted);
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  margin-top: clamp(1.75rem, 4vh, 2.75rem);
-  opacity: 0;
-  will-change: opacity, transform;
-}
-
-/* PFA Art image beneath the year line. Sized large enough to feel like
-   the scene's centerpiece while still fitting within the sticky frame
-   alongside the heading + sub + year. The img itself is height-capped
-   so it never pushes the frame on shorter viewports. */
-.establish__art {
-  margin: clamp(1.5rem, 4vh, 2.5rem) auto 0;
-  width: min(92vw, 880px);
-  display: flex;
-  justify-content: center;
-  opacity: 0;
-  will-change: opacity, transform;
-}
-.establish__art img {
-  width: 100%;
-  max-height: calc(var(--vh) * 56);
-  height: auto;
-  object-fit: contain;
-  display: block;
-}
-
-
-/* ============================================================
-   SCENE 6 — A day at the Palace (cinematic stage).
-   Sticky 100vh stage holds one image+caption at a time. GSAP scrubs
-   each beat through drift-in-from-below + fade, hold with slow scale,
-   drift-up + fade — all tied to scroll position.
-   ============================================================ */
-
-.scene--day {
-  position: relative;
-  min-height: calc(var(--vh) * 960); /* 6 beats × ~160vh — extra dwell so each beat lingers */
-  /* Background is transparent so Scene 5's welcome remains visible
-     through the overlap zone. Scene 6's beat 0 starts at opacity 0
-     and fades in at the trigger start, while Scene 5's welcome is
-     still fading out — both visible simultaneously for a true
-     crossfade. Body paper colour matches, so the surface reads as
-     one cream sheet throughout. */
-  background: transparent;
-  /* Pull Scene 6 up so its sticky engages 30vh BEFORE Scene 5's
-     sticky un-pins. That 30vh window gives Scene 5's welcome
-     fade-out (timeline 1.50→2.10 ≈ scroll 71→100vh of Scene 5) and
-     Scene 6's beat-0 fade-in (FADE window ≈ first 29vh of pinning)
-     an overlap zone — no blank cream paper in between. */
-  margin-top: calc(var(--vh) * -130);
-  z-index: 2;
-}
-
-.day__sticky {
+.vision__sticky {
   position: sticky;
   top: 0;
   height: calc(var(--vh) * 100);
@@ -847,19 +756,22 @@ body {
   align-items: center;
   justify-content: center;
   padding: clamp(2rem, 6vh, 4rem) clamp(1.5rem, 5vw, 3rem);
+  /* Scope rendering work to the sticky so neighbouring scenes
+     don't trigger relayout/repaint as layers crossfade. */
+  contain: layout style;
 }
 
-.day__stage {
+.vision__stage {
   position: relative;
   width: 100%;
-  max-width: 720px;
-  /* Grid stack: every layer occupies the same cell — natural content
-     defines the stage's height, opacity controls visibility. */
+  max-width: 880px;
+  /* Grid stack: every layer occupies the same cell — natural
+     content sizes the stage, opacity + transform control reveal. */
   display: grid;
   place-items: center;
 }
 
-.day__layer {
+.vision__layer {
   grid-area: 1 / 1;
   width: 100%;
   display: flex;
@@ -870,8 +782,69 @@ body {
   will-change: opacity, transform;
 }
 
-.day__frame {
+/* --- Welcome layer (layer 0) --- */
+.vision__layer--welcome {
+  text-align: center;
+  /* Welcome stack is text-heavy + a wide art image. Tighter cell
+     gap so the title sits closer to the sub and the art breathes
+     just below. */
+  gap: 0;
+}
+
+.vision__h {
+  font-family: var(--font-display);
+  font-weight: 350;
+  font-size: clamp(2rem, 4.4vw, 3.2rem);
+  line-height: 1.1;
+  letter-spacing: -0.005em;
+  color: var(--ink);
+  text-align: center;
+  margin: 0;
+  text-wrap: balance;
+}
+
+.vision__sub {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 350;
+  font-size: clamp(1.05rem, 1.6vw, 1.35rem);
+  line-height: 1.4;
+  color: var(--ink-soft);
+  max-width: 38ch;
+  margin: clamp(0.85rem, 2vh, 1.35rem) 0 0;
+  text-wrap: balance;
+}
+
+.vision__year {
+  font-family: var(--font-sans);
+  font-style: normal;
+  font-weight: 500;
+  font-size: 0.78rem;
+  line-height: 1;
+  color: var(--ink-muted);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  margin: clamp(1.75rem, 4vh, 2.75rem) 0 0;
+}
+
+.vision__art {
+  margin: clamp(1.5rem, 4vh, 2.5rem) auto 0;
+  width: min(92vw, 880px);
+  display: flex;
+  justify-content: center;
+}
+.vision__art img {
   width: 100%;
+  max-height: calc(var(--vh) * 56);
+  height: auto;
+  object-fit: contain;
+  display: block;
+}
+
+/* --- Day-flow layers (layers 1–6) --- */
+.vision__frame {
+  width: 100%;
+  max-width: 720px;
   margin: 0;
   aspect-ratio: 16 / 10;
   overflow: hidden;
@@ -879,16 +852,16 @@ body {
   background: var(--paper-2);
 }
 
-.day__image {
+.vision__image {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
-  will-change: transform;
 }
 
-.day__caption {
+.vision__caption {
   width: 100%;
+  max-width: 720px;
   text-align: center;
   font-family: var(--font-display);
   font-weight: 350;
@@ -897,9 +870,7 @@ body {
   letter-spacing: -0.005em;
   color: var(--ink);
   text-wrap: balance;
-  /* Caption fades as a single sentence — GSAP owns opacity/transform. */
-  opacity: 0;
-  will-change: opacity, transform;
+  margin: 0;
 }
 
 /* ============================================================
@@ -1155,10 +1126,6 @@ a:focus-visible {
 .blur__line,
 .reveal__line,
 .reveal__inno,
-.establish__h,
-.establish__sub,
-.establish__year,
-.establish__art,
 .impact__w,
 .letter__h,
 .letter__p,
@@ -1176,10 +1143,10 @@ a:focus-visible {
 @media (max-width: 860px) {
   body { font-size: 1rem; }
 
-  /* Hard snap on mobile — momentum flicks land on scene boundaries
-     instead of overshooting whole sections. Desktop keeps proximity
-     so scrub-driven scenes stay free-scrollable internally. */
-  html { scroll-snap-type: y mandatory; }
+  /* Proximity-snap on mobile: lets finger drag scrub the unified
+     Vision timeline 1:1 without snap interrupting mid-beat, while
+     still nudging momentum flicks toward the next scene start. */
+  html { scroll-snap-type: y proximity; }
 
   /* Scene 1 hero */
   .hero__inner { padding-bottom: clamp(3.5rem, 12vh, 6rem); }
@@ -1226,72 +1193,47 @@ a:focus-visible {
   }
   .ppie__trigger { height: calc(var(--vh) * 95); }
 
-  /* Scene 5 — establishing frame */
-  .establish__h { font-size: clamp(1.6rem, 6.2vw, 2.05rem); }
-  .establish__sub {
+  /* Scene 5/6 — unified Vision stage on mobile.
+     Pure opacity + tiny y-translate; backface-visibility hints
+     keep iOS Safari's compositor happy. Pinned-section height
+     scales down so each beat still gets ~120vh of scrub budget. */
+  .scene--vision { min-height: calc(var(--vh) * 1120); }   /* 7 × ~160vh */
+  .vision__sticky {
+    padding: clamp(1.5rem, 5vh, 2.5rem) clamp(1rem, 4vw, 1.5rem);
+  }
+  .vision__stage {
+    max-width: min(92vw, 480px);
+    margin: 0 auto;
+  }
+  .vision__layer {
+    gap: clamp(0.85rem, 2vh, 1.25rem);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+  .vision__frame {
+    max-width: min(92vw, 480px);
+  }
+  .vision__h { font-size: clamp(1.6rem, 6.2vw, 2.05rem); }
+  .vision__sub {
     font-size: clamp(0.95rem, 3.8vw, 1.1rem);
     margin-top: 0.75rem;
   }
-  .establish__year {
+  .vision__year {
     font-size: 0.7rem;
     letter-spacing: 0.18em;
     margin-top: 1.5rem;
   }
+  .vision__caption {
+    font-size: clamp(1rem, 4.2vw, 1.25rem);
+    padding: 0 1rem;
+  }
   .frame__top-label, .frame__bottom-label {
     font-size: clamp(0.78rem, 3.4vw, 0.95rem);
   }
-  .frame--establish .frame__inner {
-    padding: clamp(2.5rem, 8vh, 4rem) clamp(1.5rem, 5vw, 2.5rem);
-  }
-
-  /* Scene 6 day-flow — sticky stage with opacity-only crossfades.
-     No scale, no translate, no will-change:transform — keeps the
-     cinematic rhythm without iOS Safari compositing judder. */
-  .scene--day { min-height: calc(var(--vh) * 720); }
-  .day__sticky {
-    position: sticky;
-    top: 0;
-    height: calc(var(--vh) * 100);
-    padding: clamp(1.5rem, 5vh, 2.5rem) clamp(1rem, 4vw, 1.5rem);
-    /* Scope rendering work to within the sticky so neighbouring
-       scenes don't trigger relayout/repaint as beats crossfade. */
-    contain: layout style;
-  }
-  .day__stage {
-    display: grid;
-    place-items: center;
-    width: 100%;
-    max-width: min(92vw, 480px);
-    margin: 0 auto;
-  }
-  .day__layer {
-    grid-area: 1 / 1;
-    gap: clamp(0.85rem, 2vh, 1.25rem);
-    will-change: opacity;
-    /* iOS Safari composite hints — keeps opacity crossfades on the
-       compositor thread without promoting every layer to its own
-       GPU memory page. */
-    backface-visibility: hidden;
-    -webkit-backface-visibility: hidden;
-  }
-  .day__frame {
-    width: min(92vw, 480px);
-    aspect-ratio: 16 / 10;
-    margin: 0 auto;
-  }
-  .day__image {
-    will-change: auto;
-  }
-  .day__caption {
-    font-size: clamp(1rem, 4.2vw, 1.25rem);
-    padding: 0 1rem;
-    will-change: opacity;
-  }
 
   /* Tighten total scroll length for the heavy scrub scenes on mobile */
-  .scene--blur     { min-height: calc(var(--vh) * 200); }
-  .scene--establish{ min-height: calc(var(--vh) * 200); }
-  .scene--letter   { min-height: calc(var(--vh) * 200); }
+  .scene--blur   { min-height: calc(var(--vh) * 200); }
+  .scene--letter { min-height: calc(var(--vh) * 200); }
 
   /* Scene 7 impact */
   .scene--impact {
@@ -1323,7 +1265,7 @@ a:focus-visible {
 @media (max-width: 860px) and (orientation: landscape) {
   .reveal__sticky,
   .ppie__sticky,
-  .day__sticky,
+  .vision__sticky,
   .letter__hold {
     padding-top: 0.75rem;
     padding-bottom: 0.75rem;
@@ -1364,11 +1306,11 @@ a:focus-visible {
     line-height: 1.24;
   }
 
-  .day__frame {
+  .vision__frame {
     aspect-ratio: 16 / 10;
     width: min(58vw, calc(var(--vh) * 112));
   }
-  .day__caption {
+  .vision__caption {
     font-size: clamp(0.82rem, 2.6vw, 1rem);
     line-height: 1.24;
   }
@@ -1414,7 +1356,7 @@ a:focus-visible {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
-  .reveal__line, .reveal__inno, .letter__h, .letter__p, .letter__sign, .letter__ctas, .letter__rule, .letter__footer, .blur__line, .impact__line, .impact__w, .day__layer, .day__caption, .ppie__line, .establish__h, .establish__sub, .establish__year, .establish__art {
+  .reveal__line, .reveal__inno, .letter__h, .letter__p, .letter__sign, .letter__ctas, .letter__rule, .letter__footer, .blur__line, .impact__line, .impact__w, .vision__layer, .vision__caption, .ppie__line {
     opacity: 1 !important;
     transform: none !important;
   }
@@ -1434,12 +1376,8 @@ html:not(.js-ready) .blur__line,
 html:not(.js-ready) .reveal__line,
 html:not(.js-ready) .reveal__inno,
 html:not(.js-ready) .ppie__line,
-html:not(.js-ready) .establish__h,
-html:not(.js-ready) .establish__sub,
-html:not(.js-ready) .establish__year,
-html:not(.js-ready) .establish__art,
-html:not(.js-ready) .day__layer,
-html:not(.js-ready) .day__caption,
+html:not(.js-ready) .vision__layer,
+html:not(.js-ready) .vision__caption,
 html:not(.js-ready) .impact__w,
 html:not(.js-ready) .impact__line,
 html:not(.js-ready) .letter__h,
@@ -1456,8 +1394,7 @@ html:not(.js-ready) .letter__footer {
 html:not(.js-ready) .scene--blur,
 html:not(.js-ready) .scene--reveal,
 html:not(.js-ready) .scene--ppie,
-html:not(.js-ready) .scene--establish,
-html:not(.js-ready) .scene--day,
+html:not(.js-ready) .scene--vision,
 html:not(.js-ready) .scene--impact,
 html:not(.js-ready) .scene--letter {
   min-height: 0;
@@ -1466,8 +1403,7 @@ html:not(.js-ready) .scene--letter {
 html:not(.js-ready) .blur__sticky,
 html:not(.js-ready) .reveal__sticky,
 html:not(.js-ready) .ppie__sticky,
-html:not(.js-ready) .establish__hold,
-html:not(.js-ready) .day__sticky,
+html:not(.js-ready) .vision__sticky,
 html:not(.js-ready) .impact__sticky,
 html:not(.js-ready) .letter__hold {
   position: static;
@@ -1504,23 +1440,15 @@ html:not(.js-ready) .ppie__lines {
 html:not(.js-ready) .ppie__line {
   opacity: 1 !important;
 }
-/* The stage uses grid + 1/1 stacking to overlay beats; without
-   animation, render all beats as normal blocks. */
-html:not(.js-ready) .day__stage {
+/* The stage uses grid + 1/1 stacking to overlay layers; without
+   animation, render all layers as normal blocks. */
+html:not(.js-ready) .vision__stage {
   display: flex;
   flex-direction: column;
   gap: clamp(2.5rem, 8vw, 4rem);
   padding-top: clamp(3rem, 8vw, 5rem);
   padding-bottom: clamp(3rem, 8vw, 5rem);
 }
-html:not(.js-ready) .day__layer {
+html:not(.js-ready) .vision__layer {
   grid-area: auto;
-}
-/* Without GSAP driving the welcome→day crossfade, undo the
-   negative-margin overlap so beat 0 doesn't render under Scene 5's
-   welcome, and restore the cream background so the fallback page
-   reads cleanly as a sequence of stacked blocks. */
-html:not(.js-ready) .scene--day {
-  margin-top: 0;
-  background: var(--paper);
 }

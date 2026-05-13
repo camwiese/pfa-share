@@ -214,12 +214,15 @@
     gsap.to(title, { opacity: 1, y: 0, duration: 1.4, delay: 0.4, ease: 'power2.out' });
     if (chevron) gsap.to(chevron, { opacity: 1, duration: 1.0, delay: 1.2, ease: 'power2.out' });
 
-    /* Scroll-driven exit. `immediateRender: false` keeps GSAP from
-       clobbering the entrance tween's starting state at progress 0. */
-    const targets = chevron ? [title, chevron] : [title];
-    gsap.to(targets, {
+    /* Scroll-driven exit — pure opacity fade, no vertical motion.
+       The text and the bottom-darkening veil both fade in place;
+       the image stays put. */
+    const veil = document.querySelector('.hero__veil');
+    const fadeTargets = [title];
+    if (chevron) fadeTargets.push(chevron);
+    if (veil) fadeTargets.push(veil);
+    gsap.to(fadeTargets, {
       opacity: 0,
-      y: '-=20',
       ease: 'none',
       immediateRender: false,
       scrollTrigger: {
@@ -232,24 +235,30 @@
   })();
 
   /* =============================================================
-     SCENE 2 VEIL — ramp up the backdrop blur as the copy reveals
-     so the image stays crisp at first, then softly recedes behind
-     Scene 2's text. The image itself never moves; only the blur on
-     the image grows.
+     HERO BLUR — ramp up the full-viewport blur + dim as the reader
+     scrolls from Scene 1 into Scene 2. The image stays pinned;
+     only the blur/dim grow. Because .hero__blur is position:fixed
+     and full-viewport (not sized to a section), the blur appears
+     uniformly across the screen — no horizontal band sliding up
+     from below.
      ============================================================= */
-  (function scene2VeilBlur() {
-    const veil = document.querySelector('.blur__veil');
+  (function heroBlurRamp() {
+    const blur = document.querySelector('.hero__blur');
     const section = document.getElementById('scene-blur');
-    if (!veil || !section) return;
-    /* Scrub a numeric proxy and write it into the CSS variable each
+    if (!blur || !section) return;
+    /* Scrub a numeric proxy and write it into the CSS variables each
        frame; GSAP can't directly tween calc()/var() unit strings on
        backdrop-filter cleanly across browsers, so we go through the
        custom property instead. */
-    const state = { v: 0 };
+    const state = { v: 0, d: 0 };
     gsap.to(state, {
       v: 16,
+      d: 0.30,
       ease: 'none',
-      onUpdate: () => veil.style.setProperty('--blur-px', state.v + 'px'),
+      onUpdate: () => {
+        blur.style.setProperty('--blur-px', state.v + 'px');
+        blur.style.setProperty('--dim-alpha', state.d);
+      },
       scrollTrigger: {
         trigger: section,
         start: 'top bottom',        /* begin ramping as Scene 2 enters viewport */
@@ -270,9 +279,11 @@
      ============================================================= */
   (function heroBgFade() {
     const heroImage = document.querySelector('.hero__image');
+    const heroBlur  = document.querySelector('.hero__blur');
     const blurSection = document.getElementById('scene-blur');
     if (!heroImage || !blurSection) return;
-    gsap.to(heroImage, {
+    const targets = heroBlur ? [heroImage, heroBlur] : [heroImage];
+    gsap.to(targets, {
       opacity: 0,
       ease: 'none',
       scrollTrigger: {
@@ -403,56 +414,9 @@
     }
   })();
 
-  /* =============================================================
-     SCENE 5 — "Welcome to the Future"
-     Fades in as the reader scrolls into the section, lingers,
-     then fades out before the day-flow begins.
-     ============================================================= */
-  (function scene5_establish() {
-    const section = document.querySelector('.scene--establish');
-    if (!section) return;
-    const h     = section.querySelector('.establish__h');
-    const sub   = section.querySelector('.establish__sub');
-    const yr    = section.querySelector('.establish__year');
-    const art   = section.querySelector('.establish__art');
-    if (!h) return;
-
-    gsap.set([h, sub, yr], { y: 14 });
-    if (art) gsap.set(art, { y: 18 });
-
-    const tl = gsap.timeline({
-      scrollTrigger: {
-        trigger: section,
-        start: 'top top',
-        end: 'bottom top',
-        scrub: 0.8,
-      },
-    });
-
-    tl.to(h,   { opacity: 1, y: 0, duration: 0.25, ease: 'power3.out' }, 0.00);
-    tl.to(sub, { opacity: 1, y: 0, duration: 0.25, ease: 'power3.out' }, 0.18);
-    tl.to(yr,  { opacity: 1, y: 0, duration: 0.25, ease: 'power3.out' }, 0.32);
-    if (art) tl.to(art, { opacity: 1, y: 0, duration: 0.35, ease: 'power3.out' }, 0.48);
-
-    /* Hold the welcome at full opacity for a real beat. */
-    const linger = art ? [h, sub, yr, art] : [h, sub, yr];
-    tl.to(linger, { opacity: 1, duration: 0.55 }, 0.95);
-
-    /* Exit — the welcome scrolls UP and fades as Scene 6's first
-       beat arrives. The text and the lagoon art lift visibly (not
-       just a token nudge) so the handoff reads as "this scene
-       moves out of the way" rather than a simple fade. */
-    tl.to([h, sub, yr], { opacity: 0, y: -60, duration: 0.6, ease: 'power2.in' }, 1.50);
-    if (art) tl.to(art, { opacity: 0, y: -120, duration: 0.65, ease: 'power2.in' }, 1.48);
-
-    /* Pad the timeline tail so fade-out completes at ~50% of trigger
-       progress (= scroll 100vh into the 200vh section). Scene 6 is
-       pulled up by -100vh via margin-top, so its sticky takes over
-       the viewport at exactly that scroll position — welcome fade-out
-       lands just as the first vision beat arrives, no empty cream
-       paper in between. */
-    tl.to({}, { duration: 2.10 }, 2.10);
-  })();
+  /* Scene 5/6 (Vision) — see scene_vision() below; the previous
+     scene5_establish + scene6_day pair has been replaced by one
+     unified scrub timeline over 7 stacked layers. */
 
   /* =============================================================
      SCENE 4 — PPIE history (1915 panorama)
@@ -530,96 +494,70 @@
   })();
 
   /* =============================================================
-     SCENE 6 — A day at the Palace
-     Cinematic sticky stage. Beat 0 shows the line-drawing plate
-     filling the stage. Between beats 0 → 1 the plate shrinks and
-     anchors flush at the TOP-RIGHT of each photo frame, riding
-     along as a spatial companion. Beats 1–6 are the photo tour,
-     crossfading on pure opacity. Captions reveal word-by-word
-     as each beat scrolls into view.
+     SCENE 5/6 — Vision (Welcome + A day at the Palace).
+     One sticky stage, 7 stacked layers, one scrub timeline.
+     Sequential, NON-overlapping transitions: each layer holds at
+     full opacity for the bulk of its slot, then drifts up and fades
+     out completely before the next layer fades in from below.
+     There's never a moment where two layers are visible at once —
+     the previous one is fully gone, the cream paper shows briefly,
+     then the next rises in. Identical code path on desktop and
+     mobile, only the constants differ.
      ============================================================= */
-  (function scene6_day() {
-    const section = document.getElementById('scene-day');
+  (function scene_vision() {
+    const section = document.getElementById('scene-vision');
     if (!section) return;
-    const layers = Array.from(section.querySelectorAll('.day__layer'));
+    const layers = Array.from(section.querySelectorAll('.vision__layer'));
     const N = layers.length;
     if (!N) return;
 
-    /* Mobile keeps the sticky stage but drops Ken Burns scale and the
-       caption y-translate — pure opacity crossfades, no GPU compositing
-       work that judders on iOS Safari. */
     const isMobile = window.matchMedia('(max-width: 860px)').matches;
+    /* Subtle translate so the fade dominates — image dwells visible
+       for longer before sliding out of frame. */
+    const RISE = isMobile ? 36 : 64;
 
-    /* Continuous-scroll feel: each beat rises up into the frame from
-       below, holds at center, then continues upward out the top as
-       the next beat rises in behind it. Adjacent beats overlap during
-       their respective entrance/exit so the motion is uninterrupted —
-       the eye reads one continuous vertical stream of images. */
-    const RISE = isMobile ? 80 : 140;   /* px the layer travels from entry to centered */
-
-    layers.forEach((layer, i) => {
-      gsap.set(layer, { opacity: 0, y: RISE });
-      const cap = layer.querySelector('.day__caption');
-      if (cap) gsap.set(cap, isMobile ? { opacity: 0 } : { opacity: 0, y: 12 });
-    });
+    layers.forEach((layer) => gsap.set(layer, { opacity: 0, y: RISE }));
+    /* Layer 0 (Welcome) is visible from the start; nothing precedes it. */
+    gsap.set(layers[0], { opacity: 1, y: 0 });
 
     const tl = gsap.timeline({
       scrollTrigger: {
         trigger: section,
         start: 'top top',
         end: 'bottom bottom',
-        scrub: isMobile ? 0.4 : 0.8,
+        scrub: isMobile ? 0.35 : 0.6,
       },
     });
 
     const SLOT = 1 / N;
-    /* Each beat's exit OVERLAPS the next beat's entry by FADE/2 so
-       the reader always sees an image moving smoothly up the frame —
-       one is sliding out the top while the next is already rising
-       in below. */
-    const FADE     = SLOT * (isMobile ? 0.34 : 0.32);
-    const OVERLAP  = FADE * 0.55;  /* how much the exit precedes the next entry */
-    const CAP_IN   = SLOT * 0.14;
-    const CAP_OUT  = SLOT * 0.14;
-    const CAP_HOLD = Math.max(0, SLOT - CAP_IN - CAP_OUT - FADE);
+    /* Each slot is laid out as:
+         [ FADE in ][ HOLD at full opacity ][ FADE out ][ GAP ]
+       The GAP is a small beat of cream paper between two layers —
+       it guarantees the previous layer is fully gone before the
+       next one starts rising in. Most of the slot is HOLD, so each
+       image gets a long, uninterrupted dwell on screen. */
+    const FADE = SLOT * 0.18;
+    const GAP  = SLOT * 0.05;
 
     layers.forEach((layer, i) => {
-      const slotStart = i * SLOT;
-      const cap = layer.querySelector('.day__caption');
-
-      /* Enter: rise from below the centre while fading in. */
-      tl.to(layer, {
-        opacity: 1, y: 0,
-        duration: FADE,
-        ease: 'power2.out',
-      }, slotStart);
-
-      /* Caption rides in slightly after the image so the photo
-         settles first and the words follow. */
-      if (cap) {
-        const capInAt  = slotStart + FADE * (isMobile ? 0.85 : 0.95);
-        const capOutAt = capInAt + CAP_IN + CAP_HOLD;
-        const capInVars = isMobile
-          ? { opacity: 1, duration: CAP_IN, ease: 'power2.out' }
-          : { opacity: 1, y: 0, duration: CAP_IN, ease: 'power2.out' };
-        const capOutVars = isMobile
-          ? { opacity: 0, duration: CAP_OUT, ease: 'power2.in' }
-          : { opacity: 0, y: -10, duration: CAP_OUT, ease: 'power2.in' };
-        tl.to(cap, capInVars, capInAt);
-        if (i < N - 1) tl.to(cap, capOutVars, capOutAt);
+      if (i > 0) {
+        /* Enter — starts AFTER the previous layer's exit has
+           completed and GAP/2 of empty cream has passed. */
+        tl.to(layer, {
+          opacity: 1, y: 0,
+          duration: FADE,
+          ease: 'sine.inOut',
+        }, i * SLOT + GAP / 2);
       }
-
-      /* Exit: continue rising and fading. Starts OVERLAP before the
-         next beat's slot, so the next image is already rising into
-         frame while this one is still on its way out. The motion is
-         continuous — there's never a fully-still moment between
-         beats. */
       if (i < N - 1) {
+        /* Exit — completes GAP/2 BEFORE the next slot starts, so
+           there's a brief moment of paper before the next layer
+           fades in. */
         tl.to(layer, {
           opacity: 0, y: -RISE,
           duration: FADE,
-          ease: 'power2.in',
-        }, (i + 1) * SLOT - OVERLAP);
+          ease: 'sine.inOut',
+        }, (i + 1) * SLOT - FADE - GAP / 2);
       }
     });
   })();

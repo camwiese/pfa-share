@@ -57,11 +57,25 @@
        position:fixed ancestor sometimes fails to render initially). -->
   <div class="hero__image" aria-hidden="true"></div>
 
+  <!-- Full-viewport blur+dim overlay that lives in front of the hero
+       image (and behind every scene's content). As the reader scrolls
+       from Scene 1 into Scene 2, JS scrubs its --blur-px from 0 to
+       max and its background dim from transparent to ~30% black —
+       so the image itself appears to blur in place, not get covered
+       by an opaque layer sliding in from below. -->
+  <div class="hero__blur" aria-hidden="true"></div>
+
+  <!-- Full-viewport gradient veil that darkens the bottom-left of the
+       hero image so the Scene 1 title reads cleanly. Fixed (not
+       nested in Scene 1) so it doesn't scroll up with the section
+       and create a horizontal "band" mid-transition. JS fades it out
+       alongside the title as the reader scrolls into Scene 2. -->
+  <div class="hero__veil" aria-hidden="true"></div>
+
   <!-- =========================================================
        SCENE 1 — Hero (full bleed)
        ========================================================= -->
   <section class="scene scene--hero" aria-labelledby="hero-title">
-    <div class="hero__veil" aria-hidden="true"></div>
     <div class="hero__inner">
       <h1 id="hero-title" class="hero__title">A new civic destination for San Francisco at the Palace of Fine Arts</h1>
     </div>
@@ -72,12 +86,9 @@
        ========================================================= -->
   <section class="scene scene--blur" id="scene-blur">
     <div class="blur__sticky">
-      <!-- No background image here — Scene 1's .hero__image is
-           position: fixed, so it stays pinned to the viewport and
-           shows through Scene 2's transparent background. The veil
-           below provides darkness + backdrop blur for legibility. -->
+      <!-- No background or veil here — the fixed .hero__blur (above)
+           handles both the image blur and the dim overlay. -->
       <div class="blur__bg" aria-hidden="true"></div>
-      <div class="blur__veil" aria-hidden="true"></div>
       <div class="blur__inner">
         <p class="blur__text blur__text--desktop" aria-hidden="false">
           <span class="blur__line">A place you&rsquo;ll love to visit with</span>
@@ -158,71 +169,66 @@
   </section>
 
   <!-- =========================================================
-       SCENE 5 — "Welcome to the Future"
-       Plain centered text on paper, with a square line-drawing
-       placeholder (real line drawing will be dropped in later).
-       The same placeholder element travels into Scene 6's corner.
+       SCENE 5/6 — Vision (Welcome + A day at the Palace)
+       One pinned stage, one scrub timeline, 7 stacked layers.
+       Welcome is layer 0; the six day-flow beats follow as 1–6.
+       Each layer rises from below, holds at centre, then drifts
+       up and out as the next rises in — a single continuous
+       crossfade. See scene_vision() in script.js.
        ========================================================= -->
-  <section class="scene scene--establish">
-    <div class="establish__hold">
-      <h2 class="establish__h">Welcome to the Future</h2>
-      <p class="establish__sub">Our vision for San Francisco&rsquo;s new home of progress.</p>
-      <p class="establish__year">Palace of Fine Arts &middot; 2030</p>
-      <figure class="establish__art" aria-hidden="true">
-        <img src="images/Park-Lagoon-2.png" alt="" loading="lazy" decoding="async">
-      </figure>
-    </div>
-  </section>
+  <section class="scene scene--vision" id="scene-vision">
+    <div class="vision__sticky">
+      <div class="vision__stage">
 
-  <!-- =========================================================
-       SCENE 6 — A day at the Palace (crossfading beats)
-       Six photo beats. Each caption fades in as a whole sentence,
-       holds while the reader reads, then fades out into the next.
-       ========================================================= -->
-  <section class="scene scene--day" id="scene-day">
-    <div class="day__sticky">
-      <div class="day__stage">
-
-        <div class="day__layer" data-beat="0">
-          <figure class="day__frame">
-            <img src="images/arrival-1.png" alt="Arrival on Palace Drive" class="day__image" loading="eager" decoding="async">
+        <div class="vision__layer vision__layer--welcome" data-beat="0">
+          <h2 class="vision__h">Welcome to the Future</h2>
+          <p class="vision__sub">Our vision for San Francisco&rsquo;s new home of progress.</p>
+          <p class="vision__year">Palace of Fine Arts &middot; 2030</p>
+          <figure class="vision__art" aria-hidden="true">
+            <img src="images/Park-Lagoon-2.png" alt="" loading="lazy" decoding="async">
           </figure>
-          <p class="day__caption" data-caption="Step out of your Waymo onto Palace drive.">Step out of your Waymo onto Palace drive.</p>
         </div>
 
-        <div class="day__layer" data-beat="1">
-          <figure class="day__frame">
-            <img src="images/grounds-2.png" alt="Landscaped grounds" class="day__image" loading="eager" decoding="async">
+        <div class="vision__layer" data-beat="1">
+          <figure class="vision__frame">
+            <img src="images/arrival-1.png" alt="Arrival on Palace Drive" class="vision__image" loading="eager" decoding="async">
           </figure>
-          <p class="day__caption">Wander through beautifully landscaped grounds filled with statues of history&rsquo;s greatest innovators.</p>
+          <p class="vision__caption">Step out of your Waymo onto Palace drive.</p>
         </div>
 
-        <div class="day__layer" data-beat="2">
-          <figure class="day__frame">
-            <img src="images/food-3.png" alt="World&rsquo;s Fare food hall" class="day__image" loading="eager" decoding="async">
+        <div class="vision__layer" data-beat="2">
+          <figure class="vision__frame">
+            <img src="images/grounds-2.png" alt="Landscaped grounds" class="vision__image" loading="eager" decoding="async">
           </figure>
-          <p class="day__caption">Meet friends at the World&rsquo;s Fare, grabbing a bite to eat in one of the 60+ food stalls serving global and innovative dishes.</p>
+          <p class="vision__caption">Wander through beautifully landscaped grounds filled with statues of history&rsquo;s greatest innovators.</p>
         </div>
 
-        <div class="day__layer" data-beat="3">
-          <figure class="day__frame">
-            <img src="images/tour-4.png" alt="Tour into Tomorrow" class="day__image" loading="eager" decoding="async">
+        <div class="vision__layer" data-beat="3">
+          <figure class="vision__frame">
+            <img src="images/food-3.png" alt="World&rsquo;s Fare food hall" class="vision__image" loading="eager" decoding="async">
           </figure>
-          <p class="day__caption">Bring your kids on a Tour into Tomorrow, stepping into a story about the incredible future that&rsquo;s ahead.</p>
+          <p class="vision__caption">Meet friends at the World&rsquo;s Fare, grabbing a bite to eat in one of the 60+ food stalls serving global and innovative dishes.</p>
         </div>
 
-        <div class="day__layer" data-beat="4">
-          <figure class="day__frame">
-            <img src="images/lab-5.png" alt="Talks and workshops" class="day__image" loading="eager" decoding="async">
+        <div class="vision__layer" data-beat="4">
+          <figure class="vision__frame">
+            <img src="images/tour-4.png" alt="Tour into Tomorrow" class="vision__image" loading="eager" decoding="async">
           </figure>
-          <p class="day__caption">Join for a talk and workshop to learn about the incredible work being done today to build the future, and find a way to get involved.</p>
+          <p class="vision__caption">Bring your kids on a Tour into Tomorrow, stepping into a story about the incredible future that&rsquo;s ahead.</p>
         </div>
 
-        <div class="day__layer" data-beat="5">
-          <figure class="day__frame">
-            <img src="images/lagoon-6.jpeg" alt="Evening fountain show on the lagoon" class="day__image" loading="eager" decoding="async">
+        <div class="vision__layer" data-beat="5">
+          <figure class="vision__frame">
+            <img src="images/lab-5.png" alt="Talks and workshops" class="vision__image" loading="eager" decoding="async">
           </figure>
-          <p class="day__caption">End your evening with a beautiful fountain show before heading home with a renewed sense of wonder.</p>
+          <p class="vision__caption">Join for a talk and workshop to learn about the incredible work being done today to build the future, and find a way to get involved.</p>
+        </div>
+
+        <div class="vision__layer" data-beat="6">
+          <figure class="vision__frame">
+            <img src="images/lagoon-6.jpeg" alt="Evening fountain show on the lagoon" class="vision__image" loading="eager" decoding="async">
+          </figure>
+          <p class="vision__caption">End your evening with a beautiful fountain show before heading home with a renewed sense of wonder.</p>
         </div>
 
       </div>
@@ -253,9 +259,8 @@
       <div class="letter__center">
         <h2 class="letter__h">Help write the next chapter in the story of San Francisco.</h2>
         <div class="letter__body">
-          <p class="letter__p">We have a once-in-a-generation opportunity to build San Francisco&rsquo;s next great cultural institution.</p>
           <p class="letter__p">We&rsquo;re assembling a coalition of founders, funders, and builders to bring it to life.</p>
-          <p class="letter__p">If you want to help bring this to life, I&rsquo;d love to meet you.</p>
+          <p class="letter__p">If you&rsquo;d like to play a part, I&rsquo;d love to meet.</p>
         </div>
         <div class="letter__sign">
           <img class="letter__signature" src="images/cameron-wiese-signature.png" alt="Cameron Wiese" width="932" height="630">
