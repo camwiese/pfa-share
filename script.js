@@ -16,12 +16,61 @@
 (function () {
   'use strict';
 
+  const html = document.documentElement;
   const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const isTouch = window.matchMedia('(hover: none)').matches;
+  const blurCopyQuery = window.matchMedia('(max-width: 860px)');
+  let viewportW = window.innerWidth;
+  let viewportH = window.innerHeight;
 
-  /* ── Lenis (skip on touch & reduced-motion) ───────────────── */
+  function setViewportVars() {
+    viewportW = window.innerWidth;
+    viewportH = window.innerHeight;
+    html.style.setProperty('--vh', `${viewportH * 0.01}px`);
+  }
+
+  function setResponsiveSceneHeights() {
+    const reveal = document.getElementById('scene-reveal');
+    if (reveal) {
+      const setupCount = reveal.querySelectorAll('.reveal__line:not(.reveal__line--climax)').length;
+      reveal.style.minHeight = `${Math.round((setupCount * 0.6 + 1.8) * viewportH)}px`;
+    }
+
+    const impact = document.getElementById('scene-impact');
+    if (impact) {
+      const wordCount = impact.querySelectorAll('.impact__w').length;
+      impact.style.minHeight = `${Math.round((Math.max(180, wordCount * 8 + 80) / 100) * viewportH)}px`;
+    }
+  }
+
+  function updateBlurAccessibility() {
+    const mobileVisible = blurCopyQuery.matches;
+    document.querySelectorAll('.blur__text--desktop').forEach((el) => {
+      el.setAttribute('aria-hidden', mobileVisible ? 'true' : 'false');
+    });
+    document.querySelectorAll('.blur__text--mobile').forEach((el) => {
+      el.setAttribute('aria-hidden', mobileVisible ? 'false' : 'true');
+    });
+  }
+
+  setViewportVars();
+  setResponsiveSceneHeights();
+  updateBlurAccessibility();
+
+  /* Bail before adding .js-ready if we can't drive animations.
+     CSS for `html:not(.js-ready)` reveals every initially-hidden
+     element, collapses pinned-scene scroll heights, and shows just
+     the primary beat per cycled scene — so the page is always
+     readable when GSAP can't run (script blocked, CDN unreachable,
+     reduced-motion preference, JS error during boot). */
+  if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
+  if (prefersReduced) return;
+
+  html.classList.add('js-ready');
+
+  /* ── Lenis (skip on touch) ───────────────── */
   let lenis = null;
-  if (!isTouch && !prefersReduced && typeof Lenis !== 'undefined') {
+  if (!isTouch && typeof Lenis !== 'undefined') {
     lenis = new Lenis({
       duration: 1.05,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
@@ -35,7 +84,6 @@
     requestAnimationFrame(raf);
   }
 
-  if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
   gsap.registerPlugin(ScrollTrigger);
 
   /* iOS Safari: ignore the URL-bar show/hide resize — otherwise every
@@ -49,20 +97,28 @@
     gsap.ticker.lagSmoothing(0);
   }
 
-  /* ── Reduced motion: show everything in its final state, skip animations ── */
-  if (prefersReduced) {
-    document.querySelectorAll(
-      '.blur__line, .reveal__line, .reveal__inno, .letter__h, .letter__p, .letter__sign, .impact__line, .impact__w, .day__caption, .establish__art'
-    ).forEach((el) => {
-      el.style.opacity = '1';
-      el.style.transform = 'none';
+  let resizeTimer = null;
+  function refreshAfterResize() {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      const widthDelta = Math.abs(window.innerWidth - viewportW);
+      const heightDelta = Math.abs(window.innerHeight - viewportH);
+      const meaningfulResize = !isTouch || widthDelta > 24 || heightDelta > 80;
+
+      updateBlurAccessibility();
+      if (!meaningfulResize) return;
+
+      setViewportVars();
+      setResponsiveSceneHeights();
+      ScrollTrigger.refresh();
+    }, 160);
+  }
+  window.addEventListener('resize', refreshAfterResize, { passive: true });
+  if (blurCopyQuery.addEventListener) {
+    blurCopyQuery.addEventListener('change', () => {
+      updateBlurAccessibility();
+      ScrollTrigger.refresh();
     });
-    /* Climax-line is positioned but should remain visible too */
-    document.querySelectorAll('.reveal__line--climax').forEach((el) => {
-      el.style.opacity = '1';
-      el.style.transform = 'none';
-    });
-    return; /* Do not initialise any scroll-driven scenes */
   }
 
   /* =============================================================
@@ -76,15 +132,8 @@
   (function scene2_reveal() {
     const section = document.getElementById('scene-blur');
     if (!section) return;
-    const groups = section.querySelectorAll('.blur__text');
-    let lines = [];
-    groups.forEach(g => {
-      if (getComputedStyle(g).display !== 'none') {
-        lines = g.querySelectorAll('.blur__line');
-      }
-    });
-    if (!lines.length) return;
-    const N = lines.length;
+    const groups = Array.from(section.querySelectorAll('.blur__text'));
+    if (!groups.length) return;
 
     /* Timeline budget — total length scales with line count so each
        line gets the same reveal/hold cadence and the last line gets
@@ -94,38 +143,43 @@
     const LAST_HOLD  = 1.50;          /* extra dwell on the last line */
     const FADE_OUT   = 0.45;
 
-    const tl = gsap.timeline({
-      scrollTrigger: {
-        trigger: section,
-        start: 'top top',
-        end: 'bottom top',
-        scrub: 0.8,
-      },
+    groups.forEach((group) => {
+      const lines = group.querySelectorAll('.blur__line');
+      if (!lines.length) return;
+
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: section,
+          start: 'top top',
+          end: 'bottom top',
+          scrub: 0.8,
+        },
+      });
+
+      /* Pre-roll so the first line isn't already on-screen at scene start. */
+      const PREROLL = 0.20;
+      let cursor = PREROLL;
+
+      lines.forEach((line) => {
+        tl.fromTo(line,
+          { opacity: 0, y: 10 },
+          { opacity: 1, y: 0, duration: REVEAL_DUR, ease: 'power2.out' },
+          cursor
+        );
+        cursor += STEP;
+      });
+
+      /* Hold the full block — extra dwell so the last line breathes. */
+      const holdAt = cursor;
+      tl.to(lines, { opacity: 1, duration: LAST_HOLD }, holdAt);
+
+      /* Fade everything out before Scene 3. */
+      tl.to(lines, {
+        opacity: 0, y: -8,
+        duration: FADE_OUT,
+        ease: 'power2.in',
+      }, holdAt + LAST_HOLD);
     });
-
-    /* Pre-roll so the first line isn't already on-screen at scene start. */
-    const PREROLL = 0.20;
-    let cursor = PREROLL;
-
-    lines.forEach((line, i) => {
-      tl.fromTo(line,
-        { opacity: 0, y: 10 },
-        { opacity: 1, y: 0, duration: REVEAL_DUR, ease: 'power2.out' },
-        cursor
-      );
-      cursor += STEP;
-    });
-
-    /* Hold the full block — extra dwell so the last line breathes. */
-    const holdAt = cursor;
-    tl.to(lines, { opacity: 1, duration: LAST_HOLD }, holdAt);
-
-    /* Fade everything out before Scene 3. */
-    tl.to(lines, {
-      opacity: 0, y: -8,
-      duration: FADE_OUT,
-      ease: 'power2.in',
-    }, holdAt + LAST_HOLD);
   })();
 
   /* =============================================================
@@ -151,7 +205,7 @@
     const climax = section.querySelector('.reveal__line--climax');
 
     /* Section length: a little more breathing room before & after the text. */
-    section.style.minHeight = (setup.length * 60 + 180) + 'vh';
+    setResponsiveSceneHeights();
 
     const tl = gsap.timeline({
       scrollTrigger: {
@@ -442,7 +496,7 @@
        - Middle: words resolve one by one
        - Last viewport-height: words fade out before the site plan enters */
     /* Shorter scroll — tighter pacing, less empty space */
-    section.style.minHeight = (Math.max(180, words.length * 8 + 80)) + 'vh';
+    setResponsiveSceneHeights();
 
     const tl = gsap.timeline({
       scrollTrigger: {
@@ -520,9 +574,16 @@
   /* ============================================================
      Refresh after fonts / load
      ============================================================ */
-  if (document.fonts && document.fonts.ready) {
-    document.fonts.ready.then(() => ScrollTrigger.refresh());
+  function refreshScrollTriggers() {
+    setViewportVars();
+    setResponsiveSceneHeights();
+    updateBlurAccessibility();
+    ScrollTrigger.refresh();
   }
-  window.addEventListener('load', () => ScrollTrigger.refresh());
+
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(refreshScrollTriggers);
+  }
+  window.addEventListener('load', refreshScrollTriggers);
 
 })();
