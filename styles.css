@@ -56,6 +56,7 @@
   --gutter:       clamp(1.25rem, 4vw, 2.5rem);
   --pad-section:  clamp(4rem, 12vh, 8rem);
   --frame-radius: 2px;
+  --vh: 1vh;
 }
 
 /* ── Resets ───────────────────────────────────────────────── */
@@ -74,6 +75,20 @@ html {
   text-size-adjust: 100%;
   /* clip (not hidden) on html avoids breaking position:sticky on iOS Safari */
   overflow-x: clip;
+  /* Soft snap pulls scenes together at their boundaries so a fast
+     flick lands on the next scene's start instead of flying past
+     whole sections. `proximity` leaves free scroll inside a scene
+     (so scrub animations stay smooth as the reader scans through);
+     it only kicks in when the reader pauses near a scene edge. */
+  scroll-snap-type: y proximity;
+}
+
+/* Every top-level scene is a snap target — its top edge is what the
+   browser pulls toward. ScrollTrigger pin spacers live inside each
+   section, so the snap point stays at the scene's natural top edge. */
+.scene {
+  scroll-snap-align: start;
+  scroll-snap-stop: normal;
 }
 
 body {
@@ -83,10 +98,11 @@ body {
   font-size: 1.0625rem;
   line-height: 1.6;
   font-weight: 300;
-  /* overflow-x:hidden on <body> breaks position:sticky on iOS — use clip on <html> instead */
+  /* overflow-x:hidden on <body> breaks position:sticky on iOS; clip avoids
+     horizontal rubber-banding without creating a scroll container. */
+  overflow-x: clip;
   font-feature-settings: "ss01", "kern";
-  min-height: 100vh;
-  min-height: 100dvh;
+  min-height: calc(var(--vh) * 100);
   -webkit-tap-highlight-color: transparent;
   overscroll-behavior-y: none;
 }
@@ -142,9 +158,16 @@ body {
   color: rgba(241, 236, 225, 0.55);
 }
 
+/* Scene 2 background. Avoids `filter: blur()` — that filter is very
+   expensive on iOS Safari beneath a sticky+scrub-driven scene and
+   was a major source of mobile judder. A pre-baked low-contrast
+   gradient reads similar without the GPU cost. */
 .placeholder--blurred {
-  filter: blur(24px) saturate(0.85);
-  transform: scale(1.08);
+  background:
+    radial-gradient(ellipse 90% 80% at 50% 50%, rgba(60,42,22,0.45) 0%, rgba(0,0,0,0.7) 100%),
+    #1a140e;
+  filter: none;
+  transform: none;
 }
 
 /* ============================================================
@@ -285,9 +308,7 @@ body {
 
 .scene--hero {
   position: relative;
-  min-height: 100vh;
-  min-height: 100svh;
-  min-height: 100dvh;
+  min-height: calc(var(--vh) * 100);
   display: flex;
   align-items: flex-end;
   overflow: hidden;
@@ -370,16 +391,15 @@ body {
 
 .scene--blur {
   position: relative;
-  min-height: 200vh;
+  min-height: calc(var(--vh) * 200);
   background: #1c1610;
+  overflow-x: clip;
 }
 
 .blur__sticky {
   position: sticky;
   top: 0;
-  height: 100vh;
-  height: 100svh;
-  height: 100dvh;
+  height: calc(var(--vh) * 100);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -388,8 +408,9 @@ body {
 
 .blur__bg {
   position: absolute;
-  inset: -4%;
+  inset: 0;
   z-index: 0;
+  overflow: hidden;
 }
 .blur__bg .placeholder { height: 100%; }
 
@@ -449,9 +470,7 @@ body {
 .reveal__sticky {
   position: sticky;
   top: 0;
-  height: 100vh;
-  height: 100svh;
-  height: 100dvh;
+  height: calc(var(--vh) * 100);
   display: grid;
   place-items: center;
   padding: 0 clamp(1.5rem, 6vw, 3rem);
@@ -571,9 +590,7 @@ body {
 .ppie__sticky {
   position: sticky;
   top: 0;
-  height: 100vh;
-  height: 100svh;
-  height: 100dvh;
+  height: calc(var(--vh) * 100);
   display: flex;
   align-items: center;
   z-index: 1;
@@ -634,15 +651,13 @@ body {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: 0% 50%;    /* start at the far-left of the panorama */
+  object-position: 50% 50%;
   display: block;
-  will-change: object-position;
 }
 
 .ppie__triggers { position: relative; }
 .ppie__trigger {
-  height: 110vh;
-  height: 110svh;
+  height: calc(var(--vh) * 110);
 }
 
 /* ============================================================
@@ -651,16 +666,14 @@ body {
 
 .scene--establish {
   position: relative;
-  min-height: 160vh;
+  min-height: calc(var(--vh) * 220);
   background: var(--paper);
 }
 
 .establish__hold {
   position: sticky;
   top: 0;
-  height: 100vh;
-  height: 100svh;
-  height: 100dvh;
+  height: calc(var(--vh) * 100);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -728,7 +741,7 @@ body {
 }
 .establish__art img {
   width: 100%;
-  max-height: 56dvh;
+  max-height: calc(var(--vh) * 56);
   height: auto;
   object-fit: contain;
   display: block;
@@ -744,16 +757,14 @@ body {
 
 .scene--day {
   position: relative;
-  min-height: 960vh;         /* 6 beats × ~160vh — extra dwell so each beat lingers */
+  min-height: calc(var(--vh) * 960); /* 6 beats × ~160vh — extra dwell so each beat lingers */
   background: var(--paper);
 }
 
 .day__sticky {
   position: sticky;
   top: 0;
-  height: 100vh;
-  height: 100svh;
-  height: 100dvh;
+  height: calc(var(--vh) * 100);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -825,9 +836,7 @@ body {
 .impact__sticky {
   position: sticky;
   top: 0;
-  height: 100vh;
-  height: 100svh;
-  height: 100dvh;
+  height: calc(var(--vh) * 100);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -872,23 +881,25 @@ body {
    exactly at the page bottom (no further scroll). */
 .scene--letter {
   position: relative;
-  min-height: 220vh;
+  min-height: calc(var(--vh) * 220);
   background: var(--paper);
 }
 
 .letter__hold {
   position: sticky;
   top: 0;
-  height: 100vh;
-  height: 100svh;
-  height: 100dvh;
-  /* Grid: center block at top of its own auto-row, CTAs centered in
-     the flexible 1fr middle row, tail pinned to bottom. 15px bottom
-     padding keeps "World's Fair Company · Confidential" off the edge. */
+  height: calc(var(--vh) * 100);
+  /* Three-spacer grid: a generous top region pushes the heading +
+     body block down into the upper-middle of the viewport so "Help
+     write the next chapter" and "This is a once" land in the visual
+     center. CTAs sit in the middle of the lower spacer, and the
+     tail (rule + footer) pins to the bottom with 15px breathing
+     room above the viewport edge. */
   display: grid;
-  grid-template-rows: auto 1fr auto;
+  grid-template-rows: 1.4fr auto 1fr auto 1fr auto;
   justify-items: center;
-  padding: clamp(2rem, 6vh, 4rem) clamp(1.5rem, 6vw, 4rem) 15px;
+  align-items: center;
+  padding: clamp(1rem, 3vh, 2rem) clamp(1.5rem, 6vw, 4rem) 15px;
   width: 100%;
   max-width: 560px;
   margin: 0 auto;
@@ -897,6 +908,7 @@ body {
 
 /* Main letter block — heading → body → signature → name → phone. */
 .letter__center {
+  grid-row: 2;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -904,6 +916,7 @@ body {
 }
 
 .letter__tail {
+  grid-row: 6;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -993,6 +1006,7 @@ body {
    so it floats halfway between the phone number above and the footer
    below. */
 .letter__ctas {
+  grid-row: 4;
   margin: 0;
   align-self: center;
   font-family: var(--font-sans);
@@ -1053,6 +1067,31 @@ a:focus-visible {
 }
 
 /* ============================================================
+   Compositor-layer hygiene.
+   We earlier sprinkled `will-change: opacity, transform` on most
+   reveal/cascade elements. Each one allocates a dedicated GPU
+   layer. On iOS Safari (tight GPU memory) twenty-plus layers
+   noticeably stutter scroll. The truly long-running animations
+   keep their will-change (set inside their own rules); the
+   one-shot reveals drop it here. */
+.blur__line,
+.reveal__line,
+.reveal__inno,
+.establish__h,
+.establish__sub,
+.establish__year,
+.establish__art,
+.impact__w,
+.letter__h,
+.letter__p,
+.letter__sign,
+.letter__ctas,
+.letter__rule,
+.letter__footer {
+  will-change: auto;
+}
+
+/* ============================================================
    RESPONSIVE — Mobile
    ============================================================ */
 
@@ -1092,9 +1131,7 @@ a:focus-visible {
   .ppie__sticky {
     padding: 1rem 0 1.5rem;
     gap: 0.85rem;
-    height: 100vh;
-    height: 100svh;
-    height: 100dvh;
+    height: calc(var(--vh) * 100);
   }
   .ppie__grid {
     gap: 1rem;
@@ -1104,7 +1141,7 @@ a:focus-visible {
   .ppie__line {
     font-size: clamp(1.05rem, 4vw, 1.35rem);
   }
-  .ppie__trigger { height: 70vh; }
+  .ppie__trigger { height: calc(var(--vh) * 70); }
 
   /* Scene 5 — establishing frame */
   .establish__h { font-size: clamp(1.6rem, 6.2vw, 2.05rem); }
@@ -1124,29 +1161,49 @@ a:focus-visible {
     padding: clamp(2.5rem, 8vh, 4rem) clamp(1.5rem, 5vw, 2.5rem);
   }
 
-  /* Scene 6 day-flow — sticky stage, mobile-tightened.
-     Use dvh for image width so the frame fits within the visible viewport
-     even when iOS Safari's URL bar is showing. */
-  .scene--day { min-height: 900vh; min-height: 900dvh; }
+  /* Scene 6 day-flow — on mobile we drop the sticky/crossfade
+     choreography entirely and let the reader scroll naturally
+     through every beat. Each image matches PPIE's landscape size
+     so the vision tour feels consistent with the 1915 panorama. */
+  .scene--day { min-height: 0; }
   .day__sticky {
-    padding: 1rem clamp(0.75rem, 4vw, 1.5rem);
+    position: static;
+    height: auto;
+    padding: clamp(2rem, 5vh, 3rem) clamp(1rem, 4vw, 1.5rem);
   }
-  .day__stage { max-width: 100%; }
-  .day__layer { gap: 0.85rem; }
-  .day__frame {
-    aspect-ratio: 4 / 5;
-    width: min(96%, calc(62dvh * 4 / 5));
+  .day__stage {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(2.5rem, 6vh, 4rem);
+    width: 100%;
+    max-width: min(92vw, 540px);
     margin: 0 auto;
   }
+  .day__layer {
+    grid-area: auto;
+    opacity: 1 !important;
+    transform: none !important;
+    gap: clamp(0.85rem, 2vh, 1.25rem);
+  }
+  .day__frame {
+    aspect-ratio: 16 / 10;
+    width: 100%;
+    margin: 0 auto;
+  }
+  .day__image {
+    transform: none !important;
+  }
   .day__caption {
+    opacity: 1 !important;
+    transform: none !important;
     font-size: clamp(1rem, 4vw, 1.25rem);
     padding: 0 0.5rem;
   }
 
   /* Tighten total scroll length for the heavy scrub scenes on mobile */
-  .scene--blur     { min-height: 200vh; min-height: 200dvh; }
-  .scene--establish{ min-height: 140vh; min-height: 140dvh; }
-  .scene--letter   { min-height: 200vh; min-height: 200dvh; }
+  .scene--blur     { min-height: calc(var(--vh) * 200); }
+  .scene--establish{ min-height: calc(var(--vh) * 180); }
+  .scene--letter   { min-height: calc(var(--vh) * 200); }
 
   /* Scene 7 impact */
   .scene--impact {
@@ -1175,6 +1232,90 @@ a:focus-visible {
   .frame__corner { width: 28px; height: 28px; }
 }
 
+@media (max-width: 860px) and (orientation: landscape) {
+  .reveal__sticky,
+  .ppie__sticky,
+  .day__sticky,
+  .letter__hold {
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+  }
+
+  .reveal__layout {
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 0.8fr);
+    gap: clamp(0.85rem, 3vw, 1.4rem);
+    max-width: min(92vw, 760px);
+  }
+  .reveal__stack {
+    gap: 0.45rem;
+    max-width: 36ch;
+  }
+  .reveal__line {
+    font-size: clamp(0.82rem, 2.4vw, 1rem);
+    line-height: 1.25;
+  }
+  .reveal__line--climax {
+    font-size: clamp(1.2rem, 4vw, 1.65rem);
+    max-width: 24ch;
+  }
+  .reveal__innovations {
+    height: min(calc(var(--vh) * 68), 230px);
+  }
+  .reveal__inno {
+    width: clamp(104px, 18vw, 150px);
+  }
+
+  .ppie__grid {
+    width: min(92vw, calc(var(--vh) * 132));
+    gap: 0.55rem;
+    padding: 0;
+  }
+  .ppie__text { min-height: 3.2em; }
+  .ppie__line {
+    font-size: clamp(0.82rem, 2.5vw, 1rem);
+    line-height: 1.24;
+  }
+
+  .day__frame {
+    aspect-ratio: 16 / 10;
+    width: min(58vw, calc(var(--vh) * 112));
+  }
+  .day__caption {
+    font-size: clamp(0.82rem, 2.6vw, 1rem);
+    line-height: 1.24;
+  }
+
+  .letter__hold {
+    padding-left: clamp(1rem, 4vw, 1.5rem);
+    padding-right: clamp(1rem, 4vw, 1.5rem);
+  }
+  .letter__center { gap: 0.42rem; }
+  .letter__body { gap: 0.22rem; }
+  .letter__h {
+    font-size: clamp(1rem, 3vw, 1.22rem);
+    line-height: 1.12;
+  }
+  .letter__p {
+    font-size: clamp(0.78rem, 2.1vw, 0.92rem);
+    line-height: 1.28;
+  }
+  .letter__sign { margin-top: 0.45rem; }
+  .letter__signature { width: clamp(62px, 12vw, 78px); }
+  .letter__name,
+  .letter__phone {
+    font-size: 0.68rem;
+    line-height: 1.25;
+  }
+  .letter__ctas {
+    font-size: 0.54rem;
+    letter-spacing: 0.12em;
+  }
+  .letter__footer {
+    font-size: 0.5rem;
+    letter-spacing: 0.12em;
+  }
+}
+
 /* ============================================================
    Reduced motion — short-circuit all scrubs / transitions
    ============================================================ */
@@ -1185,14 +1326,101 @@ a:focus-visible {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
-  .reveal__line, .reveal__inno, .letter__h, .letter__p, .letter__sign, .letter__ctas, .letter__rule, .letter__footer, .blur__line, .impact__line, .impact__w, .day__caption, .establish__art {
+  .reveal__line, .reveal__inno, .letter__h, .letter__p, .letter__sign, .letter__ctas, .letter__rule, .letter__footer, .blur__line, .impact__line, .impact__w, .day__layer, .day__caption, .ppie__line, .establish__h, .establish__sub, .establish__year, .establish__art {
     opacity: 1 !important;
     transform: none !important;
   }
-  .day__layer { opacity: 0; }
-  .day__layer[data-beat="0"] { opacity: 1; transform: none !important; }
-  .ppie__line { opacity: 0; }
-  .ppie__line.is-active { opacity: 1; }
   .hero__chevron, .hero__chevron span { animation: none !important; }
   .hero__chevron { display: none; }
+}
+
+/* ============================================================
+   Resilience fallback — applied when our JS hasn't tagged
+   <html> with `.js-ready` (GSAP CDN blocked, content-blocker,
+   script error during boot, or prefers-reduced-motion). Every
+   initially-hidden element is forced visible; pinned-scene
+   scroll heights collapse so the page reads as a tall static
+   document instead of a wall of cream nothing.
+   ============================================================ */
+html:not(.js-ready) .blur__line,
+html:not(.js-ready) .reveal__line,
+html:not(.js-ready) .reveal__inno,
+html:not(.js-ready) .ppie__line,
+html:not(.js-ready) .establish__h,
+html:not(.js-ready) .establish__sub,
+html:not(.js-ready) .establish__year,
+html:not(.js-ready) .establish__art,
+html:not(.js-ready) .day__layer,
+html:not(.js-ready) .day__caption,
+html:not(.js-ready) .impact__w,
+html:not(.js-ready) .impact__line,
+html:not(.js-ready) .letter__h,
+html:not(.js-ready) .letter__p,
+html:not(.js-ready) .letter__sign,
+html:not(.js-ready) .letter__ctas,
+html:not(.js-ready) .letter__rule,
+html:not(.js-ready) .letter__footer {
+  opacity: 1 !important;
+  transform: none !important;
+}
+/* No need to scroll through 6+ viewports of pin spacer when
+   nothing is animating. */
+html:not(.js-ready) .scene--blur,
+html:not(.js-ready) .scene--reveal,
+html:not(.js-ready) .scene--ppie,
+html:not(.js-ready) .scene--establish,
+html:not(.js-ready) .scene--day,
+html:not(.js-ready) .scene--impact,
+html:not(.js-ready) .scene--letter {
+  min-height: 0;
+}
+/* Stickies become normal in-flow containers. */
+html:not(.js-ready) .blur__sticky,
+html:not(.js-ready) .reveal__sticky,
+html:not(.js-ready) .ppie__sticky,
+html:not(.js-ready) .establish__hold,
+html:not(.js-ready) .day__sticky,
+html:not(.js-ready) .impact__sticky,
+html:not(.js-ready) .letter__hold {
+  position: static;
+  height: auto;
+}
+html:not(.js-ready) .reveal__sticky {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(2rem, 8vw, 4rem);
+  padding-top: clamp(4rem, 10vw, 7rem);
+  padding-bottom: clamp(4rem, 10vw, 7rem);
+}
+html:not(.js-ready) .reveal__layout,
+html:not(.js-ready) .reveal__climax-hold {
+  grid-area: auto;
+}
+html:not(.js-ready) .reveal__climax-hold {
+  position: static;
+}
+html:not(.js-ready) .ppie__sticky {
+  padding-top: clamp(3rem, 8vw, 5rem);
+  padding-bottom: clamp(3rem, 8vw, 5rem);
+}
+html:not(.js-ready) .ppie__text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  min-height: auto;
+}
+html:not(.js-ready) .ppie__line {
+  grid-area: auto;
+}
+/* The stage uses grid + 1/1 stacking to overlay beats; without
+   animation, render all beats as normal blocks. */
+html:not(.js-ready) .day__stage {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(2.5rem, 8vw, 4rem);
+  padding-top: clamp(3rem, 8vw, 5rem);
+  padding-bottom: clamp(3rem, 8vw, 5rem);
+}
+html:not(.js-ready) .day__layer {
+  grid-area: auto;
 }
