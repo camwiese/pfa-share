@@ -25,7 +25,12 @@
 
   function setViewportVars() {
     viewportW = window.innerWidth;
-    viewportH = window.innerHeight;
+    /* visualViewport excludes the iOS URL-bar area so sticky stages
+       size to what the user actually sees, not what's hidden behind
+       the chrome on first load. */
+    viewportH = window.visualViewport
+      ? window.visualViewport.height
+      : window.innerHeight;
     html.style.setProperty('--vh', `${viewportH * 0.01}px`);
   }
 
@@ -33,7 +38,12 @@
     const reveal = document.getElementById('scene-reveal');
     if (reveal) {
       const setupCount = reveal.querySelectorAll('.reveal__line:not(.reveal__line--climax)').length;
-      reveal.style.minHeight = `${Math.round((setupCount * 0.6 + 1.8) * viewportH)}px`;
+      /* Mobile gets more runway per line — momentum scrolling burns
+         through text-heavy scenes too quickly with desktop spacing. */
+      const isMobile = window.matchMedia('(max-width: 860px)').matches;
+      const perLine = isMobile ? 0.75 : 0.6;
+      const padding = isMobile ? 2.2 : 1.8;
+      reveal.style.minHeight = `${Math.round((setupCount * perLine + padding) * viewportH)}px`;
     }
 
     const impact = document.getElementById('scene-impact');
@@ -114,6 +124,9 @@
     }, 160);
   }
   window.addEventListener('resize', refreshAfterResize, { passive: true });
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', refreshAfterResize, { passive: true });
+  }
   if (blurCopyQuery.addEventListener) {
     blurCopyQuery.addEventListener('change', () => {
       updateBlurAccessibility();
@@ -404,23 +417,25 @@
   (function scene6_day() {
     const section = document.getElementById('scene-day');
     if (!section) return;
-    /* On mobile we drop the sticky crossfade and let the reader scroll
-       naturally through every beat — each image renders statically at
-       the same landscape size as the PPIE panorama. The CSS in the
-       max-width:860px query handles the layout reset. */
-    if (window.matchMedia('(max-width: 860px)').matches) return;
     const layers = Array.from(section.querySelectorAll('.day__layer'));
     const N = layers.length;
     if (!N) return;
+
+    /* Mobile keeps the sticky stage but drops Ken Burns scale and the
+       caption y-translate — pure opacity crossfades, no GPU compositing
+       work that judders on iOS Safari. */
+    const isMobile = window.matchMedia('(max-width: 860px)').matches;
 
     /* Initial state — beat 0 visible, others invisible. Each caption
        starts hidden; it fades in as a whole sentence during its beat. */
     layers.forEach((layer, i) => {
       gsap.set(layer, { opacity: i === 0 ? 1 : 0 });
       const cap = layer.querySelector('.day__caption');
-      if (cap) gsap.set(cap, { opacity: 0, y: 6 });
-      const img = layer.querySelector('.day__image');
-      if (img) gsap.set(img, { scale: 1 });
+      if (cap) gsap.set(cap, isMobile ? { opacity: 0 } : { opacity: 0, y: 6 });
+      if (!isMobile) {
+        const img = layer.querySelector('.day__image');
+        if (img) gsap.set(img, { scale: 1 });
+      }
     });
 
     const tl = gsap.timeline({
@@ -428,7 +443,7 @@
         trigger: section,
         start: 'top top',
         end: 'bottom bottom',
-        scrub: 0.8,
+        scrub: isMobile ? 0.4 : 0.8,
       },
     });
 
@@ -436,10 +451,10 @@
     /* Crossfade window between adjacent beats. Most of each slot is
        a still hold so the reader can sit with the image + caption;
        transitions are kept tight at either end. */
-    const FADE     = SLOT * 0.20;     /* image/layer crossfade */
-    const CAP_IN   = SLOT * 0.14;     /* caption fade-in duration */
-    const CAP_OUT  = SLOT * 0.14;     /* caption fade-out duration */
-    const CAP_HOLD = SLOT - CAP_IN - CAP_OUT - FADE;  /* readable dwell (~52% of slot) */
+    const FADE     = SLOT * (isMobile ? 0.22 : 0.20);
+    const CAP_IN   = SLOT * 0.14;
+    const CAP_OUT  = SLOT * 0.14;
+    const CAP_HOLD = SLOT - CAP_IN - CAP_OUT - FADE;
 
     layers.forEach((layer, i) => {
       const slotStart = i * SLOT;
@@ -453,16 +468,20 @@
 
       /* Caption fades in as a single sentence, holds, then fades out. */
       if (cap) {
-        const capInAt  = slotStart + FADE * 0.9;
+        const capInAt  = slotStart + FADE * (isMobile ? 0.8 : 0.9);
         const capOutAt = capInAt + CAP_IN + Math.max(0, CAP_HOLD);
-        tl.to(cap, { opacity: 1, y: 0, duration: CAP_IN, ease: 'power2.out' }, capInAt);
-        if (i < N - 1) {
-          tl.to(cap, { opacity: 0, y: -4, duration: CAP_OUT, ease: 'power2.in' }, capOutAt);
-        }
+        const capInVars = isMobile
+          ? { opacity: 1, duration: CAP_IN, ease: 'power2.out' }
+          : { opacity: 1, y: 0, duration: CAP_IN, ease: 'power2.out' };
+        const capOutVars = isMobile
+          ? { opacity: 0, duration: CAP_OUT, ease: 'power2.in' }
+          : { opacity: 0, y: -4, duration: CAP_OUT, ease: 'power2.in' };
+        tl.to(cap, capInVars, capInAt);
+        if (i < N - 1) tl.to(cap, capOutVars, capOutAt);
       }
 
-      /* Ken Burns push-in across the beat. */
-      if (img) {
+      /* Ken Burns push-in across the beat — desktop only. */
+      if (img && !isMobile) {
         tl.fromTo(img,
           { scale: 1 },
           { scale: 1.04, duration: SLOT + FADE, ease: 'none' },
