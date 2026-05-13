@@ -10,16 +10,17 @@
 <meta property="og:type" content="website">
 <meta property="og:title" content="A new civic destination at the Palace of Fine Arts">
 <meta property="og:description" content="A new civic destination at the Palace of Fine Arts.">
-<meta property="og:image" content="Park-Lagoon-2.png">
+<meta property="og:image" content="images/header-image.png">
 <meta property="og:image:width" content="1672">
 <meta property="og:image:height" content="941">
 <meta property="og:image:type" content="image/png">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="A new civic destination at the Palace of Fine Arts">
 <meta name="twitter:description" content="A new civic destination at the Palace of Fine Arts.">
-<meta name="twitter:image" content="Park-Lagoon-2.png">
+<meta name="twitter:image" content="images/header-image.png">
 
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="preload" as="image" href="images/header-image.png" fetchpriority="high">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -47,13 +48,19 @@
 
 <main>
 
+  <!-- Fixed hero image — sits at the top of <main> so its `position:
+       fixed` isn't clipped by Scene 1's `overflow: hidden`. Stays
+       pinned to the viewport across Scenes 1 & 2 (text scrolls over
+       it), then JS scrubs its opacity to 0 as Scene 2 exits. The
+       image itself is set via `background-image` on this element
+       (avoiding a Chromium paint bug where an <img> inside a
+       position:fixed ancestor sometimes fails to render initially). -->
+  <div class="hero__image" aria-hidden="true"></div>
+
   <!-- =========================================================
        SCENE 1 — Hero (full bleed)
        ========================================================= -->
   <section class="scene scene--hero" aria-labelledby="hero-title">
-    <div class="hero__image" aria-hidden="true">
-      <span class="placeholder placeholder--hero">Hero image</span>
-    </div>
     <div class="hero__veil" aria-hidden="true"></div>
     <div class="hero__inner">
       <h1 id="hero-title" class="hero__title">A new civic destination for San Francisco at the Palace of Fine Arts</h1>
@@ -65,19 +72,21 @@
        ========================================================= -->
   <section class="scene scene--blur" id="scene-blur">
     <div class="blur__sticky">
-      <div class="blur__bg" aria-hidden="true">
-        <span class="placeholder placeholder--hero placeholder--blurred">Hero image</span>
-      </div>
+      <!-- No background image here — Scene 1's .hero__image is
+           position: fixed, so it stays pinned to the viewport and
+           shows through Scene 2's transparent background. The veil
+           below provides darkness + backdrop blur for legibility. -->
+      <div class="blur__bg" aria-hidden="true"></div>
       <div class="blur__veil" aria-hidden="true"></div>
       <div class="blur__inner">
         <p class="blur__text blur__text--desktop" aria-hidden="false">
-          <span class="blur__line">A place you can visit with</span>
+          <span class="blur__line">A place you&rsquo;ll love to visit with</span>
           <span class="blur__line">your kids, family, and friends</span>
           <span class="blur__line">to experience beauty, wonder,</span>
           <span class="blur__line">and hope for the future.</span>
         </p>
         <p class="blur__text blur__text--mobile" aria-hidden="true">
-          <span class="blur__line">A place you can visit</span>
+          <span class="blur__line">A place you&rsquo;ll love to visit</span>
           <span class="blur__line">with your kids, family, and friends</span>
           <span class="blur__line">to experience beauty, wonder,</span>
           <span class="blur__line">and hope for the future.</span>
@@ -93,11 +102,9 @@
     <div class="reveal__sticky">
       <div class="reveal__layout">
         <div class="reveal__stack">
-          <p class="reveal__line" data-line="0">Here in the Bay Area, the most extraordinary innovations on earth are being built.</p>
-          <p class="reveal__line" data-line="1">Cures for blindness, delivering livesaving medical equipment, and restoring our coral reefs.</p>
-          <p class="reveal__line" data-line="2">For most people, there&rsquo;s no place to see this.</p>
-          <p class="reveal__line" data-line="3">Without access to the future, people aren&rsquo;t inspired to build it.</p>
-          <p class="reveal__line" data-line="4">If we want an incredible future, we need a home for that optimism.</p>
+          <p class="reveal__line" data-line="0">Here in the Bay Area, the most extraordinary innovations on earth are being built &mdash; cures for blindness, robots delivering lifesaving medicine, technology restoring our coral reefs.</p>
+          <p class="reveal__line" data-line="1">But there&rsquo;s nowhere for the public to see it.</p>
+          <p class="reveal__line" data-line="2">The future needs a home.</p>
         </div>
         <div class="reveal__innovations" aria-hidden="true">
           <figure class="reveal__inno" data-inno="0">
@@ -112,7 +119,7 @@
         </div>
       </div>
       <div class="reveal__climax-hold">
-        <p class="reveal__line reveal__line--climax" data-line="5">What if San Francisco had a place where the future felt exciting again?</p>
+        <p class="reveal__line reveal__line--climax" data-line="3">A century ago, San Francisco showed the world what that could look like.</p>
       </div>
     </div>
   </section>
@@ -126,16 +133,16 @@
       <div class="ppie__grid">
         <div class="ppie__text">
           <div class="ppie__lines">
-            <p class="ppie__line is-active" data-line="0">In 1915, San Francisco opened its doors to the world, inviting millions to witness a city rebuilt from rubble.</p>
-            <p class="ppie__line" data-line="1">This World&rsquo;s Fair captured our spirit of possibility and put San Francisco on the world stage.</p>
-            <p class="ppie__line" data-line="2">The last building standing from that World&rsquo;s Fair is the Palace of Fine Arts.</p>
-            <p class="ppie__line" data-line="3">Today, it&rsquo;s in need of a long term steward who will ensure the site continues to serve San Francisco for the next 100 years.</p>
+            <p class="ppie__line is-active" data-line="0">In 1915, just nine years after the earthquake leveled the city, San Francisco invited the world to see what it had rebuilt.</p>
+            <p class="ppie__line" data-line="1">The Panama-Pacific International Exposition put San Francisco on the world stage &mdash; not as a city that survived, but as one that defined the future.</p>
+            <p class="ppie__line" data-line="2">The last building standing from that fair is the Palace of Fine Arts.</p>
+            <p class="ppie__line" data-line="3">It&rsquo;s time to write its next chapter.</p>
           </div>
         </div>
         <div class="ppie__media">
           <figure class="frame frame--light frame--landscape ppie__frame">
             <div class="frame__inner">
-              <img src="1915-PPIE-full.jpg" alt="The Panama-Pacific International Exposition, San Francisco, 1915" class="ppie__image" loading="lazy" decoding="async">
+              <img src="images/1915-PPIE-full.jpg" alt="The Panama-Pacific International Exposition, San Francisco, 1915" class="ppie__image" loading="lazy" decoding="async">
             </div>
           </figure>
         </div>
@@ -146,6 +153,7 @@
       <div class="ppie__trigger" data-line="1"></div>
       <div class="ppie__trigger" data-line="2"></div>
       <div class="ppie__trigger" data-line="3"></div>
+      <div class="ppie__trigger" data-line="close"></div>
     </div>
   </section>
 
@@ -161,7 +169,7 @@
       <p class="establish__sub">Our vision for San Francisco&rsquo;s new home of progress.</p>
       <p class="establish__year">Palace of Fine Arts &middot; 2030</p>
       <figure class="establish__art" aria-hidden="true">
-        <img src="Park-Lagoon-2.png" alt="" loading="lazy" decoding="async">
+        <img src="images/Park-Lagoon-2.png" alt="" loading="lazy" decoding="async">
       </figure>
     </div>
   </section>
@@ -177,42 +185,42 @@
 
         <div class="day__layer" data-beat="0">
           <figure class="day__frame">
-            <img src="arrive.jpeg" alt="Arrival on Palace Drive" class="day__image" loading="eager" decoding="async">
+            <img src="images/arrival-1.png" alt="Arrival on Palace Drive" class="day__image" loading="eager" decoding="async">
           </figure>
           <p class="day__caption" data-caption="Step out of your Waymo onto Palace drive.">Step out of your Waymo onto Palace drive.</p>
         </div>
 
         <div class="day__layer" data-beat="1">
           <figure class="day__frame">
-            <img src="grounds.jpeg" alt="Landscaped grounds" class="day__image" loading="eager" decoding="async">
+            <img src="images/grounds-2.png" alt="Landscaped grounds" class="day__image" loading="eager" decoding="async">
           </figure>
           <p class="day__caption">Wander through beautifully landscaped grounds filled with statues of history&rsquo;s greatest innovators.</p>
         </div>
 
         <div class="day__layer" data-beat="2">
           <figure class="day__frame">
-            <img src="lunch.jpeg" alt="World&rsquo;s Fare food hall" class="day__image" loading="eager" decoding="async">
+            <img src="images/food-3.png" alt="World&rsquo;s Fare food hall" class="day__image" loading="eager" decoding="async">
           </figure>
           <p class="day__caption">Meet friends at the World&rsquo;s Fare, grabbing a bite to eat in one of the 60+ food stalls serving global and innovative dishes.</p>
         </div>
 
         <div class="day__layer" data-beat="3">
           <figure class="day__frame">
-            <img src="tour.jpeg" alt="Tour into Tomorrow" class="day__image" loading="eager" decoding="async">
+            <img src="images/tour-4.png" alt="Tour into Tomorrow" class="day__image" loading="eager" decoding="async">
           </figure>
           <p class="day__caption">Bring your kids on a Tour into Tomorrow, stepping into a story about the incredible future that&rsquo;s ahead.</p>
         </div>
 
         <div class="day__layer" data-beat="4">
           <figure class="day__frame">
-            <img src="talks.jpeg" alt="Talks and workshops" class="day__image" loading="eager" decoding="async">
+            <img src="images/lab-5.png" alt="Talks and workshops" class="day__image" loading="eager" decoding="async">
           </figure>
           <p class="day__caption">Join for a talk and workshop to learn about the incredible work being done today to build the future, and find a way to get involved.</p>
         </div>
 
         <div class="day__layer" data-beat="5">
           <figure class="day__frame">
-            <img src="lagoon.jpeg" alt="Evening fountain show on the lagoon" class="day__image" loading="eager" decoding="async">
+            <img src="images/lagoon-6.jpeg" alt="Evening fountain show on the lagoon" class="day__image" loading="eager" decoding="async">
           </figure>
           <p class="day__caption">End your evening with a beautiful fountain show before heading home with a renewed sense of wonder.</p>
         </div>
@@ -245,12 +253,12 @@
       <div class="letter__center">
         <h2 class="letter__h">Help write the next chapter in the story of San Francisco.</h2>
         <div class="letter__body">
-          <p class="letter__p">This is a once-in-a-generation opportunity to build a new institution for San Francisco.</p>
-          <p class="letter__p">I&rsquo;m assembling a coalition of funders, founders, and civic leaders who share my belief in the future to make it happen.</p>
-          <p class="letter__p">If that&rsquo;s you, I&rsquo;d love to meet you.</p>
+          <p class="letter__p">We have a once-in-a-generation opportunity to build San Francisco&rsquo;s next great cultural institution.</p>
+          <p class="letter__p">We&rsquo;re assembling a coalition of founders, funders, and builders to bring it to life.</p>
+          <p class="letter__p">If you want to help bring this to life, I&rsquo;d love to meet you.</p>
         </div>
         <div class="letter__sign">
-          <img class="letter__signature" src="Cameron Wiese Signature.png" alt="Cameron Wiese" width="932" height="630">
+          <img class="letter__signature" src="images/cameron-wiese-signature.png" alt="Cameron Wiese" width="932" height="630">
           <p class="letter__name">Cameron Wiese</p>
           <p class="letter__phone"><a href="tel:+13603180000">360-318-0000</a></p>
         </div>

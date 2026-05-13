@@ -248,21 +248,21 @@ body {
 }
 .frame__corner--png.frame__corner--tl {
   top: -1px; left: -1px;
-  background-image: url("nouveau-corner-chrome-tl.png");
+  background-image: url("images/nouveau-corner-chrome-tl.png");
 }
 .frame__corner--png.frame__corner--tr {
   top: -1px; right: -1px;
-  background-image: url("nouveau-corner-chrome-tr.png");
+  background-image: url("images/nouveau-corner-chrome-tr.png");
   transform: none;
 }
 .frame__corner--png.frame__corner--bl {
   bottom: -1px; left: -1px;
-  background-image: url("nouveau-corner-chrome-bl.png");
+  background-image: url("images/nouveau-corner-chrome-bl.png");
   transform: none;
 }
 .frame__corner--png.frame__corner--br {
   bottom: -1px; right: -1px;
-  background-image: url("nouveau-corner-chrome-br.png");
+  background-image: url("images/nouveau-corner-chrome-br.png");
   transform: none;
 }
 
@@ -312,13 +312,31 @@ body {
   display: flex;
   align-items: flex-end;
   overflow: hidden;
-  background: #1c1610;
+  /* Transparent so the sibling .hero__image (position: fixed) shows
+     through. The #1c1610 fallback color lives on the image's own
+     container (.hero__image) — if the image fails to load, that
+     fallback paints behind any veil. */
+  background: transparent;
 }
 
 .hero__image {
-  position: absolute;
+  /* Pin the hero image to the viewport so it stays fixed in the
+     background across Scenes 1 and 2 — the reader scrolls the text
+     over it, the image itself never moves. JS fades this out as
+     Scene 2 exits, so cream scenes below aren't fighting it.
+     Sits at the top of <main> as a sibling of the scenes (not
+     nested inside any of them) so `overflow: hidden` on a scene
+     never clips it.
+     Use a background-image instead of an inner <img>: Chromium has
+     a known paint bug where an <img> inside a position:fixed
+     ancestor sometimes fails to render on initial paint until the
+     layer is invalidated. background-image is rendered by the
+     compositor directly and avoids the bug entirely. */
+  position: fixed;
   inset: 0;
   z-index: 0;
+  background: #1c1610 url("images/header-image.png") center 35% / cover no-repeat;
+  will-change: opacity;
 }
 .hero__image .placeholder { height: 100%; }
 
@@ -350,14 +368,12 @@ body {
   letter-spacing: -0.01em;
   max-width: 24ch;
   color: var(--ivory);
+  /* Page-load fade-in and the scroll-driven fade-out are now both
+     handled by GSAP (see `heroTitleFade` in script.js) so they share
+     one inline-style writer and never fight CSS-animation overrides. */
   opacity: 0;
   transform: translateY(14px);
-  animation: heroIn 1.4s ease 0.4s forwards;
   text-wrap: balance;
-}
-
-@keyframes heroIn {
-  to { opacity: 1; transform: none; }
 }
 
 .hero__chevron {
@@ -369,7 +385,9 @@ body {
   width: 28px;
   height: 28px;
   opacity: 0;
-  animation: heroIn 1s ease 1.2s forwards, chevronBob 2.2s ease-in-out 1.6s infinite;
+  /* Page-load fade-in handled by GSAP; the chevron's bob continues
+     as a pure CSS loop. */
+  animation: chevronBob 2.2s ease-in-out 1.6s infinite;
 }
 .hero__chevron span {
   display: block;
@@ -392,7 +410,9 @@ body {
 .scene--blur {
   position: relative;
   min-height: calc(var(--vh) * 200);
-  background: #1c1610;
+  /* Transparent so the fixed .hero__image bleeds through from the
+     viewport. The veil below adds darkness + blur on top. */
+  background: transparent;
   overflow-x: clip;
 }
 
@@ -411,16 +431,25 @@ body {
   inset: 0;
   z-index: 0;
   overflow: hidden;
+  /* Empty — the fixed .hero__image renders behind everything. */
 }
-.blur__bg .placeholder { height: 100%; }
 
 .blur__veil {
   position: absolute;
   inset: 0;
   z-index: 1;
-  background:
-    radial-gradient(ellipse 80% 60% at 50% 50%, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.55) 100%);
+  /* Subtle uniform dim — just enough that white text reads cleanly.
+     The real visual focus on the text comes from the blur on the
+     image behind, not from a heavy gradient "covering" it.
+     --blur-px is scrubbed by JS from 0 → 16 as Scene 2 enters, so
+     on first arrival the image is crisp; the blur ramps up only as
+     the Scene 2 copy reveals. */
+  --blur-px: 0px;
+  background: rgba(0, 0, 0, 0.32);
+  -webkit-backdrop-filter: blur(var(--blur-px));
+          backdrop-filter: blur(var(--blur-px));
   pointer-events: none;
+  will-change: backdrop-filter;
 }
 
 .blur__inner {
@@ -464,6 +493,10 @@ body {
 
 .scene--reveal {
   position: relative;
+  /* Opaque paper background — covers the fixed .hero__image (which
+     stays pinned to the viewport during Scenes 1+2) once we scroll
+     past Scene 2 into the cream-paper portion of the page. */
+  background: var(--paper);
   /* tall scroll container so timeline can scrub */
 }
 
@@ -618,9 +651,10 @@ body {
 .ppie__media .frame {
   width: 100%;
   /* Lock the frame so only the IMG inside ever scales — the frame
-     dimensions stay fixed during pan + zoom. */
+     dimensions stay fixed during pan + zoom. GSAP needs to translate
+     the frame itself for the image-exit phase, so no !important here. */
   contain: layout paint;
-  transform: none !important;
+  will-change: transform, opacity;
 }
 /* Override the default 16:10 .frame--landscape ratio just for PPIE
    so the full 1915 panorama shows end-to-end (image is ~5:2). */
@@ -637,10 +671,12 @@ body {
   width: 100%;
   height: clamp(5em, 14vh, 7em);
   overflow: hidden;
+  --ppie-mask-fade: 28%;
   -webkit-mask-image: linear-gradient(to bottom,
-    transparent 0%, black 28%, black 72%, transparent 100%);
+    transparent 0%, black var(--ppie-mask-fade), black calc(100% - var(--ppie-mask-fade)), transparent 100%);
           mask-image: linear-gradient(to bottom,
-    transparent 0%, black 28%, black 72%, transparent 100%);
+    transparent 0%, black var(--ppie-mask-fade), black calc(100% - var(--ppie-mask-fade)), transparent 100%);
+  will-change: transform, opacity;
 }
 
 .ppie__lines {
@@ -687,10 +723,10 @@ body {
 .scene--establish {
   position: relative;
   /* 200vh = 100vh sticky-pinned welcome + 100vh of post-unstick scroll.
-     Scene 6 is pulled up by -100vh (margin-top below) so it starts
-     pinning at the moment Scene 5's sticky un-pins, eliminating the
-     empty cream paper between welcome fade-out and the first vision
-     beat. */
+     Scene 6 is pulled up by -130vh (see .scene--day margin-top) so
+     it starts pinning 30vh BEFORE Scene 5's sticky un-pins,
+     creating a real overlap window where the welcome fade-out and
+     the first vision beat fade-in cross simultaneously. */
   min-height: calc(var(--vh) * 200);
   background: var(--paper);
 }
@@ -787,16 +823,19 @@ body {
 .scene--day {
   position: relative;
   min-height: calc(var(--vh) * 960); /* 6 beats × ~160vh — extra dwell so each beat lingers */
-  /* Background is transparent so Scene 5's welcome remains fully
-     visible during the -100vh overlap zone. Scene 6's beat 0 starts
-     at opacity 0 and fades in at the trigger start — true crossfade
-     between welcome fade-out and the first vision beat. The body's
-     paper background is the same colour, so the page still reads as
-     a single cream surface. */
+  /* Background is transparent so Scene 5's welcome remains visible
+     through the overlap zone. Scene 6's beat 0 starts at opacity 0
+     and fades in at the trigger start, while Scene 5's welcome is
+     still fading out — both visible simultaneously for a true
+     crossfade. Body paper colour matches, so the surface reads as
+     one cream sheet throughout. */
   background: transparent;
-  /* Pull Scene 6 up so its sticky takes over the viewport at the
-     same scroll position where Scene 5's sticky un-pins. */
-  margin-top: calc(var(--vh) * -100);
+  /* Pull Scene 6 up so its sticky engages 30vh BEFORE Scene 5's
+     sticky un-pins. That 30vh window gives Scene 5's welcome
+     fade-out (timeline 1.50→2.10 ≈ scroll 71→100vh of Scene 5) and
+     Scene 6's beat-0 fade-in (FADE window ≈ first 29vh of pinning)
+     an overlap zone — no blank cream paper in between. */
+  margin-top: calc(var(--vh) * -130);
   z-index: 2;
 }
 
