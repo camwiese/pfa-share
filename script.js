@@ -153,7 +153,7 @@
        an extra-long hold before the group fades out. */
     const REVEAL_DUR = 0.35;          /* per-line fade-in duration */
     const STEP       = 0.55;          /* gap between successive reveals */
-    const LAST_HOLD  = 1.50;          /* extra dwell on the last line */
+    const LAST_HOLD  = 2.60;          /* extra dwell on the last line — readers should sit with "hope for the future" */
     const FADE_OUT   = 0.45;
 
     groups.forEach((group) => {
@@ -238,8 +238,10 @@
       gsap.set(inno, { opacity: 0, rotation: innoRot[i] || 0, y: 22, scale: 0.96 });
     });
 
-    /* Pre-roll: breathing room so paper sits alone before text arrives. */
-    const PREROLL = 0.6;
+    /* Pre-roll: breathing room so paper sits alone before text arrives.
+       Bumped from 0.6 → 1.0 to delay the first line slightly so the
+       reader has more anticipation before "Here in the Bay Area…". */
+    const PREROLL = 1.0;
 
     /* Setup lines reveal sequentially, each dimming the previous. */
     const SETUP_STEP = 0.4;
@@ -559,23 +561,30 @@
         trigger: section,
         start: 'top top',
         end: 'bottom bottom',
-        scrub: 1.1,           /* generous scrub for a flowing cascade */
+        scrub: 1.4,           /* generous scrub for a flowing cascade */
       },
     });
 
-    const E = 'power3.out';
-    const D = 0.22;            /* per-piece reveal duration */
+    const E = 'power2.out';   /* gentler easing — less abrupt arrival */
+    const D = 0.40;            /* per-piece reveal duration */
 
-    /* Cascade — each element overlaps the next so motion never stops. */
+    /* Cascade — each element overlaps the next so motion never stops.
+       Spaced wider than the earlier draft so the closing letter
+       reads with room to breathe rather than rushing the reader. */
     tl.to(heading, { opacity: 1, y: 0, duration: D, ease: E }, 0.00);
     paragraphs.forEach((p, i) => {
-      tl.to(p, { opacity: 1, y: 0, duration: D, ease: E }, 0.16 + i * 0.12);
+      tl.to(p, { opacity: 1, y: 0, duration: D, ease: E }, 0.30 + i * 0.22);
     });
 
-    if (sign)   tl.to(sign,   { opacity: 1, y: 0, duration: D + 0.05, ease: E }, 0.60);
-    if (ctas)   tl.to(ctas,   { opacity: 1, y: 0, duration: D,        ease: E }, 0.74);
-    if (rule)   tl.to(rule,   { opacity: 1,        duration: 0.16,    ease: E }, 0.85);
-    if (footer) tl.to(footer, { opacity: 1,        duration: 0.16,    ease: E }, 0.90);
+    if (sign)   tl.to(sign,   { opacity: 1, y: 0, duration: D + 0.10, ease: E }, 1.10);
+    if (ctas)   tl.to(ctas,   { opacity: 1, y: 0, duration: D,        ease: E }, 1.45);
+    if (rule)   tl.to(rule,   { opacity: 1,        duration: 0.30,    ease: E }, 1.75);
+    if (footer) tl.to(footer, { opacity: 1,        duration: 0.30,    ease: E }, 1.95);
+
+    /* A real beat at the end — the closing letter sits, breathes,
+       and the reader lands at the bottom of the page in stillness
+       rather than mid-cascade. */
+    tl.to({}, { duration: 1.30 }, 2.30);
   })();
 
   /* ============================================================

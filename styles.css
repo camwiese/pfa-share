@@ -622,6 +622,11 @@ body {
   contain: layout paint;
   transform: none !important;
 }
+/* Override the default 16:10 .frame--landscape ratio just for PPIE
+   so the full 1915 panorama shows end-to-end (image is ~5:2). */
+.ppie__frame.frame--landscape {
+  aspect-ratio: 5 / 2;
+}
 
 /* Clipped vertical strip beneath the image. The lines column inside
    it translates upward as the reader scrolls, and the mask gradient
