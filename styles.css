@@ -623,16 +623,32 @@ body {
   transform: none !important;
 }
 
+/* Clipped vertical strip beneath the image. The lines column inside
+   it translates upward as the reader scrolls, and the mask gradient
+   fades the top edge so each line appears to dissolve "behind" the
+   image as it scrolls past, and emerges cleanly from below. */
 .ppie__text {
   position: relative;
-  display: grid;
-  place-items: center;
   width: 100%;
-  min-height: 5em;
+  height: clamp(5em, 14vh, 7em);
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(to bottom,
+    transparent 0%, black 28%, black 72%, transparent 100%);
+          mask-image: linear-gradient(to bottom,
+    transparent 0%, black 28%, black 72%, transparent 100%);
+}
+
+.ppie__lines {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(2em, 6vh, 3.25em);
+  width: 100%;
+  /* GSAP scrub translates this upward across the whole pinned scroll. */
+  will-change: transform;
 }
 
 .ppie__line {
-  grid-area: 1 / 1;
   font-family: var(--font-display);
   font-weight: 350;
   font-size: clamp(1.15rem, 1.7vw, 1.5rem);
@@ -640,11 +656,10 @@ body {
   letter-spacing: -0.005em;
   color: var(--ink);
   text-align: center;
-  max-width: 100%;             /* matches the image column width */
-  opacity: 0;
+  max-width: 100%;
+  opacity: 1;
   text-wrap: balance;
-  will-change: opacity, transform;
-  /* GSAP scrub owns motion. */
+  margin: 0;
 }
 
 .ppie__image {
@@ -666,10 +681,12 @@ body {
 
 .scene--establish {
   position: relative;
-  /* 180vh = 80vh of sticky-pinned welcome (fade-in / linger / fade-out)
-     followed by 100vh of dead-scroll so the empty stage clears the
-     viewport before Scene 6 begins. */
-  min-height: calc(var(--vh) * 180);
+  /* Generous runway: fade-in / linger / slow fade-out happen across
+     the first ~45% of the section while sticky is pinned, then a
+     long quiet stretch carries the empty stage out before Scene 6
+     begins. Bumped up so the welcome doesn't feel rushed into the
+     visions tour. */
+  min-height: calc(var(--vh) * 240);
   background: var(--paper);
 }
 
@@ -1149,7 +1166,7 @@ a:focus-visible {
     gap: 1rem;
     padding: 0 clamp(1rem, 4vw, 1.5rem);
   }
-  .ppie__text { min-height: 5em; }
+  .ppie__text { height: clamp(4.75em, 14vh, 6.5em); }
   .ppie__line {
     font-size: clamp(1.05rem, 4vw, 1.35rem);
   }
@@ -1211,7 +1228,7 @@ a:focus-visible {
 
   /* Tighten total scroll length for the heavy scrub scenes on mobile */
   .scene--blur     { min-height: calc(var(--vh) * 200); }
-  .scene--establish{ min-height: calc(var(--vh) * 180); }
+  .scene--establish{ min-height: calc(var(--vh) * 240); }
   .scene--letter   { min-height: calc(var(--vh) * 200); }
 
   /* Scene 7 impact */
@@ -1279,7 +1296,7 @@ a:focus-visible {
     gap: 0.55rem;
     padding: 0;
   }
-  .ppie__text { min-height: 3.2em; }
+  .ppie__text { height: clamp(3.5em, 14vh, 5em); }
   .ppie__line {
     font-size: clamp(0.82rem, 2.5vw, 1rem);
     line-height: 1.24;
@@ -1413,13 +1430,17 @@ html:not(.js-ready) .ppie__sticky {
   padding-bottom: clamp(3rem, 8vw, 5rem);
 }
 html:not(.js-ready) .ppie__text {
-  display: flex;
-  flex-direction: column;
+  height: auto;
+  overflow: visible;
+  -webkit-mask-image: none;
+          mask-image: none;
+}
+html:not(.js-ready) .ppie__lines {
   gap: 0.85rem;
-  min-height: auto;
+  transform: none !important;
 }
 html:not(.js-ready) .ppie__line {
-  grid-area: auto;
+  opacity: 1 !important;
 }
 /* The stage uses grid + 1/1 stacking to overlay beats; without
    animation, render all beats as normal blocks. */

@@ -332,18 +332,19 @@
 
     /* Hold the welcome at full opacity for a real beat. */
     const linger = art ? [h, sub, yr, art] : [h, sub, yr];
-    tl.to(linger, { opacity: 1, duration: 0.45 }, 0.95);
+    tl.to(linger, { opacity: 1, duration: 0.55 }, 0.95);
 
-    /* Fade out while the sticky stage is still pinned — by the time
-       the reader continues into Scene 6, the welcome is already gone
-       and the stage scrolls away empty. */
-    tl.to(linger, { opacity: 0, y: -12, duration: 0.4, ease: 'power2.in' }, 1.40);
+    /* Fade out slowly so the disappearance has weight — the welcome
+       softens out across a longer scroll window before Scene 6. */
+    tl.to(linger, { opacity: 0, y: -12, duration: 0.6, ease: 'power2.in' }, 1.50);
 
     /* Pad the timeline tail with a no-op so the fade-out completes
-       at ~40% of trigger progress (= ~72vh into the 180vh section,
-       before the sticky unsticks at 80vh). The remaining ~60% of
-       scroll is silent dead-space carrying the empty stage out. */
-    tl.to({}, { duration: 2.7 }, 1.80);
+       at ~40% of trigger progress (= ~96vh into the 240vh section,
+       before the sticky unsticks at 140vh). The remaining ~60% of
+       scroll (~144vh) is silent dead-space carrying the empty stage
+       out — gives the welcome real breathing room before the
+       visions tour arrives. */
+    tl.to({}, { duration: 3.15 }, 2.10);
   })();
 
   /* =============================================================
@@ -357,58 +358,39 @@
   (function scene4_ppie() {
     const section = document.getElementById('scene-ppie');
     if (!section) return;
-    const lines = section.querySelectorAll('.ppie__line');
+    const linesWrap = section.querySelector('.ppie__lines');
+    const text = section.querySelector('.ppie__text');
     const image = section.querySelector('.ppie__image');
-    if (!lines.length) return;
+    if (!linesWrap || !text) return;
 
-    /* Set initial state */
-    gsap.set(lines, { opacity: 0, y: 18 });
-
-    const tl = gsap.timeline({
-      scrollTrigger: {
-        trigger: section,
-        start: 'top top',
-        end: 'bottom bottom',
-        scrub: 0.6,
-      },
-    });
-
-    /* ── Image stays static. The earlier pan/zoom proved too busy
-       against the cycling captions; the panorama reads better held. */
+    /* Held panorama — earlier pan/zoom proved too busy against the
+       moving text; the image reads better held. */
     if (image) {
       image.style.objectPosition = '50% 50%';
       image.style.transform = 'none';
     }
 
-    /* ── Text line cycling ──
-       Pacing is hand-tuned so line 2 ("The last building standing… is the
-       Palace of Fine Arts.") lands at the moment the pan settles on the
-       rotunda. Lines 3–4 read against the held Palace shot. */
-    const cues = [
-      /* in,   out */
-      [0.00, 0.15],   /* "In 1915..." */
-      [0.18, 0.38],   /* "This World's Fair..." */
-      [0.42, 0.68],   /* "The last building standing... Palace of Fine Arts." */
-      [0.72, 0.86],   /* "It needs a new purpose..." */
-      [0.90, null ],  /* "We imagine a home..." — last line, no fade-out */
-    ];
-
-    lines.forEach((line, i) => {
-      const cue = cues[i];
-      if (!cue) return;
-      tl.to(line, {
-        opacity: 1, y: 0,
-        duration: 0.10,
-        ease: 'power2.out',
-      }, cue[0]);
-      if (cue[1] !== null) {
-        tl.to(line, {
-          opacity: 0, y: -14,
-          duration: 0.08,
-          ease: 'power2.in',
-        }, cue[1]);
+    /* Text scrolls upward as a single column. Initial position puts
+       the first line just below the bottom edge of the clipped strip;
+       end position puts the last line just above the top edge. The
+       strip's mask-image gradient fades both edges so each line
+       emerges from below and dissolves "behind" the image at the
+       top. Distances are function-valued so they recompute on
+       resize / ScrollTrigger.refresh. */
+    gsap.fromTo(linesWrap,
+      { y: () => text.offsetHeight },
+      {
+        y: () => -linesWrap.scrollHeight,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: section,
+          start: 'top top',
+          end: 'bottom bottom',
+          scrub: 0.6,
+          invalidateOnRefresh: true,
+        },
       }
-    });
+    );
   })();
 
   /* =============================================================
