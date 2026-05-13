@@ -334,17 +334,17 @@
     const linger = art ? [h, sub, yr, art] : [h, sub, yr];
     tl.to(linger, { opacity: 1, duration: 0.55 }, 0.95);
 
-    /* Fade out slowly so the disappearance has weight — the welcome
-       softens out across a longer scroll window before Scene 6. */
+    /* Fade out gradually — the welcome softens across a long enough
+       scroll window to feel intentional. */
     tl.to(linger, { opacity: 0, y: -12, duration: 0.6, ease: 'power2.in' }, 1.50);
 
-    /* Pad the timeline tail with a no-op so the fade-out completes
-       at ~40% of trigger progress (= ~96vh into the 240vh section,
-       before the sticky unsticks at 140vh). The remaining ~60% of
-       scroll (~144vh) is silent dead-space carrying the empty stage
-       out — gives the welcome real breathing room before the
-       visions tour arrives. */
-    tl.to({}, { duration: 3.15 }, 2.10);
+    /* Pad the timeline tail so fade-out completes at ~50% of trigger
+       progress (= scroll 100vh into the 200vh section). Scene 6 is
+       pulled up by -100vh via margin-top, so its sticky takes over
+       the viewport at exactly that scroll position — welcome fade-out
+       lands just as the first vision beat arrives, no empty cream
+       paper in between. */
+    tl.to({}, { duration: 2.10 }, 2.10);
   })();
 
   /* =============================================================
@@ -414,10 +414,12 @@
        work that judders on iOS Safari. */
     const isMobile = window.matchMedia('(max-width: 860px)').matches;
 
-    /* Initial state — beat 0 visible, others invisible. Each caption
-       starts hidden; it fades in as a whole sentence during its beat. */
+    /* Initial state — every layer hidden. Beat 0 fades in via the
+       first tween (see below), giving us a true crossfade with the
+       welcome scene's fade-out (Scene 5 ends and Scene 6 starts at
+       the same scroll position thanks to Scene 6's -100vh margin). */
     layers.forEach((layer, i) => {
-      gsap.set(layer, { opacity: i === 0 ? 1 : 0 });
+      gsap.set(layer, { opacity: 0 });
       const cap = layer.querySelector('.day__caption');
       if (cap) gsap.set(cap, isMobile ? { opacity: 0 } : { opacity: 0, y: 6 });
       if (!isMobile) {
@@ -449,10 +451,10 @@
       const img = layer.querySelector('.day__image');
       const cap = layer.querySelector('.day__caption');
 
-      /* Layer enter — pure opacity crossfade. */
-      if (i > 0) {
-        tl.to(layer, { opacity: 1, duration: FADE, ease: 'sine.inOut' }, slotStart);
-      }
+      /* Layer enter — pure opacity crossfade. Beat 0 also fades in
+         (it's no longer set to opacity 1 initially), so the welcome
+         hand-off is a real crossfade. */
+      tl.to(layer, { opacity: 1, duration: FADE, ease: 'sine.inOut' }, slotStart);
 
       /* Caption fades in as a single sentence, holds, then fades out. */
       if (cap) {
