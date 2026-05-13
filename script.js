@@ -52,7 +52,7 @@
   /* ── Reduced motion: show everything in its final state, skip animations ── */
   if (prefersReduced) {
     document.querySelectorAll(
-      '.blur__line, .reveal__line, .reveal__inno, .letter__h, .letter__p, .letter__sign, .impact__line, .impact__w'
+      '.blur__line, .reveal__line, .reveal__inno, .letter__h, .letter__p, .letter__sign, .impact__line, .impact__w, .day__caption, .establish__art'
     ).forEach((el) => {
       el.style.opacity = '1';
       el.style.transform = 'none';
@@ -67,21 +67,32 @@
 
   /* =============================================================
      SCENE 2 — "A place you can visit…"
-     Each line reveals on its own scroll beat. The two lines never
-     appear together; there's a real scroll gap before line 2 joins.
-     Then both hold, then both fade out cleanly.
-     Timeline (scrub-driven, 0–3.0):
-       0.20–0.55  line 1 fades in
-       0.55–1.10  hold line 1 alone (reader beat)
-       1.10–1.45  line 2 fades in
-       1.45–2.40  hold both
-       2.40–2.80  both fade out
+     Two flavours are in the DOM — a 2-line desktop copy and a
+     4-line mobile copy. CSS shows whichever fits the viewport;
+     we animate only the visible group. Each line reveals on its
+     own scroll beat, the last line gets an extra-long hold so it
+     can be read, then everything fades cleanly into Scene 3.
      ============================================================= */
   (function scene2_reveal() {
     const section = document.getElementById('scene-blur');
     if (!section) return;
-    const lines = section.querySelectorAll('.blur__line');
+    const groups = section.querySelectorAll('.blur__text');
+    let lines = [];
+    groups.forEach(g => {
+      if (getComputedStyle(g).display !== 'none') {
+        lines = g.querySelectorAll('.blur__line');
+      }
+    });
     if (!lines.length) return;
+    const N = lines.length;
+
+    /* Timeline budget — total length scales with line count so each
+       line gets the same reveal/hold cadence and the last line gets
+       an extra-long hold before the group fades out. */
+    const REVEAL_DUR = 0.35;          /* per-line fade-in duration */
+    const STEP       = 0.55;          /* gap between successive reveals */
+    const LAST_HOLD  = 1.50;          /* extra dwell on the last line */
+    const FADE_OUT   = 0.45;
 
     const tl = gsap.timeline({
       scrollTrigger: {
@@ -92,34 +103,29 @@
       },
     });
 
-    /* Line 1 fades in. */
-    tl.fromTo(lines[0],
-      { opacity: 0, y: 10 },
-      { opacity: 1, y: 0, duration: 0.35, ease: 'power2.out' },
-      0.20
-    );
+    /* Pre-roll so the first line isn't already on-screen at scene start. */
+    const PREROLL = 0.20;
+    let cursor = PREROLL;
 
-    /* Hold line 1 alone — meaningful scroll beat for the reader. */
-    tl.to(lines[0], { opacity: 1, duration: 0.55 }, 0.55);
-
-    /* Line 2 finally joins. */
-    if (lines[1]) {
-      tl.fromTo(lines[1],
+    lines.forEach((line, i) => {
+      tl.fromTo(line,
         { opacity: 0, y: 10 },
-        { opacity: 1, y: 0, duration: 0.35, ease: 'power2.out' },
-        1.10
+        { opacity: 1, y: 0, duration: REVEAL_DUR, ease: 'power2.out' },
+        cursor
       );
-    }
+      cursor += STEP;
+    });
 
-    /* Hold both. */
-    tl.to(lines, { opacity: 1, duration: 0.95 }, 1.45);
+    /* Hold the full block — extra dwell so the last line breathes. */
+    const holdAt = cursor;
+    tl.to(lines, { opacity: 1, duration: LAST_HOLD }, holdAt);
 
-    /* Fade out cleanly before Scene 3. */
+    /* Fade everything out before Scene 3. */
     tl.to(lines, {
       opacity: 0, y: -8,
-      duration: 0.4,
+      duration: FADE_OUT,
       ease: 'power2.in',
-    }, 2.40);
+    }, holdAt + LAST_HOLD);
   })();
 
   /* =============================================================
@@ -184,14 +190,16 @@
       }
     });
 
-    /* Cards drop in — staggered across the first couple of setup beats. */
+    /* Cards drop in starting at line 2 ("Cures for blindness…") so the
+       visuals arrive with the example, not with the setup line above it. */
+    const CARDS_START = PREROLL + SETUP_STEP;   /* aligned to line index 1 */
     innos.forEach((inno, i) => {
       tl.to(inno, {
         opacity: 1, y: 0, scale: 1,
         rotation: innoRot[i] || 0,
         duration: 0.55,
         ease: 'power3.out',
-      }, PREROLL + 0.1 + i * 0.22);
+      }, CARDS_START + i * 0.22);
     });
 
     /* Handoff: setup lines fade out first; cards keep lingering briefly. */
@@ -235,9 +243,11 @@
     const h     = section.querySelector('.establish__h');
     const sub   = section.querySelector('.establish__sub');
     const yr    = section.querySelector('.establish__year');
+    const art   = section.querySelector('.establish__art');
     if (!h) return;
 
     gsap.set([h, sub, yr], { y: 14 });
+    if (art) gsap.set(art, { y: 18 });
 
     const tl = gsap.timeline({
       scrollTrigger: {
@@ -251,13 +261,14 @@
     tl.to(h,   { opacity: 1, y: 0, duration: 0.25, ease: 'power3.out' }, 0.00);
     tl.to(sub, { opacity: 1, y: 0, duration: 0.25, ease: 'power3.out' }, 0.18);
     tl.to(yr,  { opacity: 1, y: 0, duration: 0.25, ease: 'power3.out' }, 0.32);
+    if (art) tl.to(art, { opacity: 1, y: 0, duration: 0.35, ease: 'power3.out' }, 0.48);
 
     /* Linger — fully visible */
-    tl.to([h, sub, yr], { opacity: 1, duration: 0.7 }, 0.85);
+    const linger = art ? [h, sub, yr, art] : [h, sub, yr];
+    tl.to(linger, { opacity: 1, duration: 0.7 }, 0.95);
 
-    /* Fade text out before Scene 6; the plate keeps going (it
-       continues into Scene 6 as the corner inset). */
-    tl.to([h, sub, yr], { opacity: 0, y: -12, duration: 0.4, ease: 'power2.in' }, 1.55);
+    /* Fade everything out before Scene 6. */
+    tl.to(linger, { opacity: 0, y: -12, duration: 0.4, ease: 'power2.in' }, 1.70);
   })();
 
   /* =============================================================
@@ -287,21 +298,18 @@
       },
     });
 
-    /* ── Image pan + zoom: left → right, ending on the Palace rotunda ──
-       The image (3393×1352) is a wide panorama. The Palace of Fine Arts
-       sits in the right ~70–80% of the frame. We start at the far left
-       (water/sailboats/Tower of Jewels), pan right across the fairgrounds,
-       and finish zoomed on the Palace area. The pan resolves by ~65% of
-       the timeline so the last text lines read against the held Palace shot. */
+    /* ── Image pan only (no zoom): drift across the panorama from
+       the far-left water through to the Palace rotunda on the right. */
     if (image) {
-      const panProxy = { x: 0, y: 50, s: 1 };
+      image.style.objectPosition = '0% 50%';
+      image.style.transform = 'none';
+      const panProxy = { x: 0 };
       tl.to(panProxy, {
-        x: 100, y: 100, s: 1.5,
+        x: 100,
         duration: 0.65,             /* finishes early; image holds for the closing text */
         ease: 'power1.inOut',       /* gentle start, settled finish */
         onUpdate: function () {
-          image.style.objectPosition = panProxy.x + '% ' + panProxy.y + '%';
-          image.style.transform = 'scale(' + panProxy.s + ')';
+          image.style.objectPosition = panProxy.x + '% 50%';
         },
       }, 0);
     }
@@ -350,58 +358,18 @@
     const section = document.getElementById('scene-day');
     if (!section) return;
     const layers = Array.from(section.querySelectorAll('.day__layer'));
-    const map    = section.querySelector('.day__map');
-    const stage  = section.querySelector('.day__stage');
     const N = layers.length;
-    if (!N || !map || !stage) return;
+    if (!N) return;
 
-    /* Split each caption into word spans so they can reveal one at a time. */
-    layers.forEach((layer) => {
+    /* Initial state — beat 0 visible, others invisible. Each caption
+       starts hidden; it fades in as a whole sentence during its beat. */
+    layers.forEach((layer, i) => {
+      gsap.set(layer, { opacity: i === 0 ? 1 : 0 });
       const cap = layer.querySelector('.day__caption');
-      if (!cap || cap.dataset.split === '1') return;
-      const text = cap.getAttribute('data-caption') || cap.textContent;
-      cap.innerHTML = '';
-      const words = text.split(/\s+/);
-      words.forEach((w, i) => {
-        const span = document.createElement('span');
-        span.className = 'day__caption-w';
-        span.innerHTML = w;
-        cap.appendChild(span);
-        if (i < words.length - 1) cap.appendChild(document.createTextNode(' '));
-      });
-      cap.dataset.split = '1';
-    });
-
-    /* Initial layer state — beat 0 visible, others invisible.
-       Pure opacity crossfade — no y-translate, so beats dissolve smoothly. */
-    gsap.set(layers[0], { opacity: 1 });
-    for (let i = 1; i < N; i++) gsap.set(layers[i], { opacity: 0 });
-
-    /* Each layer's caption words start hidden — they'll reveal during the beat. */
-    layers.forEach((layer) => {
-      gsap.set(layer.querySelectorAll('.day__caption-w'), { opacity: 0, y: 4 });
-    });
-
-    /* Image Ken Burns reset. */
-    layers.forEach(layer => {
+      if (cap) gsap.set(cap, { opacity: 0, y: 6 });
       const img = layer.querySelector('.day__image');
       if (img) gsap.set(img, { scale: 1 });
     });
-
-    /* Plate: starts hero-sized (transform identity). It will scale toward
-       its TOP-RIGHT corner so the small inset sits flush at the top-right
-       of the photo frame (same top-right point as the stage in this layout). */
-    gsap.set(map, { x: 0, y: 0, scale: 1, transformOrigin: 'top right' });
-
-    /* Corner-target scale: small inset that fits at the top-right of each
-       photo. Recomputed on every ScrollTrigger refresh (resize). */
-    const mapState = { scale: 0.18 };
-    function refreshCornerTarget() {
-      const stageW = stage.offsetWidth || 720;
-      const cornerW = Math.max(100, Math.min(160, stageW * 0.20));
-      mapState.scale = cornerW / stageW;
-    }
-    refreshCornerTarget();
 
     const tl = gsap.timeline({
       scrollTrigger: {
@@ -409,56 +377,36 @@
         start: 'top top',
         end: 'bottom bottom',
         scrub: 0.8,
-        invalidateOnRefresh: true,
-        onRefresh: refreshCornerTarget,
       },
     });
 
     const SLOT = 1 / N;
-    /* Generous crossfade: previous beat dissolves into the next within
-       a fade window that overlaps with the next beat's enter. */
-    const FADE = SLOT * 0.55;
-    const HOLD = SLOT - FADE;
+    /* Crossfade window between adjacent beats. Most of each slot is
+       a still hold so the reader can sit with the image + caption;
+       transitions are kept tight at either end. */
+    const FADE     = SLOT * 0.20;     /* image/layer crossfade */
+    const CAP_IN   = SLOT * 0.14;     /* caption fade-in duration */
+    const CAP_OUT  = SLOT * 0.14;     /* caption fade-out duration */
+    const CAP_HOLD = SLOT - CAP_IN - CAP_OUT - FADE;  /* readable dwell (~52% of slot) */
 
-    /* Plate shrink-to-corner during beat 0 → 1. */
-    const mapShrinkStart = SLOT - FADE;
-    const mapShrinkDur   = FADE * 1.8;
-    tl.to(map, {
-      scale: () => mapState.scale,
-      duration: mapShrinkDur,
-      ease: 'power3.inOut',
-    }, mapShrinkStart);
-
-    /* Per-layer choreography: enter (opacity) → word-by-word caption
-       reveal during the hold → Ken Burns through the whole beat →
-       gentle opacity exit overlapping with the next beat's enter. */
     layers.forEach((layer, i) => {
       const slotStart = i * SLOT;
-      const img   = layer.querySelector('.day__image');
-      const words = layer.querySelectorAll('.day__caption-w');
+      const img = layer.querySelector('.day__image');
+      const cap = layer.querySelector('.day__caption');
 
-      /* Layer enter (opacity only). */
+      /* Layer enter — pure opacity crossfade. */
       if (i > 0) {
-        tl.to(layer, {
-          opacity: 1,
-          duration: FADE,
-          ease: 'sine.inOut',
-        }, slotStart);
+        tl.to(layer, { opacity: 1, duration: FADE, ease: 'sine.inOut' }, slotStart);
       }
 
-      /* Caption words reveal one at a time across the hold window. */
-      if (words.length) {
-        const captionStart = slotStart + FADE * 0.85;
-        const captionEnd   = slotStart + FADE + HOLD * 0.85;
-        const captionDur   = Math.max(0.001, captionEnd - captionStart);
-        const stepDur      = captionDur / words.length;
-        words.forEach((w, wi) => {
-          tl.to(w, {
-            opacity: 1, y: 0,
-            duration: Math.min(0.18, stepDur * 1.4),
-            ease: 'power2.out',
-          }, captionStart + wi * stepDur);
-        });
+      /* Caption fades in as a single sentence, holds, then fades out. */
+      if (cap) {
+        const capInAt  = slotStart + FADE * 0.9;
+        const capOutAt = capInAt + CAP_IN + Math.max(0, CAP_HOLD);
+        tl.to(cap, { opacity: 1, y: 0, duration: CAP_IN, ease: 'power2.out' }, capInAt);
+        if (i < N - 1) {
+          tl.to(cap, { opacity: 0, y: -4, duration: CAP_OUT, ease: 'power2.in' }, capOutAt);
+        }
       }
 
       /* Ken Burns push-in across the beat. */
@@ -470,21 +418,9 @@
         );
       }
 
-      /* Layer exit — overlaps with the next beat's enter. */
+      /* Layer exit — overlaps the next beat's enter. */
       if (i < N - 1) {
-        tl.to(layer, {
-          opacity: 0,
-          duration: FADE,
-          ease: 'sine.inOut',
-        }, slotStart + HOLD);
-        /* Caption words exit with the layer. */
-        if (words.length) {
-          tl.to(words, {
-            opacity: 0,
-            duration: FADE,
-            ease: 'sine.inOut',
-          }, slotStart + HOLD);
-        }
+        tl.to(layer, { opacity: 0, duration: FADE, ease: 'sine.inOut' }, slotStart + SLOT - FADE);
       }
     });
   })();

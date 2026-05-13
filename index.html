@@ -17,7 +17,6 @@
 <meta name="twitter:card" content="summary_large_image">
 
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
-<link rel="preload" as="image" href="arrive.jpeg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -50,7 +49,7 @@
        ========================================================= -->
   <section class="scene scene--hero" aria-labelledby="hero-title">
     <div class="hero__image" aria-hidden="true">
-      <img src="arrive.jpeg" alt="" fetchpriority="high" decoding="async">
+      <span class="placeholder placeholder--hero">Hero image</span>
     </div>
     <div class="hero__veil" aria-hidden="true"></div>
     <div class="hero__inner">
@@ -67,13 +66,19 @@
   <section class="scene scene--blur" id="scene-blur">
     <div class="blur__sticky">
       <div class="blur__bg" aria-hidden="true">
-        <img src="arrive.jpeg" alt="" class="blur__bg-img" decoding="async">
+        <span class="placeholder placeholder--hero placeholder--blurred">Hero image</span>
       </div>
       <div class="blur__veil" aria-hidden="true"></div>
       <div class="blur__inner">
-        <p class="blur__text">
+        <p class="blur__text blur__text--desktop" aria-hidden="false">
           <span class="blur__line">A place you can visit with your kids, family, and friends</span>
           <span class="blur__line">to experience beauty, wonder, and hope for the future.</span>
+        </p>
+        <p class="blur__text blur__text--mobile" aria-hidden="true">
+          <span class="blur__line">A place you can visit</span>
+          <span class="blur__line">with your kids, family, and friends</span>
+          <span class="blur__line">to experience beauty, wonder,</span>
+          <span class="blur__line">and hope for the future.</span>
         </p>
       </div>
     </div>
@@ -153,75 +158,61 @@
       <h2 class="establish__h">Welcome to the Future</h2>
       <p class="establish__sub">Our vision for San Francisco&rsquo;s new home of progress.</p>
       <p class="establish__year">Palace of Fine Arts &middot; 2030</p>
+      <figure class="establish__art" aria-hidden="true">
+        <img src="PFA-Art.png" alt="" loading="lazy" decoding="async">
+      </figure>
     </div>
   </section>
 
   <!-- =========================================================
        SCENE 6 — A day at the Palace (crossfading beats)
-       Beat 0 is the line-drawing plate from Scene 5 (full-stage hero);
-       beats 1–6 are the photo tour. The plate shrinks to a small inset
-       at the top-right of each photo frame and rides along.
-       Captions reveal word-by-word as each beat scrolls into view.
+       Six photo beats. Each caption fades in as a whole sentence,
+       holds while the reader reads, then fades out into the next.
        ========================================================= -->
   <section class="scene scene--day" id="scene-day">
     <div class="day__sticky">
       <div class="day__stage">
 
-        <!-- Persistent line-drawing plate. Hero-sized for beat 0; scales
-             + translates into the top-right corner of each photo frame
-             for beats 1–6. -->
-        <div class="day__map" aria-hidden="true">
-          <div class="day__map-plate">
-            <span class="day__map-plate-label">Line drawing</span>
-          </div>
-        </div>
-
-        <!-- Beat 0: just a caption — the plate is the visual -->
-        <div class="day__layer day__layer--map" data-beat="0">
-          <p class="day__caption" data-caption="Palace of Fine Arts &mdash; the site, at a glance.">Palace of Fine Arts &mdash; the site, at a glance.</p>
-        </div>
-
-        <!-- Beats 1-6: the tour. -->
-        <div class="day__layer" data-beat="1">
+        <div class="day__layer" data-beat="0">
           <figure class="day__frame">
             <img src="arrive.jpeg" alt="Arrival on Palace Drive" class="day__image" loading="eager" decoding="async">
           </figure>
           <p class="day__caption" data-caption="Step out of your Waymo onto Palace drive.">Step out of your Waymo onto Palace drive.</p>
         </div>
 
-        <div class="day__layer" data-beat="2">
+        <div class="day__layer" data-beat="1">
           <figure class="day__frame">
             <img src="grounds.jpeg" alt="Landscaped grounds" class="day__image" loading="lazy" decoding="async">
           </figure>
-          <p class="day__caption" data-caption="Wander through beautifully landscaped grounds filled with statues of history&rsquo;s greatest innovators.">Wander through beautifully landscaped grounds filled with statues of history&rsquo;s greatest innovators.</p>
+          <p class="day__caption">Wander through beautifully landscaped grounds filled with statues of history&rsquo;s greatest innovators.</p>
+        </div>
+
+        <div class="day__layer" data-beat="2">
+          <figure class="day__frame">
+            <img src="lunch.jpeg" alt="World&rsquo;s Fare food hall" class="day__image" loading="lazy" decoding="async">
+          </figure>
+          <p class="day__caption">Meet friends at the World&rsquo;s Fare, grabbing a bite to eat in one of the 60+ food stalls serving global and innovative dishes.</p>
         </div>
 
         <div class="day__layer" data-beat="3">
           <figure class="day__frame">
-            <img src="lunch.jpeg" alt="World&rsquo;s Fare food hall" class="day__image" loading="lazy" decoding="async">
+            <img src="tour.jpeg" alt="Tour into Tomorrow" class="day__image" loading="lazy" decoding="async">
           </figure>
-          <p class="day__caption" data-caption="Meet friends at the World&rsquo;s Fare, grabbing a bite to eat in one of the 60+ food stalls serving global and innovative dishes.">Meet friends at the World&rsquo;s Fare, grabbing a bite to eat in one of the 60+ food stalls serving global and innovative dishes.</p>
+          <p class="day__caption">Bring your kids on a Tour into Tomorrow, stepping into a story about the incredible future that&rsquo;s ahead.</p>
         </div>
 
         <div class="day__layer" data-beat="4">
           <figure class="day__frame">
-            <img src="tour.jpeg" alt="Tour into Tomorrow" class="day__image" loading="lazy" decoding="async">
+            <img src="talks.jpeg" alt="Talks and workshops" class="day__image" loading="lazy" decoding="async">
           </figure>
-          <p class="day__caption" data-caption="Bring your kids on a Tour into Tomorrow, stepping into a story about the incredible future that&rsquo;s ahead.">Bring your kids on a Tour into Tomorrow, stepping into a story about the incredible future that&rsquo;s ahead.</p>
+          <p class="day__caption">Join for a talk and workshop to learn about the incredible work being done today to build the future, and find a way to get involved.</p>
         </div>
 
         <div class="day__layer" data-beat="5">
           <figure class="day__frame">
-            <img src="talks.jpeg" alt="Talks and workshops" class="day__image" loading="lazy" decoding="async">
-          </figure>
-          <p class="day__caption" data-caption="Join for a talk and workshop to learn about the incredible work being done today to build the future, and find a way to get involved.">Join for a talk and workshop to learn about the incredible work being done today to build the future, and find a way to get involved.</p>
-        </div>
-
-        <div class="day__layer" data-beat="6">
-          <figure class="day__frame">
             <img src="lagoon.jpeg" alt="Evening fountain show on the lagoon" class="day__image" loading="lazy" decoding="async">
           </figure>
-          <p class="day__caption" data-caption="End your evening with a beautiful fountain show before heading home with a renewed sense of wonder.">End your evening with a beautiful fountain show before heading home with a renewed sense of wonder.</p>
+          <p class="day__caption">End your evening with a beautiful fountain show before heading home with a renewed sense of wonder.</p>
         </div>
 
       </div>
@@ -249,24 +240,28 @@
        ========================================================= -->
   <section class="scene scene--letter" id="scene-letter">
     <div class="letter__hold">
-      <h2 class="letter__h">Help write the next chapter in the story of San Francisco.</h2>
-      <div class="letter__body">
-        <p class="letter__p">This is a once-in-a-generation opportunity to build a new institution for San Francisco.</p>
-        <p class="letter__p">I&rsquo;m assembling a coalition of funders, founders, and civic leaders who share my belief in the future to make it happen.</p>
-        <p class="letter__p">If that&rsquo;s you, I&rsquo;d love to meet you.</p>
-      </div>
-      <div class="letter__sign">
-        <img class="letter__signature" src="Cameron Wiese Signature.png" alt="Cameron Wiese" width="932" height="630">
-        <p class="letter__name">Cameron Wiese</p>
-        <p class="letter__phone"><a href="tel:+13603180000">360-318-0000</a></p>
+      <div class="letter__center">
+        <h2 class="letter__h">Help write the next chapter in the story of San Francisco.</h2>
+        <div class="letter__body">
+          <p class="letter__p">This is a once-in-a-generation opportunity to build a new institution for San Francisco.</p>
+          <p class="letter__p">I&rsquo;m assembling a coalition of funders, founders, and civic leaders who share my belief in the future to make it happen.</p>
+          <p class="letter__p">If that&rsquo;s you, I&rsquo;d love to meet you.</p>
+        </div>
+        <div class="letter__sign">
+          <img class="letter__signature" src="Cameron Wiese Signature.png" alt="Cameron Wiese" width="932" height="630">
+          <p class="letter__name">Cameron Wiese</p>
+          <p class="letter__phone"><a href="tel:+13603180000">360-318-0000</a></p>
+        </div>
       </div>
       <p class="letter__ctas">
         <a class="letter__cta" href="mailto:cam@worldsfair.co?subject=Yes%2C%20I%27d%20love%20to%20meet&body=I%27d%20love%20to%20learn%20more%20about%20Future%20Palace.">Get in Touch</a>
         <span class="letter__cta-sep" aria-hidden="true">&middot;</span>
         <a class="letter__cta" href="mailto:cam@worldsfair.co?subject=I%27d%20love%20to%20visit%20the%20preview%20center&body=I%27d%20love%20to%20visit%20the%20preview%20center%20and%20learn%20more%20about%20Future%20Palace.">Visit Preview Center</a>
       </p>
-      <hr class="letter__rule" aria-hidden="true">
-      <p class="letter__footer">World&rsquo;s Fair Company &middot; Confidential</p>
+      <div class="letter__tail">
+        <hr class="letter__rule" aria-hidden="true">
+        <p class="letter__footer">World&rsquo;s Fair Company &middot; Confidential</p>
+      </div>
     </div>
   </section>
 
