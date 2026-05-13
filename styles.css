@@ -681,12 +681,12 @@ body {
 
 .scene--establish {
   position: relative;
-  /* Generous runway: fade-in / linger / slow fade-out happen across
-     the first ~45% of the section while sticky is pinned, then a
-     long quiet stretch carries the empty stage out before Scene 6
-     begins. Bumped up so the welcome doesn't feel rushed into the
-     visions tour. */
-  min-height: calc(var(--vh) * 240);
+  /* 200vh = 100vh sticky-pinned welcome + 100vh of post-unstick scroll.
+     Scene 6 is pulled up by -100vh (margin-top below) so it starts
+     pinning at the moment Scene 5's sticky un-pins, eliminating the
+     empty cream paper between welcome fade-out and the first vision
+     beat. */
+  min-height: calc(var(--vh) * 200);
   background: var(--paper);
 }
 
@@ -782,7 +782,17 @@ body {
 .scene--day {
   position: relative;
   min-height: calc(var(--vh) * 960); /* 6 beats × ~160vh — extra dwell so each beat lingers */
-  background: var(--paper);
+  /* Background is transparent so Scene 5's welcome remains fully
+     visible during the -100vh overlap zone. Scene 6's beat 0 starts
+     at opacity 0 and fades in at the trigger start — true crossfade
+     between welcome fade-out and the first vision beat. The body's
+     paper background is the same colour, so the page still reads as
+     a single cream surface. */
+  background: transparent;
+  /* Pull Scene 6 up so its sticky takes over the viewport at the
+     same scroll position where Scene 5's sticky un-pins. */
+  margin-top: calc(var(--vh) * -100);
+  z-index: 2;
 }
 
 .day__sticky {
@@ -1199,6 +1209,9 @@ a:focus-visible {
     top: 0;
     height: calc(var(--vh) * 100);
     padding: clamp(1.5rem, 5vh, 2.5rem) clamp(1rem, 4vw, 1.5rem);
+    /* Scope rendering work to within the sticky so neighbouring
+       scenes don't trigger relayout/repaint as beats crossfade. */
+    contain: layout style;
   }
   .day__stage {
     display: grid;
@@ -1211,6 +1224,11 @@ a:focus-visible {
     grid-area: 1 / 1;
     gap: clamp(0.85rem, 2vh, 1.25rem);
     will-change: opacity;
+    /* iOS Safari composite hints — keeps opacity crossfades on the
+       compositor thread without promoting every layer to its own
+       GPU memory page. */
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
   }
   .day__frame {
     width: min(92vw, 480px);
@@ -1228,7 +1246,7 @@ a:focus-visible {
 
   /* Tighten total scroll length for the heavy scrub scenes on mobile */
   .scene--blur     { min-height: calc(var(--vh) * 200); }
-  .scene--establish{ min-height: calc(var(--vh) * 240); }
+  .scene--establish{ min-height: calc(var(--vh) * 200); }
   .scene--letter   { min-height: calc(var(--vh) * 200); }
 
   /* Scene 7 impact */
@@ -1453,4 +1471,12 @@ html:not(.js-ready) .day__stage {
 }
 html:not(.js-ready) .day__layer {
   grid-area: auto;
+}
+/* Without GSAP driving the welcome→day crossfade, undo the
+   negative-margin overlap so beat 0 doesn't render under Scene 5's
+   welcome, and restore the cream background so the fallback page
+   reads cleanly as a sequence of stacked blocks. */
+html:not(.js-ready) .scene--day {
+  margin-top: 0;
+  background: var(--paper);
 }
