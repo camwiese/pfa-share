@@ -1156,6 +1156,90 @@ a:focus-visible {
   .frame__corner { width: 28px; height: 28px; }
 }
 
+@media (max-width: 860px) and (orientation: landscape) {
+  .reveal__sticky,
+  .ppie__sticky,
+  .day__sticky,
+  .letter__hold {
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+  }
+
+  .reveal__layout {
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 0.8fr);
+    gap: clamp(0.85rem, 3vw, 1.4rem);
+    max-width: min(92vw, 760px);
+  }
+  .reveal__stack {
+    gap: 0.45rem;
+    max-width: 36ch;
+  }
+  .reveal__line {
+    font-size: clamp(0.82rem, 2.4vw, 1rem);
+    line-height: 1.25;
+  }
+  .reveal__line--climax {
+    font-size: clamp(1.2rem, 4vw, 1.65rem);
+    max-width: 24ch;
+  }
+  .reveal__innovations {
+    height: min(calc(var(--vh) * 68), 230px);
+  }
+  .reveal__inno {
+    width: clamp(104px, 18vw, 150px);
+  }
+
+  .ppie__grid {
+    width: min(92vw, calc(var(--vh) * 132));
+    gap: 0.55rem;
+    padding: 0;
+  }
+  .ppie__text { min-height: 3.2em; }
+  .ppie__line {
+    font-size: clamp(0.82rem, 2.5vw, 1rem);
+    line-height: 1.24;
+  }
+
+  .day__frame {
+    aspect-ratio: 16 / 10;
+    width: min(58vw, calc(var(--vh) * 112));
+  }
+  .day__caption {
+    font-size: clamp(0.82rem, 2.6vw, 1rem);
+    line-height: 1.24;
+  }
+
+  .letter__hold {
+    padding-left: clamp(1rem, 4vw, 1.5rem);
+    padding-right: clamp(1rem, 4vw, 1.5rem);
+  }
+  .letter__center { gap: 0.42rem; }
+  .letter__body { gap: 0.22rem; }
+  .letter__h {
+    font-size: clamp(1rem, 3vw, 1.22rem);
+    line-height: 1.12;
+  }
+  .letter__p {
+    font-size: clamp(0.78rem, 2.1vw, 0.92rem);
+    line-height: 1.28;
+  }
+  .letter__sign { margin-top: 0.45rem; }
+  .letter__signature { width: clamp(62px, 12vw, 78px); }
+  .letter__name,
+  .letter__phone {
+    font-size: 0.68rem;
+    line-height: 1.25;
+  }
+  .letter__ctas {
+    font-size: 0.54rem;
+    letter-spacing: 0.12em;
+  }
+  .letter__footer {
+    font-size: 0.5rem;
+    letter-spacing: 0.12em;
+  }
+}
+
 /* ============================================================
    Reduced motion — short-circuit all scrubs / transitions
    ============================================================ */
@@ -1166,14 +1250,10 @@ a:focus-visible {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
-  .reveal__line, .reveal__inno, .letter__h, .letter__p, .letter__sign, .letter__ctas, .letter__rule, .letter__footer, .blur__line, .impact__line, .impact__w, .day__caption, .establish__art {
+  .reveal__line, .reveal__inno, .letter__h, .letter__p, .letter__sign, .letter__ctas, .letter__rule, .letter__footer, .blur__line, .impact__line, .impact__w, .day__layer, .day__caption, .ppie__line, .establish__h, .establish__sub, .establish__year, .establish__art {
     opacity: 1 !important;
     transform: none !important;
   }
-  .day__layer { opacity: 0; }
-  .day__layer[data-beat="0"] { opacity: 1; transform: none !important; }
-  .ppie__line { opacity: 0; }
-  .ppie__line.is-active { opacity: 1; }
   .hero__chevron, .hero__chevron span { animation: none !important; }
   .hero__chevron { display: none; }
 }
@@ -1189,12 +1269,12 @@ a:focus-visible {
 html:not(.js-ready) .blur__line,
 html:not(.js-ready) .reveal__line,
 html:not(.js-ready) .reveal__inno,
-html:not(.js-ready) .ppie__line.is-active,
+html:not(.js-ready) .ppie__line,
 html:not(.js-ready) .establish__h,
 html:not(.js-ready) .establish__sub,
 html:not(.js-ready) .establish__year,
 html:not(.js-ready) .establish__art,
-html:not(.js-ready) .day__layer[data-beat="0"],
+html:not(.js-ready) .day__layer,
 html:not(.js-ready) .day__caption,
 html:not(.js-ready) .impact__w,
 html:not(.js-ready) .impact__line,
@@ -1206,12 +1286,6 @@ html:not(.js-ready) .letter__rule,
 html:not(.js-ready) .letter__footer {
   opacity: 1 !important;
   transform: none !important;
-}
-/* Collapse cycled / crossfading content to the lead beat so the
-   reader sees one image+caption per scene instead of overlapping. */
-html:not(.js-ready) .day__layer:not([data-beat="0"]),
-html:not(.js-ready) .ppie__line:not(.is-active) {
-  display: none;
 }
 /* No need to scroll through 6+ viewports of pin spacer when
    nothing is animating. */
@@ -1235,8 +1309,42 @@ html:not(.js-ready) .letter__hold {
   position: static;
   height: auto;
 }
+html:not(.js-ready) .reveal__sticky {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(2rem, 8vw, 4rem);
+  padding-top: clamp(4rem, 10vw, 7rem);
+  padding-bottom: clamp(4rem, 10vw, 7rem);
+}
+html:not(.js-ready) .reveal__layout,
+html:not(.js-ready) .reveal__climax-hold {
+  grid-area: auto;
+}
+html:not(.js-ready) .reveal__climax-hold {
+  position: static;
+}
+html:not(.js-ready) .ppie__sticky {
+  padding-top: clamp(3rem, 8vw, 5rem);
+  padding-bottom: clamp(3rem, 8vw, 5rem);
+}
+html:not(.js-ready) .ppie__text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  min-height: auto;
+}
+html:not(.js-ready) .ppie__line {
+  grid-area: auto;
+}
 /* The stage uses grid + 1/1 stacking to overlay beats; without
-   animation, render the single visible beat as a normal block. */
+   animation, render all beats as normal blocks. */
 html:not(.js-ready) .day__stage {
-  display: block;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(2.5rem, 8vw, 4rem);
+  padding-top: clamp(3rem, 8vw, 5rem);
+  padding-bottom: clamp(3rem, 8vw, 5rem);
+}
+html:not(.js-ready) .day__layer {
+  grid-area: auto;
 }
