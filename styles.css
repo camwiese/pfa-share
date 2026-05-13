@@ -70,6 +70,10 @@ html {
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
   scroll-behavior: auto; /* let Lenis handle smoothing on non-touch */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  /* clip (not hidden) on html avoids breaking position:sticky on iOS Safari */
+  overflow-x: clip;
 }
 
 body {
@@ -79,9 +83,12 @@ body {
   font-size: 1.0625rem;
   line-height: 1.6;
   font-weight: 300;
-  overflow-x: hidden;
+  /* overflow-x:hidden on <body> breaks position:sticky on iOS — use clip on <html> instead */
   font-feature-settings: "ss01", "kern";
   min-height: 100vh;
+  min-height: 100dvh;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior-y: none;
 }
 
 /* ============================================================
@@ -278,8 +285,9 @@ body {
 
 .scene--hero {
   position: relative;
-  min-height: 100svh;
   min-height: 100vh;
+  min-height: 100svh;
+  min-height: 100dvh;
   display: flex;
   align-items: flex-end;
   overflow: hidden;
@@ -291,9 +299,7 @@ body {
   inset: 0;
   z-index: 0;
 }
-.hero__image .placeholder {
-  height: 100%;
-}
+.hero__image .placeholder { height: 100%; }
 
 .hero__veil {
   position: absolute;
@@ -373,6 +379,7 @@ body {
   top: 0;
   height: 100vh;
   height: 100svh;
+  height: 100dvh;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -415,6 +422,13 @@ body {
   display: block;
   text-wrap: balance;
 }
+/* Two flavours: 2-line desktop copy, 4-line mobile copy. Visible
+   set is toggled by viewport — JS reads only the visible spans. */
+.blur__text--mobile { display: none; }
+@media (max-width: 860px) {
+  .blur__text--desktop { display: none; }
+  .blur__text--mobile  { display: block; }
+}
 
 .blur__line {
   display: block;
@@ -437,6 +451,7 @@ body {
   top: 0;
   height: 100vh;
   height: 100svh;
+  height: 100dvh;
   display: grid;
   place-items: center;
   padding: 0 clamp(1.5rem, 6vw, 3rem);
@@ -558,6 +573,7 @@ body {
   top: 0;
   height: 100vh;
   height: 100svh;
+  height: 100dvh;
   display: flex;
   align-items: center;
   z-index: 1;
@@ -620,14 +636,13 @@ body {
   object-fit: cover;
   object-position: 0% 50%;    /* start at the far-left of the panorama */
   display: block;
-  will-change: transform, object-position;
-  transform-origin: center center;
+  will-change: object-position;
 }
 
 .ppie__triggers { position: relative; }
 .ppie__trigger {
-  height: 75vh;
-  height: 75svh;
+  height: 110vh;
+  height: 110svh;
 }
 
 /* ============================================================
@@ -645,6 +660,7 @@ body {
   top: 0;
   height: 100vh;
   height: 100svh;
+  height: 100dvh;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -698,28 +714,26 @@ body {
   will-change: opacity, transform;
 }
 
-/* Square line-drawing plate (placeholder for now — a real SVG line
-   drawing will be dropped in later). Appears beneath the year line. */
-.establish__plate {
-  margin-top: clamp(1.5rem, 4vh, 2.5rem);
-  width: clamp(220px, 38vw, 380px);
-  aspect-ratio: 1 / 1;
-  background: var(--paper-3);
-  border: 1px solid var(--rule);
+/* PFA Art image beneath the year line. Sized large enough to feel like
+   the scene's centerpiece while still fitting within the sticky frame
+   alongside the heading + sub + year. The img itself is height-capped
+   so it never pushes the frame on shorter viewports. */
+.establish__art {
+  margin: clamp(1.5rem, 4vh, 2.5rem) auto 0;
+  width: min(92vw, 880px);
   display: flex;
-  align-items: center;
   justify-content: center;
   opacity: 0;
   will-change: opacity, transform;
 }
-.establish__plate-label {
-  font-family: var(--font-sans);
-  font-size: 0.7rem;
-  font-weight: 500;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: var(--ink-faint);
+.establish__art img {
+  width: 100%;
+  max-height: 56dvh;
+  height: auto;
+  object-fit: contain;
+  display: block;
 }
+
 
 /* ============================================================
    SCENE 6 — A day at the Palace (cinematic stage).
@@ -730,7 +744,7 @@ body {
 
 .scene--day {
   position: relative;
-  min-height: 900vh;         /* 7 beats × ~128vh — generous dwell per beat */
+  min-height: 960vh;         /* 6 beats × ~160vh — extra dwell so each beat lingers */
   background: var(--paper);
 }
 
@@ -739,6 +753,7 @@ body {
   top: 0;
   height: 100vh;
   height: 100svh;
+  height: 100dvh;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -764,57 +779,6 @@ body {
   gap: clamp(1.25rem, 3vh, 1.75rem);
   opacity: 0;
   will-change: opacity, transform;
-}
-
-/* Beat 0 — map-as-hero. No image frame; the persistent .day__map
-   element fills the hero spot at beat 0 and shrinks into the corner
-   for beats 1–6. The layer itself only holds the caption. */
-.day__layer--map {
-  /* The actual hero size is set by the .day__map element below;
-     this layer just needs enough vertical space for the caption
-     to read beneath the (initially hero-sized) map. */
-  min-height: 60vh;
-  justify-content: flex-end;
-}
-
-/* The persistent line-drawing plate. Starts as the beat-0 hero
-   (fills the day__stage's grid cell). GSAP scrub then scales it
-   toward its TOP-RIGHT corner so the small inset sits flush at
-   the top-right of each photo frame (since the frame and stage
-   share the same top-right point in this layout). */
-.day__map {
-  grid-area: 1 / 1;
-  position: relative;
-  width: 100%;
-  aspect-ratio: 1 / 1;            /* square plate */
-  /* Center the square inside the stage grid cell — top-right corner
-     of the plate then aligns with stage's right edge. */
-  justify-self: center;
-  z-index: 5;                     /* sits above all photo layers */
-  transform-origin: top right;
-  will-change: transform;
-  /* When scaled small via GSAP, the plate becomes a flush corner inset
-     pinned to the top-right of the photo frame. */
-}
-
-/* The square plate itself — placeholder until a real line drawing
-   is dropped in. Light grey paper, faint rule, centered label. */
-.day__map-plate {
-  width: 100%;
-  height: 100%;
-  background: var(--paper-3);
-  border: 1px solid var(--rule);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.day__map-plate-label {
-  font-family: var(--font-sans);
-  font-size: 0.7rem;
-  font-weight: 500;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: var(--ink-faint);
 }
 
 .day__frame {
@@ -844,12 +808,7 @@ body {
   letter-spacing: -0.005em;
   color: var(--ink);
   text-wrap: balance;
-}
-
-/* Each caption word is its own span so JS can reveal them one at
-   a time as the beat scrolls into view. */
-.day__caption-w {
-  display: inline-block;
+  /* Caption fades as a single sentence — GSAP owns opacity/transform. */
   opacity: 0;
   will-change: opacity, transform;
 }
@@ -868,6 +827,7 @@ body {
   top: 0;
   height: 100vh;
   height: 100svh;
+  height: 100dvh;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -921,16 +881,33 @@ body {
   top: 0;
   height: 100vh;
   height: 100svh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: clamp(2rem, 6vh, 4rem) clamp(1.5rem, 6vw, 4rem);
+  height: 100dvh;
+  /* Grid: center block at top of its own auto-row, CTAs centered in
+     the flexible 1fr middle row, tail pinned to bottom. 15px bottom
+     padding keeps "World's Fair Company · Confidential" off the edge. */
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  justify-items: center;
+  padding: clamp(2rem, 6vh, 4rem) clamp(1.5rem, 6vw, 4rem) 15px;
   width: 100%;
   max-width: 560px;
   margin: 0 auto;
   text-align: center;
-  gap: clamp(0.85rem, 2vh, 1.25rem);
+}
+
+/* Main letter block — heading → body → signature → name → phone. */
+.letter__center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(1rem, 2.4vh, 1.6rem);
+}
+
+.letter__tail {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(0.6rem, 1.4vh, 1rem);
 }
 
 .letter__h {
@@ -970,15 +947,14 @@ body {
   will-change: opacity, transform;
 }
 
-/* Signature block — no rule above, no rule below; sits inline
-   with the rest of the cascade. The HR rule moves to below the
-   CTAs (between CTAs and footer). */
+/* Signature block — extra space above so it sits a real beat below
+   "If that's you, I'd love to meet you." */
 .letter__sign {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 0.1rem;
-  margin: 0;
+  margin: clamp(1.5rem, 4vh, 3rem) 0 0;
   opacity: 0;
   transform: translateY(8px);
   will-change: opacity, transform;
@@ -1012,10 +988,13 @@ body {
 }
 .letter__phone a:hover { color: var(--accent); }
 
-/* Plain-text CTAs — two understated links separated by a middle
-   dot. Small uppercase letter-spaced caps. Burgundy on hover. */
+/* Plain-text CTAs — two understated links separated by a middle dot.
+   Lives in the grid's 1fr middle row and self-centers vertically,
+   so it floats halfway between the phone number above and the footer
+   below. */
 .letter__ctas {
-  margin: 0.25rem 0 0;
+  margin: 0;
+  align-self: center;
   font-family: var(--font-sans);
   font-size: 0.72rem;
   font-weight: 500;
@@ -1044,10 +1023,10 @@ body {
   color: var(--ink-faint);
 }
 
-/* HR rule — sits between the CTAs and the footer. */
+/* HR rule — sits between the cascade and the footer at the bottom. */
 .letter__rule {
   width: min(260px, 60%);
-  margin: clamp(1.25rem, 3vh, 1.75rem) auto 0;
+  margin: 0 auto;
   border: 0;
   border-top: 1px solid var(--ink-ghost);
   opacity: 0;
@@ -1061,7 +1040,7 @@ body {
   letter-spacing: 0.22em;
   text-transform: uppercase;
   color: var(--ink-faint);
-  margin: clamp(0.85rem, 2vh, 1.25rem) 0 0;
+  margin: 0;
   opacity: 0;
   will-change: opacity;
 }
@@ -1115,6 +1094,7 @@ a:focus-visible {
     gap: 0.85rem;
     height: 100vh;
     height: 100svh;
+    height: 100dvh;
   }
   .ppie__grid {
     gap: 1rem;
@@ -1144,7 +1124,10 @@ a:focus-visible {
     padding: clamp(2.5rem, 8vh, 4rem) clamp(1.5rem, 5vw, 2.5rem);
   }
 
-  /* Scene 6 day-flow — sticky stage, mobile-tightened */
+  /* Scene 6 day-flow — sticky stage, mobile-tightened.
+     Use dvh for image width so the frame fits within the visible viewport
+     even when iOS Safari's URL bar is showing. */
+  .scene--day { min-height: 900vh; min-height: 900dvh; }
   .day__sticky {
     padding: 1rem clamp(0.75rem, 4vw, 1.5rem);
   }
@@ -1152,13 +1135,18 @@ a:focus-visible {
   .day__layer { gap: 0.85rem; }
   .day__frame {
     aspect-ratio: 4 / 5;
-    width: min(96%, calc(72vh * 4 / 5));
+    width: min(96%, calc(62dvh * 4 / 5));
     margin: 0 auto;
   }
   .day__caption {
     font-size: clamp(1rem, 4vw, 1.25rem);
     padding: 0 0.5rem;
   }
+
+  /* Tighten total scroll length for the heavy scrub scenes on mobile */
+  .scene--blur     { min-height: 200vh; min-height: 200dvh; }
+  .scene--establish{ min-height: 140vh; min-height: 140dvh; }
+  .scene--letter   { min-height: 200vh; min-height: 200dvh; }
 
   /* Scene 7 impact */
   .scene--impact {
@@ -1167,15 +1155,12 @@ a:focus-visible {
   }
   .impact__line { font-size: clamp(1.35rem, 6vw, 1.75rem); }
 
-  /* Scene 6 day-map labels hidden on mobile (they'd be illegible at corner scale) */
-  .day__map .day__map-label { display: none; }
-
   /* Scene 9 letter */
   .letter__hold {
     max-width: 100%;
-    padding: clamp(1.5rem, 5vh, 2.5rem) clamp(1.25rem, 5vw, 2rem);
-    gap: 0.7rem;
+    padding: clamp(1.5rem, 5vh, 2.5rem) clamp(1.25rem, 5vw, 2rem) 15px;
   }
+  .letter__center { gap: clamp(0.85rem, 2.2vh, 1.4rem); }
   .letter__h { font-size: clamp(1.3rem, 5.4vw, 1.65rem); }
   .letter__p { font-size: clamp(0.95rem, 3.8vw, 1.05rem); }
   .letter__signature { width: clamp(90px, 26vw, 120px); }
@@ -1200,7 +1185,7 @@ a:focus-visible {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
-  .reveal__line, .reveal__inno, .letter__h, .letter__p, .letter__sign, .letter__ctas, .letter__rule, .letter__footer, .blur__line, .impact__line, .impact__w, .establish__plate, .day__caption-w {
+  .reveal__line, .reveal__inno, .letter__h, .letter__p, .letter__sign, .letter__ctas, .letter__rule, .letter__footer, .blur__line, .impact__line, .impact__w, .day__caption, .establish__art {
     opacity: 1 !important;
     transform: none !important;
   }
