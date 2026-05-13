@@ -70,6 +70,10 @@ html {
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
   scroll-behavior: auto; /* let Lenis handle smoothing on non-touch */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  /* clip (not hidden) on html avoids breaking position:sticky on iOS Safari */
+  overflow-x: clip;
 }
 
 body {
@@ -79,9 +83,12 @@ body {
   font-size: 1.0625rem;
   line-height: 1.6;
   font-weight: 300;
-  overflow-x: hidden;
+  /* overflow-x:hidden on <body> breaks position:sticky on iOS — use clip on <html> instead */
   font-feature-settings: "ss01", "kern";
   min-height: 100vh;
+  min-height: 100dvh;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior-y: none;
 }
 
 /* ============================================================
@@ -278,8 +285,9 @@ body {
 
 .scene--hero {
   position: relative;
-  min-height: 100svh;
   min-height: 100vh;
+  min-height: 100svh;
+  min-height: 100dvh;
   display: flex;
   align-items: flex-end;
   overflow: hidden;
@@ -291,6 +299,13 @@ body {
   inset: 0;
   z-index: 0;
 }
+.hero__image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 35%;
+  display: block;
+}
 .hero__image .placeholder {
   height: 100%;
 }
@@ -299,9 +314,15 @@ body {
   position: absolute;
   inset: 0;
   z-index: 1;
+  /* Soft top tint + readable bottom shade so the title sits on a darker
+     band without crushing the upper half of the image. */
   background:
-    linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0) 40%, rgba(0,0,0,0.55) 100%),
-    linear-gradient(to right, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0) 60%);
+    linear-gradient(to bottom,
+      rgba(0,0,0,0.10) 0%,
+      rgba(0,0,0,0) 35%,
+      rgba(0,0,0,0) 55%,
+      rgba(0,0,0,0.45) 85%,
+      rgba(0,0,0,0.65) 100%);
   pointer-events: none;
 }
 
@@ -373,6 +394,7 @@ body {
   top: 0;
   height: 100vh;
   height: 100svh;
+  height: 100dvh;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -385,6 +407,15 @@ body {
   z-index: 0;
 }
 .blur__bg .placeholder { height: 100%; }
+.blur__bg-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 35%;
+  display: block;
+  filter: blur(28px) saturate(0.85) brightness(0.55);
+  transform: scale(1.08);
+}
 
 .blur__veil {
   position: absolute;
@@ -437,6 +468,7 @@ body {
   top: 0;
   height: 100vh;
   height: 100svh;
+  height: 100dvh;
   display: grid;
   place-items: center;
   padding: 0 clamp(1.5rem, 6vw, 3rem);
@@ -558,6 +590,7 @@ body {
   top: 0;
   height: 100vh;
   height: 100svh;
+  height: 100dvh;
   display: flex;
   align-items: center;
   z-index: 1;
@@ -626,8 +659,8 @@ body {
 
 .ppie__triggers { position: relative; }
 .ppie__trigger {
-  height: 75vh;
-  height: 75svh;
+  height: 110vh;
+  height: 110svh;
 }
 
 /* ============================================================
@@ -645,6 +678,7 @@ body {
   top: 0;
   height: 100vh;
   height: 100svh;
+  height: 100dvh;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -698,28 +732,6 @@ body {
   will-change: opacity, transform;
 }
 
-/* Square line-drawing plate (placeholder for now — a real SVG line
-   drawing will be dropped in later). Appears beneath the year line. */
-.establish__plate {
-  margin-top: clamp(1.5rem, 4vh, 2.5rem);
-  width: clamp(220px, 38vw, 380px);
-  aspect-ratio: 1 / 1;
-  background: var(--paper-3);
-  border: 1px solid var(--rule);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0;
-  will-change: opacity, transform;
-}
-.establish__plate-label {
-  font-family: var(--font-sans);
-  font-size: 0.7rem;
-  font-weight: 500;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: var(--ink-faint);
-}
 
 /* ============================================================
    SCENE 6 — A day at the Palace (cinematic stage).
@@ -739,6 +751,7 @@ body {
   top: 0;
   height: 100vh;
   height: 100svh;
+  height: 100dvh;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -868,6 +881,7 @@ body {
   top: 0;
   height: 100vh;
   height: 100svh;
+  height: 100dvh;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -921,6 +935,7 @@ body {
   top: 0;
   height: 100vh;
   height: 100svh;
+  height: 100dvh;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1115,6 +1130,7 @@ a:focus-visible {
     gap: 0.85rem;
     height: 100vh;
     height: 100svh;
+    height: 100dvh;
   }
   .ppie__grid {
     gap: 1rem;
@@ -1144,7 +1160,10 @@ a:focus-visible {
     padding: clamp(2.5rem, 8vh, 4rem) clamp(1.5rem, 5vw, 2.5rem);
   }
 
-  /* Scene 6 day-flow — sticky stage, mobile-tightened */
+  /* Scene 6 day-flow — sticky stage, mobile-tightened.
+     Use dvh for image width so the frame fits within the visible viewport
+     even when iOS Safari's URL bar is showing. */
+  .scene--day { min-height: 700vh; min-height: 700dvh; }
   .day__sticky {
     padding: 1rem clamp(0.75rem, 4vw, 1.5rem);
   }
@@ -1152,13 +1171,26 @@ a:focus-visible {
   .day__layer { gap: 0.85rem; }
   .day__frame {
     aspect-ratio: 4 / 5;
-    width: min(96%, calc(72vh * 4 / 5));
+    width: min(96%, calc(62dvh * 4 / 5));
     margin: 0 auto;
   }
   .day__caption {
     font-size: clamp(1rem, 4vw, 1.25rem);
     padding: 0 0.5rem;
   }
+  /* Scene 6 line-drawing plate (beat 0 hero) — keep it from dominating
+     the small viewport. Smaller square so it sits comfortably above the
+     caption on iPhone-class screens. */
+  .day__map { width: min(70%, 60dvh); }
+  .day__layer--map { min-height: auto; }
+
+  /* Scene 6 day-map labels hidden on mobile (they'd be illegible at corner scale) */
+  .day__map .day__map-label { display: none; }
+
+  /* Tighten total scroll length for the heavy scrub scenes on mobile */
+  .scene--blur     { min-height: 160vh; min-height: 160dvh; }
+  .scene--establish{ min-height: 130vh; min-height: 130dvh; }
+  .scene--letter   { min-height: 180vh; min-height: 180dvh; }
 
   /* Scene 7 impact */
   .scene--impact {
@@ -1166,9 +1198,6 @@ a:focus-visible {
     min-height: auto;
   }
   .impact__line { font-size: clamp(1.35rem, 6vw, 1.75rem); }
-
-  /* Scene 6 day-map labels hidden on mobile (they'd be illegible at corner scale) */
-  .day__map .day__map-label { display: none; }
 
   /* Scene 9 letter */
   .letter__hold {
@@ -1200,7 +1229,7 @@ a:focus-visible {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
-  .reveal__line, .reveal__inno, .letter__h, .letter__p, .letter__sign, .letter__ctas, .letter__rule, .letter__footer, .blur__line, .impact__line, .impact__w, .establish__plate, .day__caption-w {
+  .reveal__line, .reveal__inno, .letter__h, .letter__p, .letter__sign, .letter__ctas, .letter__rule, .letter__footer, .blur__line, .impact__line, .impact__w, .day__caption-w {
     opacity: 1 !important;
     transform: none !important;
   }

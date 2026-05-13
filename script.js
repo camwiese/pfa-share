@@ -38,6 +38,11 @@
   if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
   gsap.registerPlugin(ScrollTrigger);
 
+  /* iOS Safari: ignore the URL-bar show/hide resize — otherwise every
+     resize triggers a ScrollTrigger.refresh() which re-computes pin
+     positions mid-scroll and visibly jumps the page. */
+  ScrollTrigger.config({ ignoreMobileResize: true });
+
   if (lenis) {
     lenis.on('scroll', ScrollTrigger.update);
     gsap.ticker.add((time) => lenis.raf(time * 1000));
@@ -230,11 +235,9 @@
     const h     = section.querySelector('.establish__h');
     const sub   = section.querySelector('.establish__sub');
     const yr    = section.querySelector('.establish__year');
-    const plate = section.querySelector('.establish__plate');
     if (!h) return;
 
     gsap.set([h, sub, yr], { y: 14 });
-    if (plate) gsap.set(plate, { opacity: 0, y: 18 });
 
     const tl = gsap.timeline({
       scrollTrigger: {
@@ -245,14 +248,12 @@
       },
     });
 
-    /* Reveal stack — heading, sub, year, plate */
     tl.to(h,   { opacity: 1, y: 0, duration: 0.25, ease: 'power3.out' }, 0.00);
     tl.to(sub, { opacity: 1, y: 0, duration: 0.25, ease: 'power3.out' }, 0.18);
     tl.to(yr,  { opacity: 1, y: 0, duration: 0.25, ease: 'power3.out' }, 0.32);
-    if (plate) tl.to(plate, { opacity: 1, y: 0, duration: 0.35, ease: 'power3.out' }, 0.48);
 
     /* Linger — fully visible */
-    tl.to([h, sub, yr, plate].filter(Boolean), { opacity: 1, duration: 0.7 }, 0.85);
+    tl.to([h, sub, yr], { opacity: 1, duration: 0.7 }, 0.85);
 
     /* Fade text out before Scene 6; the plate keeps going (it
        continues into Scene 6 as the corner inset). */
@@ -295,7 +296,7 @@
     if (image) {
       const panProxy = { x: 0, y: 50, s: 1 };
       tl.to(panProxy, {
-        x: 100, y: 62, s: 1.5,
+        x: 100, y: 100, s: 1.5,
         duration: 0.65,             /* finishes early; image holds for the closing text */
         ease: 'power1.inOut',       /* gentle start, settled finish */
         onUpdate: function () {
