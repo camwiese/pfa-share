@@ -75,6 +75,20 @@ html {
   text-size-adjust: 100%;
   /* clip (not hidden) on html avoids breaking position:sticky on iOS Safari */
   overflow-x: clip;
+  /* Soft snap pulls scenes together at their boundaries so a fast
+     flick lands on the next scene's start instead of flying past
+     whole sections. `proximity` leaves free scroll inside a scene
+     (so scrub animations stay smooth as the reader scans through);
+     it only kicks in when the reader pauses near a scene edge. */
+  scroll-snap-type: y proximity;
+}
+
+/* Every top-level scene is a snap target — its top edge is what the
+   browser pulls toward. ScrollTrigger pin spacers live inside each
+   section, so the snap point stays at the scene's natural top edge. */
+.scene {
+  scroll-snap-align: start;
+  scroll-snap-stop: normal;
 }
 
 body {
@@ -84,7 +98,9 @@ body {
   font-size: 1.0625rem;
   line-height: 1.6;
   font-weight: 300;
-  /* overflow-x:hidden on <body> breaks position:sticky on iOS — use clip on <html> instead */
+  /* overflow-x:hidden on <body> breaks position:sticky on iOS; clip avoids
+     horizontal rubber-banding without creating a scroll container. */
+  overflow-x: clip;
   font-feature-settings: "ss01", "kern";
   min-height: calc(var(--vh) * 100);
   -webkit-tap-highlight-color: transparent;
@@ -142,9 +158,16 @@ body {
   color: rgba(241, 236, 225, 0.55);
 }
 
+/* Scene 2 background. Avoids `filter: blur()` — that filter is very
+   expensive on iOS Safari beneath a sticky+scrub-driven scene and
+   was a major source of mobile judder. A pre-baked low-contrast
+   gradient reads similar without the GPU cost. */
 .placeholder--blurred {
-  filter: blur(24px) saturate(0.85);
-  transform: scale(1.08);
+  background:
+    radial-gradient(ellipse 90% 80% at 50% 50%, rgba(60,42,22,0.45) 0%, rgba(0,0,0,0.7) 100%),
+    #1a140e;
+  filter: none;
+  transform: none;
 }
 
 /* ============================================================
@@ -1035,6 +1058,31 @@ a:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 3px;
   border-radius: 2px;
+}
+
+/* ============================================================
+   Compositor-layer hygiene.
+   We earlier sprinkled `will-change: opacity, transform` on most
+   reveal/cascade elements. Each one allocates a dedicated GPU
+   layer. On iOS Safari (tight GPU memory) twenty-plus layers
+   noticeably stutter scroll. The truly long-running animations
+   keep their will-change (set inside their own rules); the
+   one-shot reveals drop it here. */
+.blur__line,
+.reveal__line,
+.reveal__inno,
+.establish__h,
+.establish__sub,
+.establish__year,
+.establish__art,
+.impact__w,
+.letter__h,
+.letter__p,
+.letter__sign,
+.letter__ctas,
+.letter__rule,
+.letter__footer {
+  will-change: auto;
 }
 
 /* ============================================================
