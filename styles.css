@@ -417,7 +417,8 @@ body :is(input, textarea) { cursor: auto; }
 .letter__content {
   position: relative; z-index: 1;
   display: flex; flex-direction: column; align-items: center;
-  text-align: center; max-width: 560px;
+  text-align: center;
+  max-width: 760px;
   padding: clamp(2rem, 5vh, 4rem) var(--gutter);
   gap: 0;
 }
@@ -425,8 +426,10 @@ body :is(input, textarea) { cursor: auto; }
   font-family: var(--font-display); font-weight: 400;
   font-size: clamp(1.7rem, 3vw, 2.4rem);
   line-height: 1.18; letter-spacing: -0.01em;
-  color: var(--ink); text-wrap: balance;
-  max-width: 24ch;
+  color: var(--ink);
+  /* Explicit <br> in markup controls the split. No balance so it
+     doesn't re-wrap. Wide max so each half fits on one line. */
+  max-width: 38ch;
   margin: 0 0 clamp(2rem, 5vh, 3.25rem);
 }
 .letter__sign {
@@ -459,6 +462,44 @@ body :is(input, textarea) { cursor: auto; }
 .letter__contact a { color: inherit; transition: color 0.3s; }
 .letter__contact a:hover { color: var(--accent); }
 .letter__sep { display: inline-block; margin: 0 0.55em; color: var(--ink-faint); }
+
+/* CTA + footer pinned to the bottom of the letter panel. */
+.panel--letter .letter__ctas,
+.panel--letter .letter__footer {
+  position: absolute;
+  left: 0; right: 0;
+  text-align: center;
+  z-index: 1;
+  margin: 0;
+}
+.panel--letter .letter__ctas {
+  bottom: clamp(3.25rem, 7vh, 4.5rem);
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+.panel--letter .letter__cta {
+  color: var(--ink-soft);
+  border-bottom: 1px solid var(--ink-faint);
+  padding: 0.15rem 0.1rem;
+  transition: color 0.3s, border-color 0.3s;
+}
+.panel--letter .letter__cta:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+.panel--letter .letter__footer {
+  bottom: clamp(1.25rem, 3vh, 2rem);
+  font-family: var(--font-sans);
+  font-size: 0.68rem;
+  font-weight: 400;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
 
 /* =============================================================
    PROGRESS DOTS
