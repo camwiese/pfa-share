@@ -400,7 +400,7 @@ body :is(input, textarea) { cursor: auto; }
 .panel--impact { background: var(--paper); }
 .impact__content {
   position: relative; z-index: 1;
-  max-width: 38ch; padding: 0 var(--gutter); text-align: center;
+  max-width: min(70ch, 92vw); padding: 0 var(--gutter); text-align: center;
 }
 .impact__text {
   font-family: var(--font-display); font-weight: 350;
