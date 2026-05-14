@@ -24,14 +24,17 @@ html, body, h1, h2, h3, p, figure { margin: 0; padding: 0; }
 a  { color: inherit; text-decoration: none; }
 img { max-width: 100%; display: block; }
 
+html, body {
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
 html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
   -webkit-text-size-adjust: 100%;
-  overflow-x: clip;
-  scroll-snap-type: y mandatory;
-  touch-action: pan-y;
+  touch-action: none;
 }
 
 body {
@@ -41,10 +44,12 @@ body {
   font-size: 1.0625rem;
   line-height: 1.6;
   font-weight: 300;
-  overflow-x: clip;
   font-feature-settings: "ss01", "kern";
   -webkit-tap-highlight-color: transparent;
+  cursor: pointer;
 }
+body :is(a, button) { cursor: pointer; }
+body :is(input, textarea) { cursor: auto; }
 
 /* ── Paper grain texture on cream panels ─────────────────── */
 .panel--cream::before {
@@ -62,13 +67,35 @@ body {
    Panel base
    ============================================================= */
 .panel {
-  position: relative;
-  min-height: calc(var(--vh) * 100);
-  scroll-snap-align: start;
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100vh;
+  height: calc(var(--vh) * 100);
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 1;
+  /* Default state for a panel that hasn't been reached yet:
+     parked off to the right, waiting to slide in. Shorter travel +
+     gentler easing softens the color↔image jumps. */
+  transform: translateX(24px);
+  transition:
+    opacity 540ms cubic-bezier(0.4, 0, 0.2, 1),
+    transform 620ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.panel.is-active {
+  opacity: 1;
+  pointer-events: auto;
+  z-index: 2;
+  transform: translateX(0);
+}
+.panel.is-past {
+  opacity: 0;
+  transform: translateX(-24px);
 }
 
 /* =============================================================
@@ -102,27 +129,7 @@ body {
   transition-delay: 0s !important;
 }
 
-/* ── Image panels: fade + Ken Burns ──────────────────────── */
-.panel--image {
-  opacity: 0;
-  transition: opacity 0.8s cubic-bezier(0.22, 0.61, 0.36, 1);
-}
-.panel--image.is-active { opacity: 1; }
-.panel--image:not(.is-active) {
-  opacity: 0;
-  transition: opacity 0.45s cubic-bezier(0.55, 0.085, 0.68, 0.53);
-}
-
-.panel--image .panel__img {
-  transform: scale(1);
-  transition: transform 12s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  transform-origin: center;
-}
-.panel--image.is-active .panel__img {
-  transform: scale(1.08);
-}
-.panel--image:nth-child(odd) .panel__img { transform-origin: 40% 45%; }
-.panel--image:nth-child(even) .panel__img { transform-origin: 60% 55%; }
+/* Image panels render statically — no Ken Burns. */
 
 /* =============================================================
    FIXED HERO IMAGE — shared between hero + tagline panels
@@ -208,13 +215,7 @@ body {
 }
 
 .hero__scroll {
-  position: absolute;
-  bottom: clamp(1.2rem, 3vh, 2rem);
-  left: 50%; transform: translateX(-50%);
-  z-index: 3;
-  display: flex; flex-direction: column; align-items: center;
-  gap: 0.5rem;
-  animation: heroIn 1s cubic-bezier(0.22, 0.61, 0.36, 1) 1.6s both;
+  display: none;
 }
 .hero__scroll-line {
   width: 1px; height: 28px;
@@ -379,13 +380,18 @@ body {
 .panel--prose { background: var(--paper); }
 .prose__content {
   position: relative; z-index: 1;
-  max-width: min(82ch, 90vw); padding: 0 var(--gutter); text-align: center;
+  max-width: min(110ch, 95vw);
+  padding: 0 var(--gutter);
+  text-align: center;
 }
 .prose__text {
-  font-family: var(--font-display); font-weight: 350;
-  font-size: clamp(1.05rem, 1.55vw, 1.3rem);
-  line-height: 1.45; letter-spacing: -0.005em;
-  color: var(--ink); text-wrap: pretty;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(1.3rem, 2vw, 1.65rem);
+  line-height: 1.32;
+  letter-spacing: -0.005em;
+  color: var(--ink);
+  text-wrap: balance;
 }
 
 /* =============================================================
@@ -394,7 +400,7 @@ body {
 .panel--impact { background: var(--paper); }
 .impact__content {
   position: relative; z-index: 1;
-  max-width: 38ch; padding: 0 var(--gutter); text-align: center;
+  max-width: min(70ch, 92vw); padding: 0 var(--gutter); text-align: center;
 }
 .impact__text {
   font-family: var(--font-display); font-weight: 350;
@@ -497,6 +503,9 @@ body {
   width: 5px; height: 5px;
   border-radius: 50%;
   background: var(--ink-ghost);
+  border: 0;
+  padding: 0;
+  cursor: pointer;
   transition: background 0.4s ease, transform 0.4s ease;
 }
 .progress__dot.is-current {
@@ -507,14 +516,33 @@ body {
 .progress.on-dark .progress__dot.is-current { background: rgba(241, 236, 225, 0.6); }
 
 /* =============================================================
-   Mobile
+   Tap hint — shown once, fades after first interaction
+   ============================================================= */
+.tap-hint {
+  position: fixed;
+  left: 50%;
+  bottom: clamp(1.25rem, 3.5vh, 2.5rem);
+  transform: translateX(-50%);
+  z-index: 90;
+  font-family: var(--font-sans);
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: rgba(241, 236, 225, 0.55);
+  pointer-events: none;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.35);
+  animation: hintIn 0.8s ease 1.6s both, hintPulse 2.8s ease-in-out 2.4s infinite;
+  transition: opacity 0.5s ease;
+}
+.tap-hint.is-gone { opacity: 0; animation: none; }
+@keyframes hintIn  { from { opacity: 0; transform: translate(-50%, 6px); } to { opacity: 1; transform: translate(-50%, 0); } }
+@keyframes hintPulse { 0%, 100% { opacity: 0.45; } 50% { opacity: 0.85; } }
+
+/* =============================================================
+   Mobile (portrait + narrow desktop)
    ============================================================= */
 @media (max-width: 860px) {
-  /* iOS Safari fights `mandatory` snapping during momentum scrolling and
-     can bounce back when scrolling up; `proximity` only snaps when the
-     user is already settling near a boundary. */
-  html { scroll-snap-type: y proximity; }
-
   .hero__title { font-size: clamp(1.5rem, 6.5vw, 2rem); }
   .tagline__text { font-size: clamp(1.05rem, 4.5vw, 1.3rem); }
   .ppie__image { aspect-ratio: 3 / 1.4; }
@@ -530,17 +558,18 @@ body {
   .letter__body p { font-size: clamp(0.95rem, 3.8vw, 1.05rem); }
   .letter__ctas { font-size: 0.66rem; }
 
+  /* Small phones: tall panels can exceed viewport. Allow internal
+     vertical scroll within them; tap still advances the deck. */
   .panel--ppie,
   .panel--letter,
   .panel--welcome {
-    min-height: calc(var(--vh) * 100);
-    height: auto;
+    overflow-y: auto;
+    align-items: flex-start;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
   }
   .letter__sign { margin-top: clamp(1.5rem, 4vh, 2rem); }
 
-  .panel--chapter .chapter__text {
-    font-size: clamp(1.4rem, 6vw, 1.8rem);
-  }
   .progress { right: 8px; gap: 5px; }
   .progress__dot { width: 4px; height: 4px; }
 
@@ -556,10 +585,98 @@ body {
 }
 
 /* =============================================================
-   Reduced motion
+   Landscape phones — short viewport, prioritize fit-in-screen
    ============================================================= */
+@media (orientation: landscape) and (max-height: 520px) {
+  /* No internal scroll — every slide fits viewport. */
+  .panel--ppie,
+  .panel--letter,
+  .panel--welcome {
+    overflow: hidden;
+    align-items: center;
+    touch-action: none;
+  }
+
+  /* Tighten container paddings so content reaches more vertical space. */
+  .panel--ppie { padding: clamp(0.75rem, 2vh, 1.25rem) var(--gutter); }
+  .panel--letter .letter__content { padding: clamp(0.75rem, 2vh, 1.25rem) var(--gutter); }
+  .welcome__content { padding: clamp(0.75rem, 2vh, 1.25rem) var(--gutter); }
+
+  /* Cap image heights so they never push other content off-screen. */
+  .ppie__image    { max-height: 38vh; aspect-ratio: 5 / 2; }
+  .welcome__figure { max-width: min(440px, 60vw); margin-top: clamp(0.5rem, 1.5vh, 0.9rem); }
+  .welcome__image  { max-height: 32vh; object-fit: contain; }
+
+  /* Compact typography for short viewports. */
+  .hero__title       { font-size: clamp(1.3rem, 4vw, 1.9rem); }
+  .tagline__text     { font-size: clamp(0.95rem, 2.6vw, 1.2rem); }
+  .ppie__intro,
+  .ppie__line        { font-size: clamp(0.85rem, 1.9vw, 1.05rem); }
+  .welcome__heading  { font-size: clamp(1.4rem, 3.6vw, 1.9rem); }
+  .welcome__sub      { font-size: clamp(0.85rem, 2vw, 1rem); }
+  .welcome__year     { margin: clamp(0.35rem, 0.8vh, 0.6rem) 0 0; }
+  .prose__text       { font-size: clamp(0.95rem, 2.4vw, 1.2rem); }
+  .impact__text      { font-size: clamp(1.15rem, 3.2vw, 1.55rem); }
+  .letter__heading   { font-size: clamp(1.05rem, 2.6vw, 1.3rem); margin-bottom: clamp(0.45rem, 1.3vh, 0.85rem); }
+  .letter__body p    { font-size: clamp(0.78rem, 1.85vw, 0.92rem); line-height: 1.4; }
+  .letter__body      { gap: clamp(0.25rem, 0.6vh, 0.45rem); }
+  .letter__sign      { margin-top: clamp(0.6rem, 1.6vh, 1rem); }
+  .letter__signature { width: clamp(78px, 9vw, 100px); margin-bottom: 0.15rem; }
+  .letter__ctas      { margin-top: clamp(0.6rem, 1.6vh, 1rem); font-size: 0.6rem; }
+  .letter__rule      { margin-top: clamp(0.45rem, 1.2vh, 0.8rem); }
+  .letter__footer    { margin-top: clamp(0.3rem, 0.8vh, 0.6rem); font-size: 0.6rem; }
+
+  /* Horizontal dots along the bottom — less crowded than a side rail. */
+  .progress {
+    top: auto;
+    bottom: 12px;
+    right: 50%;
+    transform: translateX(50%);
+    flex-direction: row;
+    gap: 5px;
+  }
+  .progress__dot { width: 4px; height: 4px; }
+
+  /* No need for the tap hint on short landscape — the deck is obvious
+     once a tap has happened anyway, and bottom space is precious. */
+  .tap-hint { display: none; }
+
+  /* Image panels: full-bleed cover instead of letterbox to use the
+     wide landscape canvas. */
+  .panel--image { background: #1c1610; }
+  .panel__img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    aspect-ratio: auto;
+    object-fit: cover;
+  }
+}
+
+/* =============================================================
+   Reduced motion / fallback: restore scroll layout
+   ============================================================= */
+.reduced-motion, .reduced-motion body {
+  height: auto;
+  overflow: auto;
+}
+.reduced-motion .panel {
+  position: relative;
+  inset: auto;
+  height: auto;
+  min-height: calc(var(--vh) * 100);
+  opacity: 1;
+  pointer-events: auto;
+  z-index: auto;
+}
+.reduced-motion .hero-fixed,
+.reduced-motion .hero-fixed__blur,
+.reduced-motion .progress { display: none; }
+.reduced-motion .panel--hero,
+.reduced-motion .panel--tagline { background: #1c1610; }
+
 @media (prefers-reduced-motion: reduce) {
-  html { scroll-snap-type: none; }
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
@@ -567,9 +684,4 @@ body {
   .panel [data-animate], .panel--image, .hero__title {
     opacity: 1 !important; transform: none !important;
   }
-  .panel--hero { background: #1c1610; }
-  .panel--tagline { background: #1c1610; }
-  .hero-fixed, .hero-fixed__blur { display: none; }
-  .progress { display: none; }
-  .hero__scroll { display: none; }
 }
