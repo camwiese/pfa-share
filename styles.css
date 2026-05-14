@@ -141,15 +141,10 @@ body :is(input, textarea) { cursor: auto; }
   inset: 0;
   z-index: 0;
   background-color: #1c1610;
-  /* JPEG fallback for browsers that don't parse image-set() with
-     type() annotations (older Safari). Modern browsers use the
-     image-set() declaration below. */
+  /* Plain JPEG — image-set() with type() annotations was causing
+     blank hero on some iOS Safari builds. JPEG is universally
+     supported and only ~310KB. */
   background-image: url("images/opt/header-image-1672.jpg");
-  background-image: image-set(
-    url("images/opt/header-image-1672.avif") type("image/avif"),
-    url("images/opt/header-image-1672.webp") type("image/webp"),
-    url("images/opt/header-image-1672.jpg") type("image/jpeg")
-  );
   background-position: center 35%;
   background-size: cover;
   background-repeat: no-repeat;
