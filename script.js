@@ -71,12 +71,11 @@
   function applyBackgroundForIndex(i) {
     if (i === 0) {
       heroFixed.classList.remove('is-hidden');
-      heroBlur.classList.remove('is-hidden');
-      document.documentElement.style.setProperty('--scene-blur', '0');
+      heroBlur.classList.remove('is-hidden', 'is-blurred');
     } else if (i === 1) {
       heroFixed.classList.remove('is-hidden');
       heroBlur.classList.remove('is-hidden');
-      document.documentElement.style.setProperty('--scene-blur', '1');
+      heroBlur.classList.add('is-blurred');
     } else {
       heroFixed.classList.add('is-hidden');
       heroBlur.classList.add('is-hidden');

@@ -158,11 +158,20 @@ body :is(input, textarea) { cursor: auto; }
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  -webkit-backdrop-filter: blur(calc(var(--scene-blur, 0) * 18px));
-          backdrop-filter: blur(calc(var(--scene-blur, 0) * 18px));
-  background-color: rgba(0, 0, 0, calc(var(--scene-blur, 0) * 0.30));
+  -webkit-backdrop-filter: blur(0px);
+          backdrop-filter: blur(0px);
+  background-color: rgba(0, 0, 0, 0);
   will-change: backdrop-filter, background-color;
-  transition: opacity 0.6s ease;
+  transition:
+    opacity 0.6s ease,
+    -webkit-backdrop-filter 0.75s cubic-bezier(0.4, 0, 0.2, 1),
+    backdrop-filter 0.75s cubic-bezier(0.4, 0, 0.2, 1),
+    background-color 0.75s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.hero-fixed__blur.is-blurred {
+  -webkit-backdrop-filter: blur(18px);
+          backdrop-filter: blur(18px);
+  background-color: rgba(0, 0, 0, 0.3);
 }
 .hero-fixed__blur.is-hidden { opacity: 0; pointer-events: none; }
 
