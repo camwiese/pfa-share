@@ -132,7 +132,15 @@ body {
   position: fixed;
   inset: 0;
   z-index: 0;
-  background: #1c1610 url("images/header-image.png") center 35% / cover no-repeat;
+  background-color: #1c1610;
+  background-image: image-set(
+    url("images/opt/header-image-1672.avif") type("image/avif"),
+    url("images/opt/header-image-1672.webp") type("image/webp"),
+    url("images/opt/header-image-1672.jpg") type("image/jpeg")
+  );
+  background-position: center 35%;
+  background-size: cover;
+  background-repeat: no-repeat;
   will-change: opacity;
   transition: opacity 0.8s ease;
 }
