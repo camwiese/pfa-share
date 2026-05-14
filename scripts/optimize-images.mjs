@@ -27,12 +27,11 @@ const SOURCES = [
   '1915-PPIE-full.jpg',
   'Park-Lagoon-2.png',
   'grounds-0.png',
-  'grounds-1.png',
   'grounds-2.png',
   'grounds-3.jpeg',
   'fare-1.png',
   'fare-2.png',
-  'exhibit-0.png',
+  // 'fare-3.png',  // TODO: add when source file lands in images/
   'exhibit-1.png',
   'exhibit-3.png',
   'exhibit-4.png',
