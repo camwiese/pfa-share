@@ -1,68 +1,26 @@
 /* =============================================================
-   Future Palace — light editorial scrollytelling
-   -------------------------------------------------------------
-   File layout:
-     :root          design tokens (palette, type, spacing)
-     resets         resets + base
-     reveal helper  reveal-init / reveal-in
-     placeholders
-     FRAME          reusable ornate container
-     SCENE 1        Hero
-     SCENE 2        Blur reveal
-     SCENE 3        Innovations
-     SCENE 4        PPIE history
-     SCENE 5        "Welcome to the Future" + plate
-     SCENE 6        Day-flow + corner plate + caption words
-     SCENE 7        Impact statement
-     SCENE 9        Letter / CTA / HR / footer
-     responsive     mobile overrides
-     reduced motion
+   Future Palace v2 — Cinematic panels
    ============================================================= */
-
 :root {
-  /* ── Palette: paper / ink ─────────────────────────────────── */
-  --paper:        #f5f2ec;       /* page background */
-  --paper-2:      #efeae0;       /* alt surface (image placeholders) */
-  --paper-3:      #e7e0d2;       /* deeper paper */
-  --ink:          #1a1612;       /* primary text */
+  --paper:        #f5f2ec;
+  --paper-2:      #efeae0;
+  --paper-3:      #e7e0d2;
+  --ink:          #1a1612;
   --ink-soft:     rgba(26, 22, 18, 0.78);
   --ink-muted:    rgba(26, 22, 18, 0.55);
   --ink-faint:    rgba(26, 22, 18, 0.32);
   --ink-ghost:    rgba(26, 22, 18, 0.14);
-  --rule:         rgba(26, 22, 18, 0.16);
-  --rule-strong:  rgba(26, 22, 18, 0.30);
-
-  /* Dark inset for ornate frames (Scenes 5, 9) */
-  --noir:         #0e0b08;
-  --noir-2:       #16110b;
   --ivory:        #f1ece1;
   --ivory-soft:   rgba(241, 236, 225, 0.78);
-  --ivory-muted:  rgba(241, 236, 225, 0.52);
-  --ivory-faint:  rgba(241, 236, 225, 0.28);
-  --gilt:         #c9a35c;
-  --gilt-soft:    rgba(201, 163, 92, 0.55);
-
-  /* Editorial accent — used on small moments (date, hover, signature) */
   --accent:       #8e2832;
-  --accent-soft:  rgba(142, 40, 50, 0.40);
-
-  /* Typography */
   --font-display: 'Fraunces', 'Cormorant Garamond', Georgia, serif;
   --font-sans:    'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-
-  /* Measure / spacing */
-  --measure:      62ch;
-  --measure-wide: 78ch;
   --gutter:       clamp(1.25rem, 4vw, 2.5rem);
-  --pad-section:  clamp(4rem, 12vh, 8rem);
-  --frame-radius: 2px;
   --vh: 1vh;
 }
 
-/* ── Resets ───────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; }
-html, body, h1, h2, h3, h4, h5, h6, p, ul, ol, li, figure { margin: 0; padding: 0; }
-ul, ol { list-style: none; }
+html, body, h1, h2, h3, p, figure { margin: 0; padding: 0; }
 a  { color: inherit; text-decoration: none; }
 img { max-width: 100%; display: block; }
 
@@ -70,25 +28,10 @@ html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
-  scroll-behavior: auto; /* let Lenis handle smoothing on non-touch */
   -webkit-text-size-adjust: 100%;
-  text-size-adjust: 100%;
-  /* clip (not hidden) on html avoids breaking position:sticky on iOS Safari */
   overflow-x: clip;
-  /* Snap is mobile-only (mandatory, set inside the max-width:860px
-     media query). Desktop stays fully smooth so Lenis-driven wheel
-     and trackpad scrolling glides through the whole narrative. */
-  /* Lock to the vertical narrative — accidental horizontal swipes
-     shouldn't interrupt scroll on touch devices. */
+  scroll-snap-type: y mandatory;
   touch-action: pan-y;
-}
-
-/* Every top-level scene is a snap target — its top edge is what the
-   browser pulls toward. ScrollTrigger pin spacers live inside each
-   section, so the snap point stays at the scene's natural top edge. */
-.scene {
-  scroll-snap-align: start;
-  scroll-snap-stop: normal;
 }
 
 body {
@@ -98,296 +41,140 @@ body {
   font-size: 1.0625rem;
   line-height: 1.6;
   font-weight: 300;
-  /* overflow-x:hidden on <body> breaks position:sticky on iOS; clip avoids
-     horizontal rubber-banding without creating a scroll container. */
   overflow-x: clip;
   font-feature-settings: "ss01", "kern";
-  min-height: calc(var(--vh) * 100);
   -webkit-tap-highlight-color: transparent;
-  overscroll-behavior-y: none;
 }
 
-/* ============================================================
-   Reveal helper — used by GSAP / IntersectionObserver
-   ============================================================ */
-
-.reveal-init {
-  opacity: 0;
-  transform: translateY(14px);
-}
-.reveal-in {
-  opacity: 1;
-  transform: none;
-  transition: opacity 1s ease, transform 1s cubic-bezier(0.2, 0.7, 0.2, 1);
-}
-
-/* ============================================================
-   Placeholders (CSS-only image stand-ins)
-   Until real assets are dropped in
-   ============================================================ */
-
-.placeholder {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
-  background:
-    repeating-linear-gradient(
-      45deg,
-      transparent 0 14px,
-      rgba(26,22,18,0.06) 14px 15px
-    ),
-    var(--paper-3);
-  color: var(--ink-muted);
-  font-family: var(--font-sans);
-  font-size: 0.78rem;
-  font-weight: 500;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  text-align: center;
-  padding: 1.25rem;
-  border: 1px solid transparent;
-}
-
-.placeholder--hero {
-  background:
-    radial-gradient(ellipse 70% 80% at 50% 40%, rgba(60,40,20,0.15) 0%, rgba(0,0,0,0.55) 100%),
-    repeating-linear-gradient(45deg, rgba(255,255,255,0.02) 0 12px, rgba(0,0,0,0.04) 12px 13px),
-    #2a2218;
-  color: rgba(241, 236, 225, 0.55);
-}
-
-/* Scene 2 background. Avoids `filter: blur()` — that filter is very
-   expensive on iOS Safari beneath a sticky+scrub-driven scene and
-   was a major source of mobile judder. A pre-baked low-contrast
-   gradient reads similar without the GPU cost. */
-.placeholder--blurred {
-  background:
-    radial-gradient(ellipse 90% 80% at 50% 50%, rgba(60,42,22,0.45) 0%, rgba(0,0,0,0.7) 100%),
-    #1a140e;
-  filter: none;
-  transform: none;
-}
-
-/* ============================================================
-   FRAME — reusable ornate container
-   Modifiers: --light (paper) | --dark (noir)
-   Modifiers: --portrait | --landscape | --map | --establish | --letter | --day
-   ============================================================ */
-
-.frame {
-  position: relative;
-  background: var(--paper-2);
-  border: 1px solid var(--rule-strong);
-  border-radius: var(--frame-radius);
-  display: flex;
-  flex-direction: column;
-  isolation: isolate;
-}
-
-.frame--light {
-  background: var(--paper-2);
-  color: var(--ink);
-  border-color: rgba(26, 22, 18, 0.32);
-}
-
-/* Cream — a subtler off-white surface used for the establishing /
-   letter frames so they feel distinct from the page yet on the same palette. */
-.frame--cream {
-  background: #faf6ed;
-  color: var(--ink);
-  border-color: rgba(26, 22, 18, 0.22);
-  box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.6) inset,
-    0 22px 60px -30px rgba(26, 22, 18, 0.18);
-}
-
-.frame__inner {
-  position: relative;
-  flex: 1 1 auto;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  padding: 0;
-}
-
-/* Corner flourishes — SVG version (Scenes 4, 6 day-flow image frames) */
-.frame__corner {
+/* ── Paper grain texture on cream panels ─────────────────── */
+.panel--cream::before {
+  content: '';
   position: absolute;
-  width: 38px;
-  height: 38px;
-  color: currentColor;
-  opacity: 0.75;
+  inset: 0;
+  z-index: 0;
+  background: var(--paper);
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  background-size: 200px 200px;
   pointer-events: none;
-  z-index: 2;
-}
-.frame--light .frame__corner { opacity: 0.55; }
-.frame--cream .frame__corner { color: var(--ink); opacity: 0.42; }
-
-.frame__corner--tl { top: -1px; left: -1px; }
-.frame__corner--tr { top: -1px; right: -1px; transform: scaleX(-1); }
-.frame__corner--bl { bottom: -1px; left: -1px; transform: scaleY(-1); }
-.frame__corner--br { bottom: -1px; right: -1px; transform: scale(-1, -1); }
-
-/* Ornate Nouveau corner PNG flourishes — used on cream frames (Scenes 5, 9).
-   PNG ratio is 600:338 ≈ 1.77:1. Sized to roughly 14% of frame width.
-   Filter darkens the silver/chrome ornament so it reads cleanly on cream paper. */
-.frame__corner--png {
-  position: absolute;
-  background-repeat: no-repeat;
-  background-size: contain;
-  background-position: center;
-  pointer-events: none;
-  z-index: 2;
-  width: clamp(80px, 14%, 140px);
-  aspect-ratio: 600 / 338;
-  opacity: 0.85;
-  filter: brightness(0.18) saturate(0);
-}
-.frame__corner--png.frame__corner--tl {
-  top: -1px; left: -1px;
-  background-image: url("images/nouveau-corner-chrome-tl.png");
-}
-.frame__corner--png.frame__corner--tr {
-  top: -1px; right: -1px;
-  background-image: url("images/nouveau-corner-chrome-tr.png");
-  transform: none;
-}
-.frame__corner--png.frame__corner--bl {
-  bottom: -1px; left: -1px;
-  background-image: url("images/nouveau-corner-chrome-bl.png");
-  transform: none;
-}
-.frame__corner--png.frame__corner--br {
-  bottom: -1px; right: -1px;
-  background-image: url("images/nouveau-corner-chrome-br.png");
-  transform: none;
 }
 
-/* Top / bottom labels (break the rule like in the PDF references) */
-.frame__top-label,
-.frame__bottom-label {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  font-family: var(--font-display);
-  font-style: italic;
-  font-weight: 400;
-  font-size: clamp(0.9rem, 1.2vw, 1.05rem);
-  letter-spacing: 0.02em;
-  white-space: nowrap;
-  padding: 0 1.5em;
-  z-index: 3;
-}
-.frame--cream .frame__top-label,
-.frame--cream .frame__bottom-label {
-  background: #faf6ed;
-  color: var(--ink-soft);
-}
-.frame--light .frame__top-label,
-.frame--light .frame__bottom-label {
-  background: var(--paper-2);
-  color: var(--ink-soft);
-}
-.frame__top-label    { top: -0.7em; }
-.frame__bottom-label { bottom: -0.7em; }
-
-/* Frame size variants */
-.frame--portrait  { aspect-ratio: 4 / 5;  }
-.frame--landscape { aspect-ratio: 16 / 10; }
-.frame--day       { aspect-ratio: 16 / 10; }
-.frame--map       { aspect-ratio: 5 / 4;  }
-.frame--establish { aspect-ratio: 4 / 3;  }
-.frame--letter    { aspect-ratio: auto;    }
-
-/* ============================================================
-   SCENE 1 — Hero
-   ============================================================ */
-
-.scene--hero {
+/* =============================================================
+   Panel base
+   ============================================================= */
+.panel {
   position: relative;
   min-height: calc(var(--vh) * 100);
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
   display: flex;
-  align-items: flex-end;
+  align-items: center;
+  justify-content: center;
   overflow: hidden;
-  /* Transparent so the sibling .hero__image (position: fixed) shows
-     through. The #1c1610 fallback color lives on the image's own
-     container (.hero__image) — if the image fails to load, that
-     fallback paints behind any veil. */
-  background: transparent;
 }
 
-.hero__image {
-  /* Pin the hero image to the viewport so it stays fixed in the
-     background across Scenes 1 and 2 — the reader scrolls the text
-     over it, the image itself never moves. JS fades this out as
-     Scene 2 exits, so cream scenes below aren't fighting it.
-     Sits at the top of <main> as a sibling of the scenes (not
-     nested inside any of them) so `overflow: hidden` on a scene
-     never clips it.
-     Use a background-image instead of an inner <img>: Chromium has
-     a known paint bug where an <img> inside a position:fixed
-     ancestor sometimes fails to render on initial paint until the
-     layer is invalidated. background-image is rendered by the
-     compositor directly and avoids the bug entirely. */
+/* =============================================================
+   CINEMATIC TRANSITIONS — ENTER + EXIT
+   ============================================================= */
+.panel [data-animate] {
+  opacity: 0;
+  transform: translateY(24px) scale(0.985);
+  transition:
+    opacity 0.9s cubic-bezier(0.22, 0.61, 0.36, 1),
+    transform 1s cubic-bezier(0.22, 0.61, 0.36, 1);
+  will-change: opacity, transform;
+}
+.panel.is-active [data-animate] {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+.panel.is-active [data-animate="1"] { transition-delay: 0.05s; }
+.panel.is-active [data-animate="2"] { transition-delay: 0.18s; }
+.panel.is-active [data-animate="3"] { transition-delay: 0.3s; }
+.panel.is-active [data-animate="4"] { transition-delay: 0.42s; }
+.panel.is-active [data-animate="5"] { transition-delay: 0.52s; }
+.panel.is-active [data-animate="6"] { transition-delay: 0.62s; }
+
+.panel:not(.is-active) [data-animate] {
+  opacity: 0;
+  transform: translateY(-8px) scale(0.97);
+  transition:
+    opacity 0.5s cubic-bezier(0.55, 0.085, 0.68, 0.53),
+    transform 0.55s cubic-bezier(0.55, 0.085, 0.68, 0.53);
+  transition-delay: 0s !important;
+}
+
+/* ── Image panels: fade + Ken Burns ──────────────────────── */
+.panel--image {
+  opacity: 0;
+  transition: opacity 0.8s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+.panel--image.is-active { opacity: 1; }
+.panel--image:not(.is-active) {
+  opacity: 0;
+  transition: opacity 0.45s cubic-bezier(0.55, 0.085, 0.68, 0.53);
+}
+
+.panel--image .panel__img {
+  transform: scale(1);
+  transition: transform 12s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transform-origin: center;
+}
+.panel--image.is-active .panel__img {
+  transform: scale(1.08);
+}
+.panel--image:nth-child(odd) .panel__img { transform-origin: 40% 45%; }
+.panel--image:nth-child(even) .panel__img { transform-origin: 60% 55%; }
+
+/* =============================================================
+   FIXED HERO IMAGE — shared between hero + tagline panels
+   ============================================================= */
+.hero-fixed {
   position: fixed;
   inset: 0;
   z-index: 0;
   background: #1c1610 url("images/header-image.png") center 35% / cover no-repeat;
   will-change: opacity;
+  transition: opacity 0.8s ease;
 }
+.hero-fixed.is-hidden { opacity: 0; pointer-events: none; }
 
-/* Full-viewport blur + dim overlay. Sits immediately in front of the
-   hero image but behind every scene's content (the title in Scene 1
-   and the body copy in Scene 2 both paint on top). JS scrubs
-   --blur-px and the dim alpha from 0 → max as the reader scrolls
-   from Scene 1 into Scene 2, so the image appears to blur in place
-   instead of getting covered by a layer rising up from below.
-   backdrop-filter is GPU-compositor accelerated (unlike `filter:
-   blur()` on the image itself, which has historically been a source
-   of iOS Safari judder), so this stays smooth under scrub-driven
-   scrolling. */
-.hero__blur {
+.hero-fixed__blur {
   position: fixed;
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  --blur-px: 0px;
-  --dim-alpha: 0;
-  background-color: rgba(0, 0, 0, var(--dim-alpha));
-  -webkit-backdrop-filter: blur(var(--blur-px));
-          backdrop-filter: blur(var(--blur-px));
-  will-change: backdrop-filter, background-color, opacity;
+  -webkit-backdrop-filter: blur(calc(var(--scene-blur, 0) * 18px));
+          backdrop-filter: blur(calc(var(--scene-blur, 0) * 18px));
+  background-color: rgba(0, 0, 0, calc(var(--scene-blur, 0) * 0.30));
+  will-change: backdrop-filter, background-color;
+  transition: opacity 0.6s ease;
 }
-.hero__image .placeholder { height: 100%; }
+.hero-fixed__blur.is-hidden { opacity: 0; pointer-events: none; }
 
-.hero__veil {
-  /* Fixed (not absolute inside Scene 1) so the veil stays anchored
-     to the viewport and doesn't scroll up with the section — which
-     was producing a horizontal "band" mid-transition. JS fades this
-     out alongside the title as the reader leaves Scene 1. */
-  position: fixed;
-  inset: 0;
+/* =============================================================
+   HERO
+   ============================================================= */
+.panel--hero {
+  background: transparent;
+  align-items: flex-end;
   z-index: 1;
+}
+.hero__veil {
+  position: absolute; inset: 0; z-index: 1;
   background:
-    linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0) 40%, rgba(0,0,0,0.55) 100%),
-    linear-gradient(to right, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0) 60%);
+    linear-gradient(to bottom, transparent 0%, transparent 30%, rgba(0,0,0,0.6) 100%),
+    linear-gradient(to right, rgba(0,0,0,0.4) 0%, transparent 55%);
   pointer-events: none;
-  will-change: opacity;
+  transition: opacity 0.6s ease;
 }
+.panel--hero:not(.is-active) .hero__veil { opacity: 0; }
 
-.hero__inner {
-  position: relative;
-  z-index: 2;
-  padding: 0 clamp(1.5rem, 6vw, 5rem) clamp(3rem, 7vh, 5rem);
-  max-width: 1060px;
-  width: 100%;
+.hero__content {
+  position: relative; z-index: 2;
+  width: 100%; max-width: 1060px;
   margin: 0 auto;
-  color: var(--ivory);
+  padding: 0 clamp(1.5rem, 6vw, 5rem) clamp(4.5rem, 10vh, 7rem);
 }
-
 .hero__title {
   font-family: var(--font-display);
   font-weight: 350;
@@ -396,1059 +183,381 @@ body {
   letter-spacing: -0.01em;
   max-width: 24ch;
   color: var(--ivory);
-  /* Page-load fade-in and the scroll-driven fade-out are now both
-     handled by GSAP (see `heroTitleFade` in script.js) so they share
-     one inline-style writer and never fight CSS-animation overrides. */
-  opacity: 0;
-  transform: translateY(14px);
   text-wrap: balance;
+  animation: heroIn 1.6s cubic-bezier(0.22, 0.61, 0.36, 1) 0.4s both;
 }
-
-.hero__chevron {
-  position: absolute;
-  bottom: 1.5rem;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 2;
-  width: 28px;
-  height: 28px;
+@keyframes heroIn {
+  from { opacity: 0; transform: translateY(22px); }
+  to   { opacity: 1; transform: none; }
+}
+.panel--hero:not(.is-active) .hero__title {
+  animation: none;
   opacity: 0;
-  /* Page-load fade-in handled by GSAP; the chevron's bob continues
-     as a pure CSS loop. */
-  animation: chevronBob 2.2s ease-in-out 1.6s infinite;
+  transform: translateY(-10px) scale(1.02);
+  transition: opacity 0.6s ease-in, transform 0.7s ease-in;
 }
-.hero__chevron span {
-  display: block;
-  width: 100%;
-  height: 100%;
-  border-right: 1px solid rgba(241,236,225,0.5);
-  border-bottom: 1px solid rgba(241,236,225,0.5);
-  transform: rotate(45deg) translate(-2px, -2px);
-}
-@keyframes chevronBob {
-  0%, 100% { transform: translate(-50%, 0); }
-  50%      { transform: translate(-50%, 6px); }
+.panel--hero.is-active .hero__title {
+  opacity: 1; transform: none;
 }
 
-/* ============================================================
-   SCENE 2 — Blurred standalone (text reveals on scroll, then fades)
-   Tall section with a sticky stage; JS scrubs text opacity.
-   ============================================================ */
-
-.scene--blur {
-  position: relative;
-  min-height: calc(var(--vh) * 200);
-  /* Transparent so the fixed .hero__image bleeds through from the
-     viewport. The veil below adds darkness + blur on top. */
-  background: transparent;
-  overflow-x: clip;
-}
-
-.blur__sticky {
-  position: sticky;
-  top: 0;
-  height: calc(var(--vh) * 100);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-}
-
-.blur__bg {
+.hero__scroll {
   position: absolute;
-  inset: 0;
-  z-index: 0;
-  overflow: hidden;
-  /* Empty — the fixed .hero__image renders behind everything. */
+  bottom: clamp(1.2rem, 3vh, 2rem);
+  left: 50%; transform: translateX(-50%);
+  z-index: 3;
+  display: flex; flex-direction: column; align-items: center;
+  gap: 0.5rem;
+  animation: heroIn 1s cubic-bezier(0.22, 0.61, 0.36, 1) 1.6s both;
+}
+.hero__scroll-line {
+  width: 1px; height: 28px;
+  background: linear-gradient(to bottom, rgba(241,236,225,0.5), transparent);
+  animation: scrollPulse 2.4s ease-in-out infinite;
+}
+@keyframes scrollPulse {
+  0%, 100% { opacity: 0.5; transform: scaleY(1); }
+  50%      { opacity: 0.2; transform: scaleY(0.6); }
+}
+.panel--hero:not(.is-active) .hero__scroll {
+  animation: none; opacity: 0;
+  transition: opacity 0.3s ease-in;
 }
 
-/* .blur__veil removed — the fixed .hero__blur above now handles
-   both the image blur and the dim overlay for Scene 2. Keeping no
-   per-section veil means there's no "horizontal band" of blur
-   sliding up from below as the section scrolls into view. */
-
-.blur__inner {
-  position: relative;
-  z-index: 2;
-  width: 100%;
-  max-width: 72ch;
-  margin: 0 auto;
+/* =============================================================
+   TAGLINE
+   ============================================================= */
+.panel--tagline {
+  background: transparent;
+  z-index: 1;
+}
+.tagline__content {
+  position: relative; z-index: 2;
+  width: 100%; max-width: 58ch;
   padding: 0 clamp(1.5rem, 6vw, 4rem);
   text-align: center;
-  color: var(--ivory);
 }
-
-.blur__text {
+.tagline__text {
   font-family: var(--font-display);
   font-weight: 350;
   font-size: clamp(1.15rem, 2.1vw, 1.75rem);
-  line-height: 1.35;
+  line-height: 1.42;
   letter-spacing: -0.003em;
-  display: block;
+  color: var(--ivory);
   text-wrap: balance;
 }
-/* Two flavours: 2-line desktop copy, 4-line mobile copy. Visible
-   set is toggled by viewport — JS reads only the visible spans. */
-.blur__text--mobile { display: none; }
-@media (max-width: 860px) {
-  .blur__text--desktop { display: none; }
-  .blur__text--mobile  { display: block; }
-}
 
-.blur__line {
-  display: block;
-  opacity: 0;
-  transform: translateY(10px);
-  will-change: opacity, transform;
-}
-
-/* ============================================================
-   SCENE 3 — Progressive line reveal (the question)
-   ============================================================ */
-
-.scene--reveal {
-  position: relative;
-  /* Opaque paper background — covers the fixed .hero__image (which
-     stays pinned to the viewport during Scenes 1+2) once we scroll
-     past Scene 2 into the cream-paper portion of the page. */
-  background: var(--paper);
-  /* tall scroll container so timeline can scrub */
-}
-
-.reveal__sticky {
-  position: sticky;
-  top: 0;
-  height: calc(var(--vh) * 100);
-  display: grid;
-  place-items: center;
-  padding: 0 clamp(1.5rem, 6vw, 3rem);
-}
-
-/* Two-column layout: text reveal on left, innovation stack on right */
-.reveal__layout {
-  grid-area: 1 / 1;
-  width: 100%;
-  max-width: 980px;
-  display: grid;
-  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
-  gap: clamp(2rem, 5vw, 4rem);
-  align-items: center;
-}
-
-.reveal__stack {
-  display: flex;
-  flex-direction: column;
-  gap: clamp(1rem, 2.2vh, 1.8rem);
-  max-width: min(48ch, 100%);
-}
-
-.reveal__climax-hold {
-  grid-area: 1 / 1;
-  width: 100%;
-  max-width: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  pointer-events: none;
+/* =============================================================
+   CHAPTER BRIDGE
+   ============================================================= */
+.panel--chapter { background: var(--paper); }
+.chapter__content {
+  position: relative; z-index: 1;
+  max-width: 32ch;
+  padding: 0 var(--gutter);
   text-align: center;
 }
-
-.reveal__line {
+.chapter__text {
   font-family: var(--font-display);
   font-weight: 350;
-  font-size: clamp(1.05rem, 1.55vw, 1.35rem);
-  line-height: 1.45;
-  color: var(--ink);
-  opacity: 0;
-  transform: translateY(10px);
-  will-change: opacity, transform;
-  text-wrap: balance;
-}
-
-.reveal__line--climax {
-  /* Match the Scene 1 hero title size so the two anchor statements
-     read as a pair across the narrative. */
   font-size: clamp(1.65rem, 3.4vw, 2.85rem);
   line-height: 1.16;
-  font-weight: 350;
   letter-spacing: -0.012em;
   color: var(--ink);
-  max-width: 28ch;
-  margin: 0 auto;
   text-wrap: balance;
 }
 
-/* Innovation card stack — polaroid-on-a-table layout.
-   4 cards, each tilted at a small angle, stacking with subtle offsets.
-   Each card animates in as the corresponding setup line is revealed. */
-.reveal__innovations {
-  position: relative;
-  width: 100%;
-  height: clamp(320px, 55vh, 520px);
-  perspective: 1200px;
+/* =============================================================
+   PPIE
+   ============================================================= */
+.panel--ppie {
+  flex-direction: column;
+  padding: clamp(2rem, 5vh, 4rem) var(--gutter);
 }
-
-.reveal__inno {
-  position: absolute;
-  width: clamp(220px, 28vw, 320px);
-  margin: 0;
+.ppie__content {
+  position: relative; z-index: 1;
+  width: 100%; max-width: 720px;
+  margin: 0 auto;
+  display: flex; flex-direction: column; align-items: center;
+}
+.ppie__intro {
+  width: 100%;
+  margin-bottom: clamp(0.7rem, 1.6vh, 1.1rem);
+  font-family: var(--font-display); font-weight: 350;
+  font-size: clamp(1rem, 1.5vw, 1.3rem);
+  line-height: 1.4; letter-spacing: -0.005em;
+  color: var(--ink); text-align: center; text-wrap: balance;
+}
+.ppie__figure {
+  width: 100%;
+  border: 1px solid rgba(26,22,18,0.22);
+  border-radius: 2px;
+  overflow: hidden;
   background: var(--paper-2);
-  border: 1px solid rgba(26, 22, 18, 0.10);
-  padding: clamp(0.45rem, 0.9vw, 0.6rem) clamp(0.45rem, 0.9vw, 0.6rem) clamp(0.7rem, 1.4vw, 0.9rem);
-  box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.6) inset,
-    0 14px 40px -18px rgba(26, 22, 18, 0.45),
-    0 2px 6px -2px rgba(26, 22, 18, 0.15);
-  opacity: 0;
-  will-change: opacity, transform;
-  /* GSAP scrub owns opacity + transform — no CSS transition or it chases the target */
 }
-/* Position per card — three dropped polaroids in a triangular cascade.
-   Rotation + opacity owned by GSAP (so scrub can interpolate cleanly). */
-.reveal__inno[data-inno="0"] { top: 0%;  left: 4%;  }
-.reveal__inno[data-inno="1"] { top: 10%; left: 44%; }
-.reveal__inno[data-inno="2"] { top: 52%; left: 22%; }
-
-.reveal__inno-image {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 4 / 3;
-  background: var(--paper-3);
-  overflow: hidden;
-}
-.reveal__inno-image img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-
-/* (Card captions removed — images alone carry the visual.) */
-
-/* ============================================================
-   SCENE 4 — PPIE history
-   Sticky stage. On desktop: text-left cycles through 5 lines while
-   landscape image stays put on the right. Triggers below provide
-   scroll length, one per line.
-   ============================================================ */
-
-.scene--ppie {
-  position: relative;
-  background: var(--paper);
-}
-
-.ppie__sticky {
-  position: sticky;
-  top: 0;
-  height: calc(var(--vh) * 100);
-  display: flex;
-  align-items: center;
-  z-index: 1;
-}
-
-/* Single column on every viewport: image on top, text below — matched widths. */
-.ppie__grid {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: clamp(1.25rem, 3vh, 2rem);
-  width: 100%;
-  max-width: 720px;            /* shared column width */
-  margin: 0 auto;
-  padding: 0 clamp(1.5rem, 5vw, 3rem);
-}
-
-.ppie__media {
-  width: 100%;
-  order: 1;                    /* image on top */
-}
-.ppie__text {
-  order: 2;                    /* text below */
-}
-.ppie__media .frame {
-  width: 100%;
-  /* Lock the frame so only the IMG inside ever scales — the frame
-     dimensions stay fixed during pan + zoom. GSAP needs to translate
-     the frame itself for the image-exit phase, so no !important here. */
-  contain: layout paint;
-  will-change: transform, opacity;
-}
-/* Override the default 16:10 .frame--landscape ratio just for PPIE
-   so the full 1915 panorama shows end-to-end (image is ~5:2). */
-.ppie__frame.frame--landscape {
-  aspect-ratio: 5 / 2;
-}
-
-/* Clipped vertical strip beneath the image. The lines column inside
-   it translates upward as the reader scrolls, and the mask gradient
-   fades the top edge so each line appears to dissolve "behind" the
-   image as it scrolls past, and emerges cleanly from below. */
-.ppie__text {
-  position: relative;
-  width: 100%;
-  height: clamp(5em, 14vh, 7em);
-  overflow: hidden;
-  --ppie-mask-fade: 28%;
-  -webkit-mask-image: linear-gradient(to bottom,
-    transparent 0%, black var(--ppie-mask-fade), black calc(100% - var(--ppie-mask-fade)), transparent 100%);
-          mask-image: linear-gradient(to bottom,
-    transparent 0%, black var(--ppie-mask-fade), black calc(100% - var(--ppie-mask-fade)), transparent 100%);
-  will-change: transform, opacity;
-}
-
-.ppie__lines {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: clamp(2em, 6vh, 3.25em);
-  width: 100%;
-  /* GSAP scrub translates this upward across the whole pinned scroll. */
-  will-change: transform;
-}
-
-.ppie__line {
-  font-family: var(--font-display);
-  font-weight: 350;
-  font-size: clamp(1.15rem, 1.7vw, 1.5rem);
-  line-height: 1.35;
-  letter-spacing: -0.005em;
-  color: var(--ink);
-  text-align: center;
-  max-width: 100%;
-  opacity: 1;
-  text-wrap: balance;
-  margin: 0;
-}
-
 .ppie__image {
-  width: 100%;
-  height: 100%;
+  width: 100%; height: auto; display: block;
+  aspect-ratio: 5 / 2;
   object-fit: cover;
-  object-position: 50% 50%;
-  display: block;
 }
-
-.ppie__triggers { position: relative; }
-.ppie__trigger {
-  height: calc(var(--vh) * 110);
-}
-
-/* ============================================================
-   SCENE 5/6 — Vision (Welcome + A day at the Palace).
-   One sticky stage, 7 stacked layers. A single GSAP scrub
-   timeline drives a continuous crossfade across all of them
-   so the whole section reads as one uninterrupted scroll.
-   ============================================================ */
-
-.scene--vision {
-  position: relative;
-  /* 7 layers × ~200vh of scroll per slot — generous dwell time
-     so each beat lingers visible for a real reading moment. */
-  min-height: calc(var(--vh) * 1400);
-  background: var(--paper);
-}
-
-.vision__sticky {
-  position: sticky;
-  top: 0;
-  height: calc(var(--vh) * 100);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: clamp(2rem, 6vh, 4rem) clamp(1.5rem, 5vw, 3rem);
-  /* Scope rendering work to the sticky so neighbouring scenes
-     don't trigger relayout/repaint as layers crossfade. */
-  contain: layout style;
-}
-
-.vision__stage {
-  position: relative;
-  width: 100%;
-  max-width: 880px;
-  /* Grid stack: every layer occupies the same cell — natural
-     content sizes the stage, opacity + transform control reveal. */
-  display: grid;
-  place-items: center;
-}
-
-.vision__layer {
-  grid-area: 1 / 1;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: clamp(1.25rem, 3vh, 1.75rem);
-  opacity: 0;
-  will-change: opacity, transform;
-}
-
-/* --- Welcome layer (layer 0) --- */
-.vision__layer--welcome {
+.ppie__text {
+  width: 100%; padding-top: 10px;
+  display: flex; flex-direction: column;
+  gap: clamp(0.6rem, 1.5vh, 1rem);
   text-align: center;
-  /* Welcome stack is text-heavy + a wide art image. Tighter cell
-     gap so the title sits closer to the sub and the art breathes
-     just below. */
-  gap: 0;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0px, black 10px, black 100%);
+          mask-image: linear-gradient(to bottom, transparent 0px, black 10px, black 100%);
+}
+.ppie__line {
+  font-family: var(--font-display); font-weight: 350;
+  font-size: clamp(1rem, 1.5vw, 1.3rem);
+  line-height: 1.4; letter-spacing: -0.005em;
+  color: var(--ink); text-wrap: balance;
 }
 
-.vision__h {
-  font-family: var(--font-display);
-  font-weight: 350;
+/* =============================================================
+   WELCOME
+   ============================================================= */
+.welcome__content {
+  position: relative; z-index: 1;
+  display: flex; flex-direction: column; align-items: center;
+  text-align: center;
+  max-width: 960px;
+  width: 100%;
+  padding: clamp(2.5rem, 6vh, 4.5rem) var(--gutter);
+}
+.welcome__heading {
+  font-family: var(--font-display); font-weight: 350;
   font-size: clamp(2rem, 4.4vw, 3.2rem);
-  line-height: 1.1;
-  letter-spacing: -0.005em;
-  color: var(--ink);
-  text-align: center;
-  margin: 0;
-  text-wrap: balance;
+  line-height: 1.1; letter-spacing: -0.005em;
+  color: var(--ink); text-wrap: balance;
+  max-width: 22ch;
 }
-
-.vision__sub {
+.welcome__sub {
   font-family: var(--font-display);
-  font-style: italic;
-  font-weight: 350;
-  font-size: clamp(1.05rem, 1.6vw, 1.35rem);
-  line-height: 1.4;
-  color: var(--ink-soft);
-  max-width: 38ch;
-  margin: clamp(0.85rem, 2vh, 1.35rem) 0 0;
+  font-style: italic; font-weight: 350;
+  font-size: clamp(1rem, 1.5vw, 1.25rem);
+  line-height: 1.48; color: var(--ink-soft);
+  margin: clamp(0.85rem, 2vh, 1.2rem) 0 0;
   text-wrap: balance;
+  max-width: 46ch;
 }
-
-.vision__year {
-  font-family: var(--font-sans);
-  font-style: normal;
-  font-weight: 500;
-  font-size: 0.78rem;
-  line-height: 1;
-  color: var(--ink-muted);
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
+.welcome__year {
+  font-family: var(--font-sans); font-weight: 500;
+  font-size: 0.75rem; color: var(--ink-muted);
+  letter-spacing: 0.25em; text-transform: uppercase;
+  margin: clamp(1.25rem, 3vh, 1.85rem) 0 0;
+}
+.welcome__figure {
+  width: 100%;
+  max-width: 760px;
   margin: clamp(1.75rem, 4vh, 2.75rem) 0 0;
 }
-
-.vision__art {
-  margin: clamp(1.5rem, 4vh, 2.5rem) auto 0;
-  width: min(92vw, 880px);
-  display: flex;
-  justify-content: center;
-}
-.vision__art img {
-  width: 100%;
-  max-height: calc(var(--vh) * 56);
-  height: auto;
-  object-fit: contain;
-  display: block;
+.welcome__image {
+  width: 100%; height: auto; display: block;
 }
 
-/* --- Day-flow layers (layers 1–6) --- */
-.vision__frame {
-  width: 100%;
-  max-width: 720px;
-  margin: 0;
-  aspect-ratio: 16 / 10;
-  overflow: hidden;
-  border: 1px solid rgba(26, 22, 18, 0.10);
-  background: var(--paper-2);
-}
-
-.vision__image {
-  width: 100%;
-  height: 100%;
+/* =============================================================
+   IMAGE PANELS
+   ============================================================= */
+.panel--image { background: var(--paper-2); padding: 0; }
+.panel__img {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
   object-fit: cover;
-  display: block;
 }
 
-.vision__caption {
-  width: 100%;
-  max-width: 720px;
-  text-align: center;
-  font-family: var(--font-display);
-  font-weight: 350;
-  font-size: clamp(1.15rem, 1.7vw, 1.5rem);
-  line-height: 1.35;
-  letter-spacing: -0.005em;
-  color: var(--ink);
-  text-wrap: balance;
-  margin: 0;
+/* =============================================================
+   PROSE
+   ============================================================= */
+.panel--prose { background: var(--paper); }
+.prose__content {
+  position: relative; z-index: 1;
+  max-width: min(82ch, 90vw); padding: 0 var(--gutter); text-align: center;
+}
+.prose__text {
+  font-family: var(--font-display); font-weight: 350;
+  font-size: clamp(1.05rem, 1.55vw, 1.3rem);
+  line-height: 1.45; letter-spacing: -0.005em;
+  color: var(--ink); text-wrap: pretty;
 }
 
-/* ============================================================
-   SCENE 7 — Impact statement
-   ============================================================ */
-
-.scene--impact {
-  position: relative;
-  background: var(--paper);
+/* =============================================================
+   IMPACT
+   ============================================================= */
+.panel--impact { background: var(--paper); }
+.impact__content {
+  position: relative; z-index: 1;
+  max-width: 38ch; padding: 0 var(--gutter); text-align: center;
 }
-
-.impact__sticky {
-  position: sticky;
-  top: 0;
-  height: calc(var(--vh) * 100);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: clamp(2rem, 6vh, 4rem) clamp(1.5rem, 6vw, 4rem);
-}
-
-.impact__inner {
-  max-width: 42ch;
-  text-align: center;
-}
-
-.impact__line {
-  font-family: var(--font-display);
-  font-weight: 350;
+.impact__text {
+  font-family: var(--font-display); font-weight: 350;
   font-style: italic;
-  font-size: clamp(1.6rem, 3.4vw, 2.6rem);
-  line-height: 1.28;
-  letter-spacing: -0.005em;
-  color: var(--ink);
-  text-wrap: balance;
+  font-size: clamp(1.5rem, 3.2vw, 2.5rem);
+  line-height: 1.32; letter-spacing: -0.005em;
+  color: var(--ink); text-wrap: balance;
 }
 
-/* Each word starts hidden and resolves to ink as scroll advances.
-   Stays invisible while neighbouring scenes are still on-screen. */
-.impact__w {
-  display: inline-block;
-  opacity: 0;
-  will-change: opacity;
+/* =============================================================
+   LETTER
+   ============================================================= */
+.panel--letter { background: var(--paper); }
+.letter__content {
+  position: relative; z-index: 1;
+  display: flex; flex-direction: column; align-items: center;
+  text-align: center; max-width: 560px;
+  padding: clamp(2rem, 5vh, 4rem) var(--gutter);
+  gap: 0;
 }
-
-/* (Zone-glow overlay removed — the plate is decorative for now.
-   When a real line drawing is dropped in, zone polygons can be
-   re-added on top of it.) */
-
-/* ============================================================
-   SCENE 9 — Letter
-   ============================================================ */
-
-/* Frameless closing letter — sticky stage with a line-by-line scrub
-   reveal. Section is taller than the viewport so each piece arrives
-   on its own scroll beat. When the cascade finishes, the user is
-   exactly at the page bottom (no further scroll). */
-.scene--letter {
-  position: relative;
-  min-height: calc(var(--vh) * 220);
-  background: var(--paper);
-}
-
-.letter__hold {
-  position: sticky;
-  top: 0;
-  height: calc(var(--vh) * 100);
-  /* Three-spacer grid: a generous top region pushes the heading +
-     body block down into the upper-middle of the viewport so "Help
-     write the next chapter" and "This is a once" land in the visual
-     center. CTAs sit in the middle of the lower spacer, and the
-     tail (rule + footer) pins to the bottom with 15px breathing
-     room above the viewport edge. */
-  display: grid;
-  grid-template-rows: 1.4fr auto 1fr auto 1fr auto;
-  justify-items: center;
-  align-items: center;
-  padding: clamp(1rem, 3vh, 2rem) clamp(1.5rem, 6vw, 4rem) 15px;
-  width: 100%;
-  max-width: 560px;
-  margin: 0 auto;
-  text-align: center;
-}
-
-/* Main letter block — heading → body → signature → name → phone. */
-.letter__center {
-  grid-row: 2;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: clamp(1rem, 2.4vh, 1.6rem);
-}
-
-.letter__tail {
-  grid-row: 6;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: clamp(0.6rem, 1.4vh, 1rem);
-}
-
-.letter__h {
-  font-family: var(--font-display);
-  font-weight: 350;
-  font-size: clamp(1.45rem, 2.4vw, 1.95rem);
-  line-height: 1.2;
-  letter-spacing: -0.008em;
-  color: var(--ink);
-  margin: 0;
-  text-align: center;
-  text-wrap: balance;
+.letter__heading {
+  font-family: var(--font-display); font-weight: 350;
+  font-size: clamp(1.5rem, 2.8vw, 2.1rem);
+  line-height: 1.2; letter-spacing: -0.01em;
+  color: var(--ink); text-wrap: balance;
   max-width: 22ch;
-  opacity: 0;
-  transform: translateY(10px);
-  will-change: opacity, transform;
+  margin: 0 0 clamp(1.75rem, 4.5vh, 3rem);
 }
-
 .letter__body {
-  display: flex;
-  flex-direction: column;
-  gap: clamp(0.5rem, 1.2vh, 0.85rem);
-  max-width: 44ch;
-  margin: 0 auto;
+  display: flex; flex-direction: column;
+  gap: clamp(0.55rem, 1.2vh, 0.85rem); max-width: 42ch;
 }
-
-.letter__p {
-  font-family: var(--font-display);
-  font-weight: 350;
-  font-size: clamp(1rem, 1.25vw, 1.1rem);
-  line-height: 1.5;
-  color: var(--ink);
-  text-align: center;
-  text-wrap: balance;
-  opacity: 0;
-  transform: translateY(8px);
-  will-change: opacity, transform;
+.letter__body p {
+  font-family: var(--font-display); font-weight: 350;
+  font-size: clamp(1rem, 1.3vw, 1.12rem);
+  line-height: 1.55; color: var(--ink); text-wrap: balance;
 }
-
-/* Signature block — extra space above so it sits a real beat below
-   "If that's you, I'd love to meet you." */
 .letter__sign {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.1rem;
-  margin: clamp(1.5rem, 4vh, 3rem) 0 0;
-  opacity: 0;
-  transform: translateY(8px);
-  will-change: opacity, transform;
+  display: flex; flex-direction: column; align-items: center;
+  gap: 0.05rem;
+  margin: clamp(2rem, 5vh, 3.5rem) 0 0;
 }
-
 .letter__signature {
   display: block;
-  width: clamp(100px, 13vw, 130px);
+  width: clamp(110px, 14vw, 140px);
   height: auto;
-  margin: 0 auto 0.15rem;
+  margin-bottom: 0.35rem;
   mix-blend-mode: multiply;
   user-select: none;
 }
-
-.letter__name,
-.letter__phone {
-  font-family: var(--font-sans);
-  font-size: 0.82rem;
-  font-weight: 400;
-  color: var(--ink-muted);
-  letter-spacing: 0.02em;
-  margin: 0;
-  line-height: 1.4;
+.letter__name, .letter__phone {
+  font-family: var(--font-sans); font-size: 0.82rem;
+  font-weight: 400; color: var(--ink-muted);
+  letter-spacing: 0.03em; line-height: 1.5;
 }
 .letter__name { color: var(--ink-soft); font-weight: 500; }
-.letter__phone a {
-  color: inherit;
-  display: inline-block;
-  padding: 0.1rem 0.15rem;
-  transition: color 0.3s ease;
-}
+.letter__phone a { color: inherit; transition: color 0.3s; }
 .letter__phone a:hover { color: var(--accent); }
-
-/* Plain-text CTAs — two understated links separated by a middle dot.
-   Lives in the grid's 1fr middle row and self-centers vertically,
-   so it floats halfway between the phone number above and the footer
-   below. */
 .letter__ctas {
-  grid-row: 4;
-  margin: 0;
-  align-self: center;
-  font-family: var(--font-sans);
-  font-size: 0.72rem;
-  font-weight: 500;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: var(--ink-muted);
-  line-height: 1.6;
-  text-align: center;
-  opacity: 0;
-  transform: translateY(8px);
-  will-change: opacity, transform;
+  font-family: var(--font-sans); font-size: 0.72rem;
+  font-weight: 500; letter-spacing: 0.22em;
+  text-transform: uppercase; color: var(--ink-muted);
+  margin: clamp(2rem, 5vh, 3.5rem) 0 0;
 }
 .letter__cta {
   color: var(--ink-soft);
   border-bottom: 1px solid var(--ink-faint);
-  padding: 0.1rem 0.05rem;
-  transition: color 0.3s ease, border-color 0.3s ease;
+  padding: 0.15rem 0.1rem;
+  transition: color 0.3s, border-color 0.3s;
 }
-.letter__cta:hover {
-  color: var(--accent);
-  border-color: var(--accent);
-}
-.letter__cta-sep {
-  display: inline-block;
-  margin: 0 0.6em;
-  color: var(--ink-faint);
-}
-
-/* HR rule — sits between the cascade and the footer at the bottom. */
+.letter__cta:hover { color: var(--accent); border-color: var(--accent); }
+.letter__sep { display: inline-block; margin: 0 0.6em; color: var(--ink-faint); }
 .letter__rule {
-  width: min(260px, 60%);
-  margin: 0 auto;
-  border: 0;
+  width: min(200px, 50%); border: 0;
   border-top: 1px solid var(--ink-ghost);
-  opacity: 0;
-  will-change: opacity;
+  margin: clamp(1.5rem, 4vh, 2.5rem) 0 0;
 }
-
 .letter__footer {
-  font-family: var(--font-sans);
-  font-size: 0.66rem;
-  font-weight: 400;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: var(--ink-faint);
-  margin: 0;
+  font-family: var(--font-sans); font-size: 0.68rem;
+  font-weight: 400; color: var(--ink-muted);
+  letter-spacing: 0.18em; text-transform: uppercase;
+  margin: clamp(0.6rem, 1.5vh, 1rem) 0 0;
+}
+
+/* =============================================================
+   PROGRESS DOTS
+   ============================================================= */
+.progress {
+  position: fixed;
+  right: clamp(10px, 2vw, 18px);
+  top: 50%; transform: translateY(-50%);
+  z-index: 100;
+  display: flex; flex-direction: column;
+  gap: 6px;
   opacity: 0;
-  will-change: opacity;
+  transition: opacity 0.6s ease;
 }
-
-/* Visible focus rings on all interactive elements */
-a:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 3px;
-  border-radius: 2px;
+.progress.is-visible { opacity: 1; }
+.progress__dot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--ink-ghost);
+  transition: background 0.4s ease, transform 0.4s ease;
 }
-
-/* ============================================================
-   Compositor-layer hygiene.
-   We earlier sprinkled `will-change: opacity, transform` on most
-   reveal/cascade elements. Each one allocates a dedicated GPU
-   layer. On iOS Safari (tight GPU memory) twenty-plus layers
-   noticeably stutter scroll. The truly long-running animations
-   keep their will-change (set inside their own rules); the
-   one-shot reveals drop it here. */
-.blur__line,
-.reveal__line,
-.reveal__inno,
-.impact__w,
-.letter__h,
-.letter__p,
-.letter__sign,
-.letter__ctas,
-.letter__rule,
-.letter__footer {
-  will-change: auto;
+.progress__dot.is-current {
+  background: var(--ink-muted);
+  transform: scale(1.4);
 }
+.progress.on-dark .progress__dot { background: rgba(241, 236, 225, 0.2); }
+.progress.on-dark .progress__dot.is-current { background: rgba(241, 236, 225, 0.6); }
 
-/* ============================================================
-   RESPONSIVE — Mobile
-   ============================================================ */
-
+/* =============================================================
+   Mobile
+   ============================================================= */
 @media (max-width: 860px) {
-  body { font-size: 1rem; }
+  .hero__title { font-size: clamp(1.5rem, 6.5vw, 2rem); }
+  .tagline__text { font-size: clamp(1.05rem, 4.5vw, 1.3rem); }
+  .ppie__image { aspect-ratio: 3 / 1.4; }
+  .ppie__line { font-size: clamp(0.92rem, 3.8vw, 1.1rem); }
+  .welcome__heading { font-size: clamp(1.6rem, 7vw, 2.2rem); }
+  .welcome__sub { font-size: clamp(0.95rem, 4vw, 1.1rem); }
+  .prose__text { font-size: clamp(1.05rem, 4.5vw, 1.35rem); }
+  .impact__text { font-size: clamp(1.3rem, 5.5vw, 1.8rem); }
+  .letter__heading {
+    font-size: clamp(1.35rem, 6vw, 1.7rem);
+    margin-bottom: clamp(1.5rem, 3.5vh, 2rem);
+  }
+  .letter__body p { font-size: clamp(0.95rem, 3.8vw, 1.05rem); }
+  .letter__ctas { font-size: 0.66rem; }
 
-  /* Proximity-snap on mobile: lets finger drag scrub the unified
-     Vision timeline 1:1 without snap interrupting mid-beat, while
-     still nudging momentum flicks toward the next scene start. */
-  html { scroll-snap-type: y proximity; }
+  .panel--ppie,
+  .panel--letter,
+  .panel--welcome {
+    min-height: calc(var(--vh) * 100);
+    height: auto;
+  }
+  .letter__sign { margin-top: clamp(1.5rem, 4vh, 2rem); }
 
-  /* Scene 1 hero */
-  .hero__inner { padding-bottom: clamp(3.5rem, 12vh, 6rem); }
-  .hero__title { font-size: clamp(2rem, 8vw, 2.6rem); max-width: 22ch; }
+  .panel--chapter .chapter__text {
+    font-size: clamp(1.4rem, 6vw, 1.8rem);
+  }
+  .progress { right: 8px; gap: 5px; }
+  .progress__dot { width: 4px; height: 4px; }
 
-  /* Scene 2 blur */
-  .blur__text { font-size: clamp(1.2rem, 4.6vw, 1.55rem); }
-
-  /* Scene 3 reveal — single column on mobile, innovation stack below text */
-  .reveal__layout {
-    grid-template-columns: 1fr;
-    gap: clamp(1rem, 3vh, 1.5rem);
-  }
-  .reveal__stack { max-width: 92vw; }
-  .reveal__line { font-size: clamp(1rem, 4vw, 1.2rem); }
-  .reveal__line--climax {
-    font-size: clamp(1.55rem, 6.5vw, 2rem);
-    max-width: 92vw;
-  }
-  .reveal__innovations {
-    height: clamp(180px, 28vh, 240px);
-  }
-  .reveal__inno {
-    width: clamp(140px, 42vw, 200px);
-  }
-  .reveal__inno[data-inno="0"] { top: 2%;  left: 4%;  }
-  .reveal__inno[data-inno="1"] { top: 12%; left: 48%; }
-  .reveal__inno[data-inno="2"] { top: 50%; left: 26%; }
-  .reveal__inno figcaption { font-size: 0.74rem; }
-
-  /* Scene 4 PPIE — same single-column pattern, mobile-tightened */
-  .ppie__sticky {
-    padding: 1rem 0 1.5rem;
-    gap: 0.85rem;
-    height: calc(var(--vh) * 100);
-  }
-  .ppie__grid {
-    gap: 1rem;
-    padding: 0 clamp(1rem, 4vw, 1.5rem);
-  }
-  .ppie__text { height: clamp(4.75em, 14vh, 6.5em); }
-  .ppie__line {
-    font-size: clamp(1.05rem, 4vw, 1.35rem);
-  }
-  .ppie__trigger { height: calc(var(--vh) * 95); }
-
-  /* Scene 5/6 — unified Vision stage on mobile.
-     Pure opacity + tiny y-translate; backface-visibility hints
-     keep iOS Safari's compositor happy. Pinned-section height
-     scales down so each beat still gets ~120vh of scrub budget. */
-  .scene--vision { min-height: calc(var(--vh) * 1120); }   /* 7 × ~160vh */
-  .vision__sticky {
-    padding: clamp(1.5rem, 5vh, 2.5rem) clamp(1rem, 4vw, 1.5rem);
-  }
-  .vision__stage {
-    max-width: min(92vw, 480px);
-    margin: 0 auto;
-  }
-  .vision__layer {
-    gap: clamp(0.85rem, 2vh, 1.25rem);
-    backface-visibility: hidden;
-    -webkit-backface-visibility: hidden;
-  }
-  .vision__frame {
-    max-width: min(92vw, 480px);
-  }
-  .vision__h { font-size: clamp(1.6rem, 6.2vw, 2.05rem); }
-  .vision__sub {
-    font-size: clamp(0.95rem, 3.8vw, 1.1rem);
-    margin-top: 0.75rem;
-  }
-  .vision__year {
-    font-size: 0.7rem;
-    letter-spacing: 0.18em;
-    margin-top: 1.5rem;
-  }
-  .vision__caption {
-    font-size: clamp(1rem, 4.2vw, 1.25rem);
-    padding: 0 1rem;
-  }
-  .frame__top-label, .frame__bottom-label {
-    font-size: clamp(0.78rem, 3.4vw, 0.95rem);
-  }
-
-  /* Tighten total scroll length for the heavy scrub scenes on mobile */
-  .scene--blur   { min-height: calc(var(--vh) * 200); }
-  .scene--letter { min-height: calc(var(--vh) * 200); }
-
-  /* Scene 7 impact */
-  .scene--impact {
-    padding: clamp(2.5rem, 6vh, 4rem) clamp(1.5rem, 5vw, 2.5rem);
-    min-height: auto;
-  }
-  .impact__line { font-size: clamp(1.35rem, 6vw, 1.75rem); }
-
-  /* Scene 9 letter */
-  .letter__hold {
-    max-width: 100%;
-    padding: clamp(1.5rem, 5vh, 2.5rem) clamp(1.25rem, 5vw, 2rem) 15px;
-  }
-  .letter__center { gap: clamp(0.85rem, 2.2vh, 1.4rem); }
-  .letter__h { font-size: clamp(1.3rem, 5.4vw, 1.65rem); }
-  .letter__p { font-size: clamp(0.95rem, 3.8vw, 1.05rem); }
-  .letter__signature { width: clamp(90px, 26vw, 120px); }
-  .letter__ctas {
-    font-size: 0.66rem;
-    letter-spacing: 0.18em;
-  }
-  .letter__cta-sep { margin: 0 0.4em; }
-  .letter__rule { width: min(220px, 70%); }
-  .letter__footer { letter-spacing: 0.18em; }
-
-  .frame__corner { width: 28px; height: 28px; }
-}
-
-@media (max-width: 860px) and (orientation: landscape) {
-  .reveal__sticky,
-  .ppie__sticky,
-  .vision__sticky,
-  .letter__hold {
-    padding-top: 0.75rem;
-    padding-bottom: 0.75rem;
-  }
-
-  .reveal__layout {
-    grid-template-columns: minmax(0, 0.9fr) minmax(0, 0.8fr);
-    gap: clamp(0.85rem, 3vw, 1.4rem);
-    max-width: min(92vw, 760px);
-  }
-  .reveal__stack {
-    gap: 0.45rem;
-    max-width: 36ch;
-  }
-  .reveal__line {
-    font-size: clamp(0.82rem, 2.4vw, 1rem);
-    line-height: 1.25;
-  }
-  .reveal__line--climax {
-    font-size: clamp(1.2rem, 4vw, 1.65rem);
-    max-width: 24ch;
-  }
-  .reveal__innovations {
-    height: min(calc(var(--vh) * 68), 230px);
-  }
-  .reveal__inno {
-    width: clamp(104px, 18vw, 150px);
-  }
-
-  .ppie__grid {
-    width: min(92vw, calc(var(--vh) * 132));
-    gap: 0.55rem;
-    padding: 0;
-  }
-  .ppie__text { height: clamp(3.5em, 14vh, 5em); }
-  .ppie__line {
-    font-size: clamp(0.82rem, 2.5vw, 1rem);
-    line-height: 1.24;
-  }
-
-  .vision__frame {
-    aspect-ratio: 16 / 10;
-    width: min(58vw, calc(var(--vh) * 112));
-  }
-  .vision__caption {
-    font-size: clamp(0.82rem, 2.6vw, 1rem);
-    line-height: 1.24;
-  }
-
-  .letter__hold {
-    padding-left: clamp(1rem, 4vw, 1.5rem);
-    padding-right: clamp(1rem, 4vw, 1.5rem);
-  }
-  .letter__center { gap: 0.42rem; }
-  .letter__body { gap: 0.22rem; }
-  .letter__h {
-    font-size: clamp(1rem, 3vw, 1.22rem);
-    line-height: 1.12;
-  }
-  .letter__p {
-    font-size: clamp(0.78rem, 2.1vw, 0.92rem);
-    line-height: 1.28;
-  }
-  .letter__sign { margin-top: 0.45rem; }
-  .letter__signature { width: clamp(62px, 12vw, 78px); }
-  .letter__name,
-  .letter__phone {
-    font-size: 0.68rem;
-    line-height: 1.25;
-  }
-  .letter__ctas {
-    font-size: 0.54rem;
-    letter-spacing: 0.12em;
-  }
-  .letter__footer {
-    font-size: 0.5rem;
-    letter-spacing: 0.12em;
+  /* 16:9 letterbox on portrait phones */
+  .panel--image { background: var(--paper); }
+  .panel__img {
+    position: relative;
+    inset: auto;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
   }
 }
 
-/* ============================================================
-   Reduced motion — short-circuit all scrubs / transitions
-   ============================================================ */
-
+/* =============================================================
+   Reduced motion
+   ============================================================= */
 @media (prefers-reduced-motion: reduce) {
+  html { scroll-snap-type: none; }
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
-  .reveal__line, .reveal__inno, .letter__h, .letter__p, .letter__sign, .letter__ctas, .letter__rule, .letter__footer, .blur__line, .impact__line, .impact__w, .vision__layer, .vision__caption, .ppie__line {
-    opacity: 1 !important;
-    transform: none !important;
+  .panel [data-animate], .panel--image, .hero__title {
+    opacity: 1 !important; transform: none !important;
   }
-  .hero__chevron, .hero__chevron span { animation: none !important; }
-  .hero__chevron { display: none; }
-}
-
-/* ============================================================
-   Resilience fallback — applied when our JS hasn't tagged
-   <html> with `.js-ready` (GSAP CDN blocked, content-blocker,
-   script error during boot, or prefers-reduced-motion). Every
-   initially-hidden element is forced visible; pinned-scene
-   scroll heights collapse so the page reads as a tall static
-   document instead of a wall of cream nothing.
-   ============================================================ */
-html:not(.js-ready) .blur__line,
-html:not(.js-ready) .reveal__line,
-html:not(.js-ready) .reveal__inno,
-html:not(.js-ready) .ppie__line,
-html:not(.js-ready) .vision__layer,
-html:not(.js-ready) .vision__caption,
-html:not(.js-ready) .impact__w,
-html:not(.js-ready) .impact__line,
-html:not(.js-ready) .letter__h,
-html:not(.js-ready) .letter__p,
-html:not(.js-ready) .letter__sign,
-html:not(.js-ready) .letter__ctas,
-html:not(.js-ready) .letter__rule,
-html:not(.js-ready) .letter__footer {
-  opacity: 1 !important;
-  transform: none !important;
-}
-/* No need to scroll through 6+ viewports of pin spacer when
-   nothing is animating. */
-html:not(.js-ready) .scene--blur,
-html:not(.js-ready) .scene--reveal,
-html:not(.js-ready) .scene--ppie,
-html:not(.js-ready) .scene--vision,
-html:not(.js-ready) .scene--impact,
-html:not(.js-ready) .scene--letter {
-  min-height: 0;
-}
-/* Stickies become normal in-flow containers. */
-html:not(.js-ready) .blur__sticky,
-html:not(.js-ready) .reveal__sticky,
-html:not(.js-ready) .ppie__sticky,
-html:not(.js-ready) .vision__sticky,
-html:not(.js-ready) .impact__sticky,
-html:not(.js-ready) .letter__hold {
-  position: static;
-  height: auto;
-}
-html:not(.js-ready) .reveal__sticky {
-  display: flex;
-  flex-direction: column;
-  gap: clamp(2rem, 8vw, 4rem);
-  padding-top: clamp(4rem, 10vw, 7rem);
-  padding-bottom: clamp(4rem, 10vw, 7rem);
-}
-html:not(.js-ready) .reveal__layout,
-html:not(.js-ready) .reveal__climax-hold {
-  grid-area: auto;
-}
-html:not(.js-ready) .reveal__climax-hold {
-  position: static;
-}
-html:not(.js-ready) .ppie__sticky {
-  padding-top: clamp(3rem, 8vw, 5rem);
-  padding-bottom: clamp(3rem, 8vw, 5rem);
-}
-html:not(.js-ready) .ppie__text {
-  height: auto;
-  overflow: visible;
-  -webkit-mask-image: none;
-          mask-image: none;
-}
-html:not(.js-ready) .ppie__lines {
-  gap: 0.85rem;
-  transform: none !important;
-}
-html:not(.js-ready) .ppie__line {
-  opacity: 1 !important;
-}
-/* The stage uses grid + 1/1 stacking to overlay layers; without
-   animation, render all layers as normal blocks. */
-html:not(.js-ready) .vision__stage {
-  display: flex;
-  flex-direction: column;
-  gap: clamp(2.5rem, 8vw, 4rem);
-  padding-top: clamp(3rem, 8vw, 5rem);
-  padding-bottom: clamp(3rem, 8vw, 5rem);
-}
-html:not(.js-ready) .vision__layer {
-  grid-area: auto;
+  .panel--hero { background: #1c1610; }
+  .panel--tagline { background: #1c1610; }
+  .hero-fixed, .hero-fixed__blur { display: none; }
+  .progress { display: none; }
+  .hero__scroll { display: none; }
 }
