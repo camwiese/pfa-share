@@ -558,13 +558,16 @@ body :is(input, textarea) { cursor: auto; }
   .letter__body p { font-size: clamp(0.95rem, 3.8vw, 1.05rem); }
   .letter__ctas { font-size: 0.66rem; }
 
-  /* Small phones: tall panels can exceed viewport. Allow internal
-     vertical scroll within them; tap still advances the deck. */
+  /* Keep these panels flex-centered like everything else; the sizing
+     above (clamped fonts, capped image heights) keeps their content
+     within viewport on mobile. overflow-y:auto stays as a safety net
+     in case content somehow overflows on a very small phone — flex
+     centering still works, and the panel becomes scrollable rather
+     than clipped. */
   .panel--ppie,
   .panel--letter,
   .panel--welcome {
     overflow-y: auto;
-    align-items: flex-start;
     -webkit-overflow-scrolling: touch;
     touch-action: pan-y;
   }
