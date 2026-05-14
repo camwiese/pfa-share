@@ -65,7 +65,6 @@ body {
   position: relative;
   min-height: calc(var(--vh) * 100);
   scroll-snap-align: start;
-  scroll-snap-stop: always;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -511,6 +510,11 @@ body {
    Mobile
    ============================================================= */
 @media (max-width: 860px) {
+  /* iOS Safari fights `mandatory` snapping during momentum scrolling and
+     can bounce back when scrolling up; `proximity` only snaps when the
+     user is already settling near a boundary. */
+  html { scroll-snap-type: y proximity; }
+
   .hero__title { font-size: clamp(1.5rem, 6.5vw, 2rem); }
   .tagline__text { font-size: clamp(1.05rem, 4.5vw, 1.3rem); }
   .ppie__image { aspect-ratio: 3 / 1.4; }
