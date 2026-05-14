@@ -26,11 +26,19 @@ const SOURCES = [
   'header-image.png',
   '1915-PPIE-full.jpg',
   'Park-Lagoon-2.png',
-  'arrival-1.png',
-  'food-3.png',
-  'tour-4.png',
-  'lab-5.png',
-  'lagoon-6.jpeg',
+  'grounds-0.png',
+  'grounds-1.png',
+  'grounds-2.png',
+  'grounds-3.jpeg',
+  'fare-2.png',
+  'exhibit-0.png',
+  'exhibit-1.png',
+  'exhibit-2.png',
+  'exhibit-3.png',
+  'exhibit-4.png',
+  'exhibit-5.png',
+  'lab-1.png',
+  'lab-2.png',
 ];
 
 function fmtBytes(n) {
@@ -61,9 +69,11 @@ async function processOne(filename) {
   let skipped = 0;
   let bytesWritten = 0;
 
-  // Only generate widths up to the source's actual width.
-  const widths = WIDTHS.filter((w) => w <= (meta.width || w));
-  if (widths.length === 0) widths.push(meta.width);
+  // Generate every target width. `withoutEnlargement: true` (set in the
+  // pipeline below) caps the output at the source's actual width, so a
+  // 1670-wide source will produce a "1672w" file that is really 1670 wide.
+  // Browsers use the srcset descriptor for selection, so this is fine.
+  const widths = WIDTHS.slice();
 
   for (const width of widths) {
     for (const fmt of FORMATS) {
