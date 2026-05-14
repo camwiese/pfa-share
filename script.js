@@ -132,11 +132,22 @@
   }
 
   /* ── Tap: left 20% = prev, right 80% = next ──────────── */
-  document.addEventListener('click', function (e) {
-    if (isInteractive(e.target)) return;
+  /* iOS Safari can drop synthetic click events under certain
+     touch-action / overflow combinations, so we handle taps on
+     touchend (see below) and skip the click that would follow. */
+  var swallowNextClick = false;
+  function handleTap(x) {
     var w = window.innerWidth;
-    if (e.clientX < w * 0.2) prev();
+    if (x < w * 0.2) prev();
     else next();
+  }
+  document.addEventListener('click', function (e) {
+    if (swallowNextClick) {
+      swallowNextClick = false;
+      return;
+    }
+    if (isInteractive(e.target)) return;
+    handleTap(e.clientX);
   });
 
   /* ── Keyboard ────────────────────────────────────────── */
@@ -192,11 +203,20 @@
   document.addEventListener('touchend', function (e) {
     if (!e.changedTouches[0]) return;
     if (isInteractive(e.target)) return;
-    var dy = e.changedTouches[0].clientY - touchStartY;
-    var dx = e.changedTouches[0].clientX - touchStartX;
+    var endX = e.changedTouches[0].clientX;
+    var endY = e.changedTouches[0].clientY;
+    var dx = endX - touchStartX;
+    var dy = endY - touchStartY;
     var dt = Date.now() - touchStartT;
     var absX = Math.abs(dx), absY = Math.abs(dy);
-    if (absX < 40 && absY < 40 && dt < 700) return;  // tap → click handler
+    /* Tap (no significant drag): advance directly. Swallow the click
+       event iOS will fire next so we don't double-advance. */
+    if (absX < 12 && absY < 12 && dt < 500) {
+      swallowNextClick = true;
+      handleTap(endX);
+      return;
+    }
+    /* Swipe: vertical or horizontal beyond 40px = nav. */
     if (absY > absX) {
       if (dy < -40) next();
       else if (dy > 40) prev();
