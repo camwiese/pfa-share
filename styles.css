@@ -129,17 +129,7 @@ body :is(input, textarea) { cursor: auto; }
   transition-delay: 0s !important;
 }
 
-/* ── Image panels: Ken Burns on active ───────────────────── */
-.panel--image .panel__img {
-  transform: scale(1);
-  transition: transform 12s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  transform-origin: center;
-}
-.panel--image.is-active .panel__img {
-  transform: scale(1.08);
-}
-.panel--image:nth-child(odd) .panel__img { transform-origin: 40% 45%; }
-.panel--image:nth-child(even) .panel__img { transform-origin: 60% 55%; }
+/* Image panels render statically — no Ken Burns. */
 
 /* =============================================================
    FIXED HERO IMAGE — shared between hero + tagline panels
@@ -401,7 +391,7 @@ body :is(input, textarea) { cursor: auto; }
   line-height: 1.32;
   letter-spacing: -0.005em;
   color: var(--ink);
-  text-wrap: pretty;
+  text-wrap: balance;
 }
 
 /* =============================================================
