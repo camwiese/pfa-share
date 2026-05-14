@@ -79,12 +79,22 @@ body :is(input, textarea) { cursor: auto; }
   opacity: 0;
   pointer-events: none;
   z-index: 1;
-  transition: opacity 0.6s cubic-bezier(0.22, 0.61, 0.36, 1);
+  /* Default state for a panel that hasn't been reached yet:
+     parked off to the right, waiting to slide in. */
+  transform: translateX(40px);
+  transition:
+    opacity 380ms cubic-bezier(0.22, 0.61, 0.36, 1),
+    transform 440ms cubic-bezier(0.22, 0.61, 0.36, 1);
 }
 .panel.is-active {
   opacity: 1;
   pointer-events: auto;
   z-index: 2;
+  transform: translateX(0);
+}
+.panel.is-past {
+  opacity: 0;
+  transform: translateX(-40px);
 }
 
 /* =============================================================
@@ -497,6 +507,9 @@ body :is(input, textarea) { cursor: auto; }
   width: 5px; height: 5px;
   border-radius: 50%;
   background: var(--ink-ghost);
+  border: 0;
+  padding: 0;
+  cursor: pointer;
   transition: background 0.4s ease, transform 0.4s ease;
 }
 .progress__dot.is-current {
@@ -507,12 +520,33 @@ body :is(input, textarea) { cursor: auto; }
 .progress.on-dark .progress__dot.is-current { background: rgba(241, 236, 225, 0.6); }
 
 /* =============================================================
-   Mobile
+   Tap hint — shown once, fades after first interaction
+   ============================================================= */
+.tap-hint {
+  position: fixed;
+  left: 50%;
+  bottom: clamp(1.25rem, 3.5vh, 2.5rem);
+  transform: translateX(-50%);
+  z-index: 90;
+  font-family: var(--font-sans);
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: rgba(241, 236, 225, 0.55);
+  pointer-events: none;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.35);
+  animation: hintIn 0.8s ease 1.6s both, hintPulse 2.8s ease-in-out 2.4s infinite;
+  transition: opacity 0.5s ease;
+}
+.tap-hint.is-gone { opacity: 0; animation: none; }
+@keyframes hintIn  { from { opacity: 0; transform: translate(-50%, 6px); } to { opacity: 1; transform: translate(-50%, 0); } }
+@keyframes hintPulse { 0%, 100% { opacity: 0.45; } 50% { opacity: 0.85; } }
+
+/* =============================================================
+   Mobile (portrait + narrow desktop)
    ============================================================= */
 @media (max-width: 860px) {
-  /* iOS Safari fights `mandatory` snapping during momentum scrolling and
-     can bounce back when scrolling up; `proximity` only snaps when the
-     user is already settling near a boundary. */
   .hero__title { font-size: clamp(1.5rem, 6.5vw, 2rem); }
   .tagline__text { font-size: clamp(1.05rem, 4.5vw, 1.3rem); }
   .ppie__image { aspect-ratio: 3 / 1.4; }
@@ -551,6 +585,76 @@ body :is(input, textarea) { cursor: auto; }
     width: 100%;
     height: auto;
     aspect-ratio: 16 / 9;
+  }
+}
+
+/* =============================================================
+   Landscape phones — short viewport, prioritize fit-in-screen
+   ============================================================= */
+@media (orientation: landscape) and (max-height: 520px) {
+  /* No internal scroll — every slide fits viewport. */
+  .panel--ppie,
+  .panel--letter,
+  .panel--welcome {
+    overflow: hidden;
+    align-items: center;
+    touch-action: none;
+  }
+
+  /* Tighten container paddings so content reaches more vertical space. */
+  .panel--ppie { padding: clamp(0.75rem, 2vh, 1.25rem) var(--gutter); }
+  .panel--letter .letter__content { padding: clamp(0.75rem, 2vh, 1.25rem) var(--gutter); }
+  .welcome__content { padding: clamp(0.75rem, 2vh, 1.25rem) var(--gutter); }
+
+  /* Cap image heights so they never push other content off-screen. */
+  .ppie__image    { max-height: 38vh; aspect-ratio: 5 / 2; }
+  .welcome__figure { max-width: min(440px, 60vw); margin-top: clamp(0.5rem, 1.5vh, 0.9rem); }
+  .welcome__image  { max-height: 32vh; object-fit: contain; }
+
+  /* Compact typography for short viewports. */
+  .hero__title       { font-size: clamp(1.3rem, 4vw, 1.9rem); }
+  .tagline__text     { font-size: clamp(0.95rem, 2.6vw, 1.2rem); }
+  .ppie__intro,
+  .ppie__line        { font-size: clamp(0.85rem, 1.9vw, 1.05rem); }
+  .welcome__heading  { font-size: clamp(1.4rem, 3.6vw, 1.9rem); }
+  .welcome__sub      { font-size: clamp(0.85rem, 2vw, 1rem); }
+  .welcome__year     { margin: clamp(0.35rem, 0.8vh, 0.6rem) 0 0; }
+  .prose__text       { font-size: clamp(0.95rem, 2.4vw, 1.2rem); }
+  .impact__text      { font-size: clamp(1.15rem, 3.2vw, 1.55rem); }
+  .letter__heading   { font-size: clamp(1.05rem, 2.6vw, 1.3rem); margin-bottom: clamp(0.45rem, 1.3vh, 0.85rem); }
+  .letter__body p    { font-size: clamp(0.78rem, 1.85vw, 0.92rem); line-height: 1.4; }
+  .letter__body      { gap: clamp(0.25rem, 0.6vh, 0.45rem); }
+  .letter__sign      { margin-top: clamp(0.6rem, 1.6vh, 1rem); }
+  .letter__signature { width: clamp(78px, 9vw, 100px); margin-bottom: 0.15rem; }
+  .letter__ctas      { margin-top: clamp(0.6rem, 1.6vh, 1rem); font-size: 0.6rem; }
+  .letter__rule      { margin-top: clamp(0.45rem, 1.2vh, 0.8rem); }
+  .letter__footer    { margin-top: clamp(0.3rem, 0.8vh, 0.6rem); font-size: 0.6rem; }
+
+  /* Horizontal dots along the bottom — less crowded than a side rail. */
+  .progress {
+    top: auto;
+    bottom: 12px;
+    right: 50%;
+    transform: translateX(50%);
+    flex-direction: row;
+    gap: 5px;
+  }
+  .progress__dot { width: 4px; height: 4px; }
+
+  /* No need for the tap hint on short landscape — the deck is obvious
+     once a tap has happened anyway, and bottom space is precious. */
+  .tap-hint { display: none; }
+
+  /* Image panels: full-bleed cover instead of letterbox to use the
+     wide landscape canvas. */
+  .panel--image { background: #1c1610; }
+  .panel__img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    aspect-ratio: auto;
+    object-fit: cover;
   }
 }
 

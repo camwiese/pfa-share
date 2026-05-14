@@ -1,7 +1,7 @@
 /* =============================================================
    Future Palace v2 — Deck mode
    Tap / arrow / wheel / swipe → next panel. One panel visible
-   at a time. No native scrolling.
+   at a time. No native scrolling. Direction-aware slide+fade.
    ============================================================= */
 
 (function () {
@@ -24,6 +24,7 @@
   var progressNav = document.querySelector('.progress');
   var heroFixed = document.querySelector('.hero-fixed');
   var heroBlur = document.querySelector('.hero-fixed__blur');
+  var tapHint = document.querySelector('.tap-hint');
 
   /* ── Reduced motion: fall back to a stacked scroll layout ── */
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
@@ -38,7 +39,7 @@
     var dot = document.createElement('button');
     dot.type = 'button';
     dot.className = 'progress__dot';
-    dot.setAttribute('aria-label', 'Go to panel ' + (i + 1));
+    dot.setAttribute('aria-label', 'Go to slide ' + (i + 1));
     dot.addEventListener('click', function (e) {
       e.stopPropagation();
       setIndex(i);
@@ -48,11 +49,21 @@
     dots.push(dot);
   });
 
-  /* ── Deck state ──────────────────────────────────────── */
+  /* ── Initial state ───────────────────────────────────── */
   var currentIndex = 0;
-  panels[0].classList.add('is-active');
+  applyClasses(0);
   applyBackgroundForIndex(0);
   progressNav.classList.toggle('on-dark', panels[0].hasAttribute('data-dark'));
+  preloadNearby(0);
+
+  function applyClasses(target) {
+    panels.forEach(function (p, i) {
+      p.classList.remove('is-active', 'is-past');
+      if (i < target) p.classList.add('is-past');
+      else if (i === target) p.classList.add('is-active');
+      /* i > target: default state (off to the right, opacity 0) */
+    });
+  }
 
   function applyBackgroundForIndex(i) {
     if (i === 0) {
@@ -69,15 +80,29 @@
     }
   }
 
+  /* Eagerly load images on the current panel and its two neighbors
+     in each direction, so the next tap never waits on the network. */
+  function preloadNearby(i) {
+    panels.forEach(function (p, idx) {
+      if (Math.abs(idx - i) > 2) return;
+      p.querySelectorAll('img').forEach(function (img) {
+        if (img.getAttribute('loading') === 'lazy') {
+          img.setAttribute('loading', 'eager');
+        }
+      });
+    });
+  }
+
   function setIndex(target) {
     if (target < 0) target = 0;
     if (target >= panels.length) target = panels.length - 1;
     if (target === currentIndex) return;
 
-    panels[currentIndex].classList.remove('is-active');
-    panels[target].classList.add('is-active');
+    var direction = target > currentIndex ? 'forward' : 'backward';
+    document.body.dataset.direction = direction;
 
     currentIndex = target;
+    applyClasses(target);
 
     dots.forEach(function (d, i) {
       d.classList.toggle('is-current', i === currentIndex);
@@ -86,7 +111,10 @@
     progressNav.classList.toggle('on-dark', panels[currentIndex].hasAttribute('data-dark'));
     progressNav.classList.add('is-visible');
 
+    if (tapHint) tapHint.classList.add('is-gone');
+
     applyBackgroundForIndex(currentIndex);
+    preloadNearby(currentIndex);
   }
 
   function next() { setIndex(currentIndex + 1); }
@@ -103,11 +131,11 @@
     return false;
   }
 
-  /* ── Tap: left 25% = prev, right 75% = next ──────────── */
+  /* ── Tap: left 20% = prev, right 80% = next ──────────── */
   document.addEventListener('click', function (e) {
     if (isInteractive(e.target)) return;
     var w = window.innerWidth;
-    if (e.clientX < w * 0.25) prev();
+    if (e.clientX < w * 0.2) prev();
     else next();
   });
 
@@ -147,15 +175,13 @@
     if (wheelLock) return;
     if (Math.abs(e.deltaY) < 12) return;
     wheelLock = true;
-    setTimeout(function () { wheelLock = false; }, 650);
+    setTimeout(function () { wheelLock = false; }, 600);
     if (e.deltaY > 0) next();
     else prev();
   }, { passive: true });
 
   /* ── Touch: tap (handled by click) + swipe ───────────── */
-  var touchStartY = 0;
-  var touchStartX = 0;
-  var touchStartT = 0;
+  var touchStartY = 0, touchStartX = 0, touchStartT = 0;
   document.addEventListener('touchstart', function (e) {
     if (!e.touches[0]) return;
     touchStartY = e.touches[0].clientY;
@@ -170,8 +196,7 @@
     var dx = e.changedTouches[0].clientX - touchStartX;
     var dt = Date.now() - touchStartT;
     var absX = Math.abs(dx), absY = Math.abs(dy);
-    // Anything under 40px in 700ms is a tap — let the click handler take it.
-    if (absX < 40 && absY < 40 && dt < 700) return;
+    if (absX < 40 && absY < 40 && dt < 700) return;  // tap → click handler
     if (absY > absX) {
       if (dy < -40) next();
       else if (dy > 40) prev();
