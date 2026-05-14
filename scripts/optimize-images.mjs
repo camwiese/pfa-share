@@ -31,7 +31,7 @@ const SOURCES = [
   'grounds-3.jpeg',
   'fare-1.png',
   'fare-2.png',
-  // 'fare-3.png',  // TODO: add when source file lands in images/
+  'fare-3.png',
   'exhibit-1.png',
   'exhibit-3.png',
   'exhibit-4.png',
