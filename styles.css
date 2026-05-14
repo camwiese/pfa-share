@@ -80,11 +80,12 @@ body :is(input, textarea) { cursor: auto; }
   pointer-events: none;
   z-index: 1;
   /* Default state for a panel that hasn't been reached yet:
-     parked off to the right, waiting to slide in. */
-  transform: translateX(40px);
+     parked off to the right, waiting to slide in. Shorter travel +
+     gentler easing softens the color↔image jumps. */
+  transform: translateX(24px);
   transition:
-    opacity 380ms cubic-bezier(0.22, 0.61, 0.36, 1),
-    transform 440ms cubic-bezier(0.22, 0.61, 0.36, 1);
+    opacity 540ms cubic-bezier(0.4, 0, 0.2, 1),
+    transform 620ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 .panel.is-active {
   opacity: 1;
@@ -94,7 +95,7 @@ body :is(input, textarea) { cursor: auto; }
 }
 .panel.is-past {
   opacity: 0;
-  transform: translateX(-40px);
+  transform: translateX(-24px);
 }
 
 /* =============================================================
