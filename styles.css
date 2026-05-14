@@ -34,7 +34,9 @@ html {
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
   -webkit-text-size-adjust: 100%;
-  touch-action: none;
+  /* iOS Safari can swallow click events when this is `none`. `manipulation`
+     keeps tap→click intact, just disables double-tap-zoom and pinch. */
+  touch-action: manipulation;
 }
 
 body {
