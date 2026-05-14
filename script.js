@@ -26,9 +26,10 @@
   var heroBlur = document.querySelector('.hero-fixed__blur');
   var tapHint = document.querySelector('.tap-hint');
 
-  /* ── Reduced motion: fall back to a stacked scroll layout ── */
+  /* ── Reduced motion: fall back to a stacked scroll layout ──
+     Class goes on <html> so we can override its overflow/height. */
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    document.body.classList.add('reduced-motion');
+    document.documentElement.classList.add('reduced-motion');
     panels.forEach(function (p) { p.classList.add('is-active'); });
     return;
   }
