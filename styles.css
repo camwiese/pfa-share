@@ -284,17 +284,15 @@ body :is(input, textarea) { cursor: auto; }
 }
 .ppie__content {
   position: relative; z-index: 1;
-  width: 100%; max-width: 920px;
+  width: 100%; max-width: 1000px;
   margin: 0 auto;
   display: flex; flex-direction: column; align-items: center;
 }
 .ppie__intro {
   width: 100%;
   margin-bottom: clamp(0.9rem, 2vh, 1.4rem);
-  font-family: var(--font-display); font-weight: 400;
-  font-size: clamp(1.1rem, 1.6vw, 1.4rem);
-  line-height: 1.38; letter-spacing: -0.005em;
-  color: var(--ink); text-align: center; text-wrap: balance;
+  display: flex; flex-direction: column;
+  gap: clamp(0.65rem, 1.5vh, 1rem);
 }
 .ppie__figure {
   width: 100%;
@@ -318,7 +316,9 @@ body :is(input, textarea) { cursor: auto; }
 }
 .ppie__line {
   font-family: var(--font-display); font-weight: 400;
-  font-size: clamp(1.1rem, 1.6vw, 1.4rem);
+  font-size: clamp(1.05rem, 1.45vw, 1.25rem);
+  text-align: center;
+  text-wrap: balance;
   line-height: 1.4; letter-spacing: -0.005em;
   color: var(--ink); text-wrap: balance;
 }
