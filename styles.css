@@ -24,14 +24,17 @@ html, body, h1, h2, h3, p, figure { margin: 0; padding: 0; }
 a  { color: inherit; text-decoration: none; }
 img { max-width: 100%; display: block; }
 
+html, body {
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
 html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
   -webkit-text-size-adjust: 100%;
-  overflow-x: clip;
-  scroll-snap-type: y mandatory;
-  touch-action: pan-y;
+  touch-action: none;
 }
 
 body {
@@ -41,10 +44,12 @@ body {
   font-size: 1.0625rem;
   line-height: 1.6;
   font-weight: 300;
-  overflow-x: clip;
   font-feature-settings: "ss01", "kern";
   -webkit-tap-highlight-color: transparent;
+  cursor: pointer;
 }
+body :is(a, button) { cursor: pointer; }
+body :is(input, textarea) { cursor: auto; }
 
 /* ── Paper grain texture on cream panels ─────────────────── */
 .panel--cream::before {
@@ -62,13 +67,24 @@ body {
    Panel base
    ============================================================= */
 .panel {
-  position: relative;
-  min-height: calc(var(--vh) * 100);
-  scroll-snap-align: start;
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100vh;
+  height: calc(var(--vh) * 100);
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 1;
+  transition: opacity 0.6s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+.panel.is-active {
+  opacity: 1;
+  pointer-events: auto;
+  z-index: 2;
 }
 
 /* =============================================================
@@ -102,17 +118,7 @@ body {
   transition-delay: 0s !important;
 }
 
-/* ── Image panels: fade + Ken Burns ──────────────────────── */
-.panel--image {
-  opacity: 0;
-  transition: opacity 0.8s cubic-bezier(0.22, 0.61, 0.36, 1);
-}
-.panel--image.is-active { opacity: 1; }
-.panel--image:not(.is-active) {
-  opacity: 0;
-  transition: opacity 0.45s cubic-bezier(0.55, 0.085, 0.68, 0.53);
-}
-
+/* ── Image panels: Ken Burns on active ───────────────────── */
 .panel--image .panel__img {
   transform: scale(1);
   transition: transform 12s cubic-bezier(0.25, 0.46, 0.45, 0.94);
@@ -208,13 +214,7 @@ body {
 }
 
 .hero__scroll {
-  position: absolute;
-  bottom: clamp(1.2rem, 3vh, 2rem);
-  left: 50%; transform: translateX(-50%);
-  z-index: 3;
-  display: flex; flex-direction: column; align-items: center;
-  gap: 0.5rem;
-  animation: heroIn 1s cubic-bezier(0.22, 0.61, 0.36, 1) 1.6s both;
+  display: none;
 }
 .hero__scroll-line {
   width: 1px; height: 28px;
@@ -513,8 +513,6 @@ body {
   /* iOS Safari fights `mandatory` snapping during momentum scrolling and
      can bounce back when scrolling up; `proximity` only snaps when the
      user is already settling near a boundary. */
-  html { scroll-snap-type: y proximity; }
-
   .hero__title { font-size: clamp(1.5rem, 6.5vw, 2rem); }
   .tagline__text { font-size: clamp(1.05rem, 4.5vw, 1.3rem); }
   .ppie__image { aspect-ratio: 3 / 1.4; }
@@ -530,17 +528,18 @@ body {
   .letter__body p { font-size: clamp(0.95rem, 3.8vw, 1.05rem); }
   .letter__ctas { font-size: 0.66rem; }
 
+  /* Small phones: tall panels can exceed viewport. Allow internal
+     vertical scroll within them; tap still advances the deck. */
   .panel--ppie,
   .panel--letter,
   .panel--welcome {
-    min-height: calc(var(--vh) * 100);
-    height: auto;
+    overflow-y: auto;
+    align-items: flex-start;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
   }
   .letter__sign { margin-top: clamp(1.5rem, 4vh, 2rem); }
 
-  .panel--chapter .chapter__text {
-    font-size: clamp(1.4rem, 6vw, 1.8rem);
-  }
   .progress { right: 8px; gap: 5px; }
   .progress__dot { width: 4px; height: 4px; }
 
@@ -556,10 +555,28 @@ body {
 }
 
 /* =============================================================
-   Reduced motion
+   Reduced motion / fallback: restore scroll layout
    ============================================================= */
+.reduced-motion, .reduced-motion body {
+  height: auto;
+  overflow: auto;
+}
+.reduced-motion .panel {
+  position: relative;
+  inset: auto;
+  height: auto;
+  min-height: calc(var(--vh) * 100);
+  opacity: 1;
+  pointer-events: auto;
+  z-index: auto;
+}
+.reduced-motion .hero-fixed,
+.reduced-motion .hero-fixed__blur,
+.reduced-motion .progress { display: none; }
+.reduced-motion .panel--hero,
+.reduced-motion .panel--tagline { background: #1c1610; }
+
 @media (prefers-reduced-motion: reduce) {
-  html { scroll-snap-type: none; }
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
@@ -567,9 +584,4 @@ body {
   .panel [data-animate], .panel--image, .hero__title {
     opacity: 1 !important; transform: none !important;
   }
-  .panel--hero { background: #1c1610; }
-  .panel--tagline { background: #1c1610; }
-  .hero-fixed, .hero-fixed__blur { display: none; }
-  .progress { display: none; }
-  .hero__scroll { display: none; }
 }
