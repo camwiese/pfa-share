@@ -32,6 +32,7 @@ const SOURCES = [
   'fare-1.png',
   'fare-2.png',
   'fare-3.png',
+  'fare-4.png',
   'exhibit-1.png',
   'exhibit-3.png',
   'exhibit-4.png',
