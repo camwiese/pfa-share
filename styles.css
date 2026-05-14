@@ -422,68 +422,43 @@ body :is(input, textarea) { cursor: auto; }
   gap: 0;
 }
 .letter__heading {
-  font-family: var(--font-display); font-weight: 350;
-  font-size: clamp(1.5rem, 2.8vw, 2.1rem);
-  line-height: 1.2; letter-spacing: -0.01em;
+  font-family: var(--font-display); font-weight: 400;
+  font-size: clamp(1.7rem, 3vw, 2.4rem);
+  line-height: 1.18; letter-spacing: -0.01em;
   color: var(--ink); text-wrap: balance;
-  max-width: 22ch;
-  margin: 0 0 clamp(1.75rem, 4.5vh, 3rem);
-}
-.letter__body {
-  display: flex; flex-direction: column;
-  gap: clamp(0.55rem, 1.2vh, 0.85rem); max-width: 42ch;
-}
-.letter__body p {
-  font-family: var(--font-display); font-weight: 350;
-  font-size: clamp(1rem, 1.3vw, 1.12rem);
-  line-height: 1.55; color: var(--ink); text-wrap: balance;
+  max-width: 24ch;
+  margin: 0 0 clamp(2rem, 5vh, 3.25rem);
 }
 .letter__sign {
   display: flex; flex-direction: column; align-items: center;
   gap: 0.05rem;
-  margin: clamp(2rem, 5vh, 3.5rem) 0 0;
+  margin: 0;
 }
 .letter__signature {
   display: block;
-  width: clamp(110px, 14vw, 140px);
+  width: clamp(120px, 14vw, 150px);
   height: auto;
-  margin-bottom: 0.35rem;
+  margin-bottom: 0.5rem;
   mix-blend-mode: multiply;
   user-select: none;
 }
-.letter__name, .letter__phone {
-  font-family: var(--font-sans); font-size: 0.82rem;
-  font-weight: 400; color: var(--ink-muted);
-  letter-spacing: 0.03em; line-height: 1.5;
+.letter__name,
+.letter__title,
+.letter__contact {
+  font-family: var(--font-sans);
+  font-size: 0.86rem;
+  font-weight: 400;
+  color: var(--ink-muted);
+  letter-spacing: 0.03em;
+  line-height: 1.5;
+  margin: 0;
 }
 .letter__name { color: var(--ink-soft); font-weight: 500; }
-.letter__phone a { color: inherit; transition: color 0.3s; }
-.letter__phone a:hover { color: var(--accent); }
-.letter__ctas {
-  font-family: var(--font-sans); font-size: 0.72rem;
-  font-weight: 500; letter-spacing: 0.22em;
-  text-transform: uppercase; color: var(--ink-muted);
-  margin: clamp(2rem, 5vh, 3.5rem) 0 0;
-}
-.letter__cta {
-  color: var(--ink-soft);
-  border-bottom: 1px solid var(--ink-faint);
-  padding: 0.15rem 0.1rem;
-  transition: color 0.3s, border-color 0.3s;
-}
-.letter__cta:hover { color: var(--accent); border-color: var(--accent); }
-.letter__sep { display: inline-block; margin: 0 0.6em; color: var(--ink-faint); }
-.letter__rule {
-  width: min(200px, 50%); border: 0;
-  border-top: 1px solid var(--ink-ghost);
-  margin: clamp(1.5rem, 4vh, 2.5rem) 0 0;
-}
-.letter__footer {
-  font-family: var(--font-sans); font-size: 0.68rem;
-  font-weight: 400; color: var(--ink-muted);
-  letter-spacing: 0.18em; text-transform: uppercase;
-  margin: clamp(0.6rem, 1.5vh, 1rem) 0 0;
-}
+.letter__title { color: var(--ink-muted); margin-top: 0.05rem; }
+.letter__contact { margin-top: 0.45rem; }
+.letter__contact a { color: inherit; transition: color 0.3s; }
+.letter__contact a:hover { color: var(--accent); }
+.letter__sep { display: inline-block; margin: 0 0.55em; color: var(--ink-faint); }
 
 /* =============================================================
    PROGRESS DOTS
