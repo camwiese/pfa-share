@@ -164,9 +164,9 @@ body :is(input, textarea) { cursor: auto; }
   will-change: backdrop-filter, background-color;
   transition:
     opacity 0.6s ease,
-    -webkit-backdrop-filter 0.75s cubic-bezier(0.4, 0, 0.2, 1),
-    backdrop-filter 0.75s cubic-bezier(0.4, 0, 0.2, 1),
-    background-color 0.75s cubic-bezier(0.4, 0, 0.2, 1);
+    -webkit-backdrop-filter 0.94s cubic-bezier(0.4, 0, 0.2, 1),
+    backdrop-filter 0.94s cubic-bezier(0.4, 0, 0.2, 1),
+    background-color 0.94s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .hero-fixed__blur.is-blurred {
   -webkit-backdrop-filter: blur(18px);
