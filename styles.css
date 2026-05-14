@@ -82,9 +82,9 @@ body :is(input, textarea) { cursor: auto; }
   pointer-events: none;
   z-index: 1;
   /* Default state for a panel that hasn't been reached yet:
-     parked off to the right, waiting to slide in. Shorter travel +
-     gentler easing softens the color↔image jumps. */
-  transform: translateX(24px);
+     parked below, waiting to slide up into view. Vertical motion
+     reads as a deck-style scroll instead of a horizontal swipe. */
+  transform: translateY(24px);
   transition:
     opacity 540ms cubic-bezier(0.4, 0, 0.2, 1),
     transform 620ms cubic-bezier(0.4, 0, 0.2, 1);
@@ -93,11 +93,11 @@ body :is(input, textarea) { cursor: auto; }
   opacity: 1;
   pointer-events: auto;
   z-index: 2;
-  transform: translateX(0);
+  transform: translateY(0);
 }
 .panel.is-past {
   opacity: 0;
-  transform: translateX(-24px);
+  transform: translateY(-24px);
 }
 
 /* =============================================================
@@ -241,14 +241,14 @@ body :is(input, textarea) { cursor: auto; }
 }
 .tagline__content {
   position: relative; z-index: 2;
-  width: 100%; max-width: 58ch;
+  width: 100%; max-width: min(80ch, 92vw);
   padding: 0 clamp(1.5rem, 6vw, 4rem);
   text-align: center;
 }
 .tagline__text {
   font-family: var(--font-display);
   font-weight: 350;
-  font-size: clamp(1.15rem, 2.1vw, 1.75rem);
+  font-size: clamp(1.1rem, 1.75vw, 1.5rem);
   line-height: 1.42;
   letter-spacing: -0.003em;
   color: var(--ivory);
@@ -290,10 +290,10 @@ body :is(input, textarea) { cursor: auto; }
 }
 .ppie__intro {
   width: 100%;
-  margin-bottom: clamp(0.7rem, 1.6vh, 1.1rem);
-  font-family: var(--font-display); font-weight: 350;
-  font-size: clamp(0.95rem, 1.3vw, 1.15rem);
-  line-height: 1.4; letter-spacing: -0.005em;
+  margin-bottom: clamp(0.9rem, 2vh, 1.4rem);
+  font-family: var(--font-display); font-weight: 400;
+  font-size: clamp(1.1rem, 1.6vw, 1.4rem);
+  line-height: 1.38; letter-spacing: -0.005em;
   color: var(--ink); text-align: center; text-wrap: balance;
 }
 .ppie__figure {
@@ -317,8 +317,8 @@ body :is(input, textarea) { cursor: auto; }
           mask-image: linear-gradient(to bottom, transparent 0px, black 10px, black 100%);
 }
 .ppie__line {
-  font-family: var(--font-display); font-weight: 350;
-  font-size: clamp(0.95rem, 1.3vw, 1.15rem);
+  font-family: var(--font-display); font-weight: 400;
+  font-size: clamp(1.1rem, 1.6vw, 1.4rem);
   line-height: 1.4; letter-spacing: -0.005em;
   color: var(--ink); text-wrap: balance;
 }
@@ -430,7 +430,7 @@ body :is(input, textarea) { cursor: auto; }
   /* Explicit <br> in markup controls the split. No balance so it
      doesn't re-wrap. Wide max so each half fits on one line. */
   max-width: 38ch;
-  margin: 0 0 clamp(2rem, 5vh, 3.25rem);
+  margin: 0 0 clamp(3.5rem, 8vh, 5.5rem);
 }
 .letter__sign {
   display: flex; flex-direction: column; align-items: center;
