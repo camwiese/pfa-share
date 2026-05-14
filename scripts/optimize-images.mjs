@@ -30,14 +30,13 @@ const SOURCES = [
   'grounds-1.png',
   'grounds-2.png',
   'grounds-3.jpeg',
+  'fare-1.png',
   'fare-2.png',
   'exhibit-0.png',
   'exhibit-1.png',
-  'exhibit-2.png',
   'exhibit-3.png',
   'exhibit-4.png',
   'exhibit-5.png',
-  'lab-1.png',
   'lab-2.png',
 ];
 
