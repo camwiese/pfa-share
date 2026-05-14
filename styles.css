@@ -427,10 +427,11 @@ body :is(input, textarea) { cursor: auto; }
   font-size: clamp(1.7rem, 3vw, 2.4rem);
   line-height: 1.18; letter-spacing: -0.01em;
   color: var(--ink);
+  text-align: center;
   /* Explicit <br> in markup controls the split. No balance so it
      doesn't re-wrap. Wide max so each half fits on one line. */
   max-width: 38ch;
-  margin: 0 0 clamp(3.5rem, 8vh, 5.5rem);
+  margin: 0 auto clamp(2rem, 4.5vh, 3rem);
 }
 .letter__sign {
   display: flex; flex-direction: column; align-items: center;
@@ -463,23 +464,16 @@ body :is(input, textarea) { cursor: auto; }
 .letter__contact a:hover { color: var(--accent); }
 .letter__sep { display: inline-block; margin: 0 0.55em; color: var(--ink-faint); }
 
-/* CTA + footer pinned to the bottom of the letter panel. */
-.panel--letter .letter__ctas,
-.panel--letter .letter__footer {
-  position: absolute;
-  left: 0; right: 0;
-  text-align: center;
-  z-index: 1;
-  margin: 0;
-}
+/* CTA + footer in normal flow, beneath the signature block. */
 .panel--letter .letter__ctas {
-  bottom: clamp(3.25rem, 7vh, 4.5rem);
+  margin: clamp(1.75rem, 4vh, 2.75rem) 0 0;
   font-family: var(--font-sans);
   font-size: 0.72rem;
   font-weight: 500;
   letter-spacing: 0.22em;
   text-transform: uppercase;
   color: var(--ink-muted);
+  text-align: center;
 }
 .panel--letter .letter__cta {
   color: var(--ink-soft);
@@ -492,13 +486,14 @@ body :is(input, textarea) { cursor: auto; }
   border-color: var(--accent);
 }
 .panel--letter .letter__footer {
-  bottom: clamp(1.25rem, 3vh, 2rem);
+  margin: clamp(0.75rem, 2vh, 1.25rem) 0 0;
   font-family: var(--font-sans);
   font-size: 0.68rem;
   font-weight: 400;
   letter-spacing: 0.2em;
   text-transform: uppercase;
   color: var(--ink-muted);
+  text-align: center;
 }
 
 /* =============================================================
