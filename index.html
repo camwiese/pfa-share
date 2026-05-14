@@ -10,17 +10,17 @@
 <meta property="og:type" content="website">
 <meta property="og:title" content="A new civic destination at the Palace of Fine Arts">
 <meta property="og:description" content="A new civic destination at the Palace of Fine Arts.">
-<meta property="og:image" content="images/header-image.png">
-<meta property="og:image:width" content="1672">
-<meta property="og:image:height" content="941">
-<meta property="og:image:type" content="image/png">
+<meta property="og:image" content="images/opt/header-image-1280.jpg">
+<meta property="og:image:width" content="1280">
+<meta property="og:image:height" content="720">
+<meta property="og:image:type" content="image/jpeg">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="A new civic destination at the Palace of Fine Arts">
 <meta name="twitter:description" content="A new civic destination at the Palace of Fine Arts.">
-<meta name="twitter:image" content="images/header-image.png">
+<meta name="twitter:image" content="images/opt/header-image-1280.jpg">
 
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
-<link rel="preload" as="image" href="images/header-image.png" fetchpriority="high">
+<link rel="preload" as="image" type="image/avif" imagesrcset="images/opt/header-image-800.avif 800w, images/opt/header-image-1280.avif 1280w, images/opt/header-image-1672.avif 1672w" imagesizes="100vw" fetchpriority="high">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -56,11 +56,16 @@
     <div class="ppie__content">
       <p class="ppie__intro" data-animate="1">In 1915, San Francisco invited the world to visit a similar place.</p>
       <figure class="ppie__figure" data-animate="2">
-        <img src="images/1915-PPIE-full.jpg" alt="The Panama-Pacific International Exposition, San Francisco, 1915" class="ppie__image" loading="lazy" decoding="async">
+        <picture>
+          <source type="image/avif" srcset="images/opt/1915-PPIE-full-800.avif 800w, images/opt/1915-PPIE-full-1280.avif 1280w, images/opt/1915-PPIE-full-1672.avif 1672w" sizes="(max-width: 860px) 90vw, 720px">
+          <source type="image/webp" srcset="images/opt/1915-PPIE-full-800.webp 800w, images/opt/1915-PPIE-full-1280.webp 1280w, images/opt/1915-PPIE-full-1672.webp 1672w" sizes="(max-width: 860px) 90vw, 720px">
+          <img src="images/opt/1915-PPIE-full-1280.jpg" srcset="images/opt/1915-PPIE-full-800.jpg 800w, images/opt/1915-PPIE-full-1280.jpg 1280w, images/opt/1915-PPIE-full-1672.jpg 1672w" sizes="(max-width: 860px) 90vw, 720px" alt="The Panama-Pacific International Exposition, San Francisco, 1915" class="ppie__image" loading="lazy" decoding="async" width="3393" height="1352">
+        </picture>
       </figure>
       <div class="ppie__text" data-animate="3">
-        <p class="ppie__line">We hosted the Panama-Pacific International Exposition&nbsp;&ndash;&nbsp;a World&rsquo;s Fair celebrating human achievement and our spirit of possibility.</p>
-        <p class="ppie__line">Its last remaining structure, the Palace of Fine Arts, has been patiently awaiting its next chapter.</p>
+        <p class="ppie__line">The Panama-Pacific International Exposition celebrated human achievement and our spirit of possibility.</p>
+        <p class="ppie__line">The last building standing from that fair is the Palace of Fine Arts.</p>
+        <p class="ppie__line">It&rsquo;s time to write its next chapter.</p>
       </div>
     </div>
   </section>
@@ -72,7 +77,11 @@
       <p class="welcome__sub" data-animate="2">Our vision for San Francisco&rsquo;s new home of progress.</p>
       <p class="welcome__year" data-animate="3">Palace of Fine Arts &middot; 2030</p>
       <figure class="welcome__figure" data-animate="4">
-        <img src="images/Park-Lagoon-2.png" alt="The Palace of Fine Arts and lagoon, reimagined" class="welcome__image" loading="lazy" decoding="async">
+        <picture>
+          <source type="image/avif" srcset="images/opt/Park-Lagoon-2-800.avif 800w, images/opt/Park-Lagoon-2-1280.avif 1280w, images/opt/Park-Lagoon-2-1672.avif 1672w" sizes="(max-width: 860px) 90vw, 760px">
+          <source type="image/webp" srcset="images/opt/Park-Lagoon-2-800.webp 800w, images/opt/Park-Lagoon-2-1280.webp 1280w, images/opt/Park-Lagoon-2-1672.webp 1672w" sizes="(max-width: 860px) 90vw, 760px">
+          <img src="images/opt/Park-Lagoon-2-1280.jpg" srcset="images/opt/Park-Lagoon-2-800.jpg 800w, images/opt/Park-Lagoon-2-1280.jpg 1280w, images/opt/Park-Lagoon-2-1672.jpg 1672w" sizes="(max-width: 860px) 90vw, 760px" alt="The Palace of Fine Arts and lagoon, reimagined" class="welcome__image" loading="lazy" decoding="async" width="1672" height="941">
+        </picture>
       </figure>
     </div>
   </section>
@@ -84,59 +93,147 @@
     </div>
   </section>
 
-  <section class="panel panel--image" data-panel="5">
-    <img src="images/arrival-1.png" alt="Arrival on Palace Drive" class="panel__img" loading="lazy" decoding="async">
-  </section>
-
-  <section class="panel panel--cream panel--prose" data-panel="6">
+  <!-- Grounds: prose then four image beats -->
+  <section class="panel panel--cream panel--prose" data-panel="5">
     <div class="prose__content">
       <p class="prose__text" data-animate="1">Grab coffee, wander through dozens of statues honoring history&rsquo;s greatest innovators, picnic on the lawn, and stay for a fountain show that closes every evening.</p>
     </div>
   </section>
 
-  <section class="panel panel--image" data-panel="7">
-    <img src="images/food-3.png" alt="World's Fare food hall" class="panel__img" loading="lazy" decoding="async">
+  <section class="panel panel--image" data-panel="6">
+    <picture>
+      <source type="image/avif" srcset="images/opt/grounds-0-800.avif 800w, images/opt/grounds-0-1280.avif 1280w, images/opt/grounds-0-1672.avif 1672w" sizes="100vw">
+      <source type="image/webp" srcset="images/opt/grounds-0-800.webp 800w, images/opt/grounds-0-1280.webp 1280w, images/opt/grounds-0-1672.webp 1672w" sizes="100vw">
+      <img src="images/opt/grounds-0-1280.jpg" srcset="images/opt/grounds-0-800.jpg 800w, images/opt/grounds-0-1280.jpg 1280w, images/opt/grounds-0-1672.jpg 1672w" sizes="100vw" alt="Palace of Fine Arts grounds" class="panel__img" loading="lazy" decoding="async" width="1672" height="941">
+    </picture>
   </section>
 
-  <section class="panel panel--cream panel--prose" data-panel="8">
+  <section class="panel panel--image" data-panel="7">
+    <picture>
+      <source type="image/avif" srcset="images/opt/grounds-1-800.avif 800w, images/opt/grounds-1-1280.avif 1280w, images/opt/grounds-1-1672.avif 1672w" sizes="100vw">
+      <source type="image/webp" srcset="images/opt/grounds-1-800.webp 800w, images/opt/grounds-1-1280.webp 1280w, images/opt/grounds-1-1672.webp 1672w" sizes="100vw">
+      <img src="images/opt/grounds-1-1280.jpg" srcset="images/opt/grounds-1-800.jpg 800w, images/opt/grounds-1-1280.jpg 1280w, images/opt/grounds-1-1672.jpg 1672w" sizes="100vw" alt="Wandering the Palace grounds" class="panel__img" loading="lazy" decoding="async" width="1672" height="941">
+    </picture>
+  </section>
+
+  <section class="panel panel--image" data-panel="8">
+    <picture>
+      <source type="image/avif" srcset="images/opt/grounds-2-800.avif 800w, images/opt/grounds-2-1280.avif 1280w, images/opt/grounds-2-1672.avif 1672w" sizes="100vw">
+      <source type="image/webp" srcset="images/opt/grounds-2-800.webp 800w, images/opt/grounds-2-1280.webp 1280w, images/opt/grounds-2-1672.webp 1672w" sizes="100vw">
+      <img src="images/opt/grounds-2-1280.jpg" srcset="images/opt/grounds-2-800.jpg 800w, images/opt/grounds-2-1280.jpg 1280w, images/opt/grounds-2-1672.jpg 1672w" sizes="100vw" alt="Picnic and statues on the Palace lawn" class="panel__img" loading="lazy" decoding="async" width="1672" height="941">
+    </picture>
+  </section>
+
+  <section class="panel panel--image" data-panel="9">
+    <picture>
+      <source type="image/avif" srcset="images/opt/grounds-3-800.avif 800w, images/opt/grounds-3-1280.avif 1280w, images/opt/grounds-3-1672.avif 1672w" sizes="100vw">
+      <source type="image/webp" srcset="images/opt/grounds-3-800.webp 800w, images/opt/grounds-3-1280.webp 1280w, images/opt/grounds-3-1672.webp 1672w" sizes="100vw">
+      <img src="images/opt/grounds-3-1280.jpg" srcset="images/opt/grounds-3-800.jpg 800w, images/opt/grounds-3-1280.jpg 1280w, images/opt/grounds-3-1672.jpg 1672w" sizes="100vw" alt="Evening fountain show on the lagoon" class="panel__img" loading="lazy" decoding="async" width="2750" height="1536">
+    </picture>
+  </section>
+
+  <!-- Fare: prose then food hall -->
+  <section class="panel panel--cream panel--prose" data-panel="10">
     <div class="prose__content">
       <p class="prose__text" data-animate="1">Explore over 60 stalls where single-item specialists obsess over one perfect dish, local chefs showcase the Bay Area&rsquo;s global culinary culture, and food pioneers serve what farming and science have made possible.</p>
     </div>
   </section>
 
-  <section class="panel panel--image" data-panel="9">
-    <img src="images/tour-4.png" alt="Tour into Tomorrow" class="panel__img" loading="lazy" decoding="async">
+  <section class="panel panel--image" data-panel="11">
+    <picture>
+      <source type="image/avif" srcset="images/opt/fare-2-800.avif 800w, images/opt/fare-2-1280.avif 1280w, images/opt/fare-2-1672.avif 1672w" sizes="100vw">
+      <source type="image/webp" srcset="images/opt/fare-2-800.webp 800w, images/opt/fare-2-1280.webp 1280w, images/opt/fare-2-1672.webp 1672w" sizes="100vw">
+      <img src="images/opt/fare-2-1280.jpg" srcset="images/opt/fare-2-800.jpg 800w, images/opt/fare-2-1280.jpg 1280w, images/opt/fare-2-1672.jpg 1672w" sizes="100vw" alt="World&rsquo;s Fare food hall" class="panel__img" loading="lazy" decoding="async" width="1678" height="937">
+    </picture>
   </section>
 
-  <section class="panel panel--cream panel--prose" data-panel="10">
+  <!-- Tomorrow: prose then six exhibit beats -->
+  <section class="panel panel--cream panel--prose" data-panel="12">
     <div class="prose__content">
-      <p class="prose__text" data-animate="1">Step into a Tomorrow. Explore a clean energy facility powering the world, an ocean station restoring coral reefs, a space station pushing the boundaries of medicine, and a community where today&rsquo;s innovations are part of everyday life.</p>
+      <p class="prose__text" data-animate="1">Step into a clean energy facility powering the world, an ocean station restoring coral reefs, a space station pushing the boundaries of medicine, and a community where today&rsquo;s innovations are part of everyday life.</p>
     </div>
   </section>
 
-  <section class="panel panel--image" data-panel="11">
-    <img src="images/lab-5.png" alt="Talks and workshops" class="panel__img" loading="lazy" decoding="async">
+  <section class="panel panel--image" data-panel="13">
+    <picture>
+      <source type="image/avif" srcset="images/opt/exhibit-0-800.avif 800w, images/opt/exhibit-0-1280.avif 1280w, images/opt/exhibit-0-1672.avif 1672w" sizes="100vw">
+      <source type="image/webp" srcset="images/opt/exhibit-0-800.webp 800w, images/opt/exhibit-0-1280.webp 1280w, images/opt/exhibit-0-1672.webp 1672w" sizes="100vw">
+      <img src="images/opt/exhibit-0-1280.jpg" srcset="images/opt/exhibit-0-800.jpg 800w, images/opt/exhibit-0-1280.jpg 1280w, images/opt/exhibit-0-1672.jpg 1672w" sizes="100vw" alt="Tomorrow exhibit entrance" class="panel__img" loading="lazy" decoding="async" width="1672" height="941">
+    </picture>
   </section>
 
-  <section class="panel panel--cream panel--prose" data-panel="12">
+  <section class="panel panel--image" data-panel="14">
+    <picture>
+      <source type="image/avif" srcset="images/opt/exhibit-1-800.avif 800w, images/opt/exhibit-1-1280.avif 1280w, images/opt/exhibit-1-1672.avif 1672w" sizes="100vw">
+      <source type="image/webp" srcset="images/opt/exhibit-1-800.webp 800w, images/opt/exhibit-1-1280.webp 1280w, images/opt/exhibit-1-1672.webp 1672w" sizes="100vw">
+      <img src="images/opt/exhibit-1-1280.jpg" srcset="images/opt/exhibit-1-800.jpg 800w, images/opt/exhibit-1-1280.jpg 1280w, images/opt/exhibit-1-1672.jpg 1672w" sizes="100vw" alt="Clean energy facility" class="panel__img" loading="lazy" decoding="async" width="1683" height="934">
+    </picture>
+  </section>
+
+  <section class="panel panel--image" data-panel="15">
+    <picture>
+      <source type="image/avif" srcset="images/opt/exhibit-2-800.avif 800w, images/opt/exhibit-2-1280.avif 1280w, images/opt/exhibit-2-1672.avif 1672w" sizes="100vw">
+      <source type="image/webp" srcset="images/opt/exhibit-2-800.webp 800w, images/opt/exhibit-2-1280.webp 1280w, images/opt/exhibit-2-1672.webp 1672w" sizes="100vw">
+      <img src="images/opt/exhibit-2-1280.jpg" srcset="images/opt/exhibit-2-800.jpg 800w, images/opt/exhibit-2-1280.jpg 1280w, images/opt/exhibit-2-1672.jpg 1672w" sizes="100vw" alt="Ocean station restoring coral reefs" class="panel__img" loading="lazy" decoding="async" width="1672" height="941">
+    </picture>
+  </section>
+
+  <section class="panel panel--image" data-panel="16">
+    <picture>
+      <source type="image/avif" srcset="images/opt/exhibit-3-800.avif 800w, images/opt/exhibit-3-1280.avif 1280w, images/opt/exhibit-3-1672.avif 1672w" sizes="100vw">
+      <source type="image/webp" srcset="images/opt/exhibit-3-800.webp 800w, images/opt/exhibit-3-1280.webp 1280w, images/opt/exhibit-3-1672.webp 1672w" sizes="100vw">
+      <img src="images/opt/exhibit-3-1280.jpg" srcset="images/opt/exhibit-3-800.jpg 800w, images/opt/exhibit-3-1280.jpg 1280w, images/opt/exhibit-3-1672.jpg 1672w" sizes="100vw" alt="Space station pushing the boundaries of medicine" class="panel__img" loading="lazy" decoding="async" width="1670" height="941">
+    </picture>
+  </section>
+
+  <section class="panel panel--image" data-panel="17">
+    <picture>
+      <source type="image/avif" srcset="images/opt/exhibit-4-800.avif 800w, images/opt/exhibit-4-1280.avif 1280w, images/opt/exhibit-4-1672.avif 1672w" sizes="100vw">
+      <source type="image/webp" srcset="images/opt/exhibit-4-800.webp 800w, images/opt/exhibit-4-1280.webp 1280w, images/opt/exhibit-4-1672.webp 1672w" sizes="100vw">
+      <img src="images/opt/exhibit-4-1280.jpg" srcset="images/opt/exhibit-4-800.jpg 800w, images/opt/exhibit-4-1280.jpg 1280w, images/opt/exhibit-4-1672.jpg 1672w" sizes="100vw" alt="A community where today&rsquo;s innovations are everyday life" class="panel__img" loading="lazy" decoding="async" width="1672" height="941">
+    </picture>
+  </section>
+
+  <section class="panel panel--image" data-panel="18">
+    <picture>
+      <source type="image/avif" srcset="images/opt/exhibit-5-800.avif 800w, images/opt/exhibit-5-1280.avif 1280w, images/opt/exhibit-5-1672.avif 1672w" sizes="100vw">
+      <source type="image/webp" srcset="images/opt/exhibit-5-800.webp 800w, images/opt/exhibit-5-1280.webp 1280w, images/opt/exhibit-5-1672.webp 1672w" sizes="100vw">
+      <img src="images/opt/exhibit-5-1280.jpg" srcset="images/opt/exhibit-5-800.jpg 800w, images/opt/exhibit-5-1280.jpg 1280w, images/opt/exhibit-5-1672.jpg 1672w" sizes="100vw" alt="Exhibit hall at the Palace of Fine Arts" class="panel__img" loading="lazy" decoding="async" width="1678" height="937">
+    </picture>
+  </section>
+
+  <!-- Labs: prose then two beats -->
+  <section class="panel panel--cream panel--prose" data-panel="19">
     <div class="prose__content">
       <p class="prose__text" data-animate="1">Meet the scientists behind the breakthroughs you just walked through, work alongside them in hands-on workshops, and find your own way to help build the future.</p>
     </div>
   </section>
 
-  <section class="panel panel--image" data-panel="13">
-    <img src="images/lagoon-6.jpeg" alt="Evening fountain show on the lagoon" class="panel__img" loading="lazy" decoding="async">
+  <section class="panel panel--image" data-panel="20">
+    <picture>
+      <source type="image/avif" srcset="images/opt/lab-1-800.avif 800w, images/opt/lab-1-1280.avif 1280w, images/opt/lab-1-1672.avif 1672w" sizes="100vw">
+      <source type="image/webp" srcset="images/opt/lab-1-800.webp 800w, images/opt/lab-1-1280.webp 1280w, images/opt/lab-1-1672.webp 1672w" sizes="100vw">
+      <img src="images/opt/lab-1-1280.jpg" srcset="images/opt/lab-1-800.jpg 800w, images/opt/lab-1-1280.jpg 1280w, images/opt/lab-1-1672.jpg 1672w" sizes="100vw" alt="Scientists at work in the Palace labs" class="panel__img" loading="lazy" decoding="async" width="1672" height="941">
+    </picture>
+  </section>
+
+  <section class="panel panel--image" data-panel="21">
+    <picture>
+      <source type="image/avif" srcset="images/opt/lab-2-800.avif 800w, images/opt/lab-2-1280.avif 1280w, images/opt/lab-2-1672.avif 1672w" sizes="100vw">
+      <source type="image/webp" srcset="images/opt/lab-2-800.webp 800w, images/opt/lab-2-1280.webp 1280w, images/opt/lab-2-1672.webp 1672w" sizes="100vw">
+      <img src="images/opt/lab-2-1280.jpg" srcset="images/opt/lab-2-800.jpg 800w, images/opt/lab-2-1280.jpg 1280w, images/opt/lab-2-1672.jpg 1672w" sizes="100vw" alt="Hands-on workshops with the scientists" class="panel__img" loading="lazy" decoding="async" width="1679" height="937">
+    </picture>
   </section>
 
   <!-- Closing reflection -->
-  <section class="panel panel--cream panel--impact" data-panel="14">
+  <section class="panel panel--cream panel--impact" data-panel="22">
     <div class="impact__content">
       <p class="impact__text" data-animate="1">Every visit leaves you with a sense of wonder&nbsp;&mdash; and a reason to come back.</p>
     </div>
   </section>
 
   <!-- Letter -->
-  <section class="panel panel--cream panel--letter" data-panel="15">
+  <section class="panel panel--cream panel--letter" data-panel="23">
     <div class="letter__content">
       <h2 class="letter__heading" data-animate="1">Help write the next chapter in the story of San&nbsp;Francisco.</h2>
       <div class="letter__body" data-animate="2">
