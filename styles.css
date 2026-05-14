@@ -655,39 +655,30 @@ body :is(input, textarea) { cursor: auto; }
 }
 
 /* =============================================================
-   Reduced motion / fallback: restore scroll layout
+   Reduced motion: same deck, no animation.
+   Layout / interactions stay identical; we only flatten the
+   slide+fade between panels into an instant cut and skip the
+   content reveal animations.
    ============================================================= */
-.reduced-motion, .reduced-motion body {
-  height: auto;
-  overflow: auto;
-}
 .reduced-motion .panel {
-  position: relative;
-  inset: auto;
-  height: auto;
-  min-height: calc(var(--vh) * 100);
+  transition: none;
+  transform: none;
+}
+.reduced-motion .panel.is-past { transform: none; }
+.reduced-motion .panel [data-animate] {
   opacity: 1;
-  pointer-events: auto;
-  z-index: auto;
+  transform: none;
+  transition: none;
+}
+.reduced-motion .hero__title {
+  animation: none;
+  opacity: 1;
+  transform: none;
 }
 .reduced-motion .hero-fixed,
-.reduced-motion .hero-fixed__blur,
-.reduced-motion .progress,
-.reduced-motion .tap-hint { display: none; }
-/* No fixed bg in reduced motion — paint the hero image directly on
-   the hero panel so users still see the Palace, and dim the tagline
-   panel so its ivory text stays legible. */
-.reduced-motion .panel--hero {
-  background: #1c1610 url("images/opt/header-image-1672.jpg") center 35% / cover no-repeat;
+.reduced-motion .hero-fixed__blur {
+  transition: none;
 }
-.reduced-motion .panel--tagline { background: #1c1610; }
-
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: 0.01ms !important;
-    transition-duration: 0.01ms !important;
-  }
-  .panel [data-animate], .panel--image, .hero__title {
-    opacity: 1 !important; transform: none !important;
-  }
+.reduced-motion .tap-hint {
+  animation: none;
 }

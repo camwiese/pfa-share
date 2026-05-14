@@ -26,12 +26,11 @@
   var heroBlur = document.querySelector('.hero-fixed__blur');
   var tapHint = document.querySelector('.tap-hint');
 
-  /* ── Reduced motion: fall back to a stacked scroll layout ──
-     Class goes on <html> so we can override its overflow/height. */
+  /* ── Reduced motion: tag the document but keep the full deck.
+     CSS shortens the slide/fade to an instant cut; everything else
+     (tap to advance, swipe, keys, dots) stays identical. */
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
     document.documentElement.classList.add('reduced-motion');
-    panels.forEach(function (p) { p.classList.add('is-active'); });
-    return;
   }
 
   /* ── Build progress dots (clickable) ─────────────────── */
