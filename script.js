@@ -26,9 +26,12 @@
   var heroBlur = document.querySelector('.hero-fixed__blur');
   var tapHint = document.querySelector('.tap-hint');
 
-  /* ── Reduced motion: tag the document but keep the full deck.
-     CSS shortens the slide/fade to an instant cut; everything else
-     (tap to advance, swipe, keys, dots) stays identical. */
+  /* Reduced motion: same deck, just no animations. Detect the OS
+     preference and tag <html>; the CSS for `.reduced-motion` swaps
+     slide+fade transitions for instant cuts and skips the per-panel
+     content reveals. All navigation (tap, swipe, keys, dots) stays
+     identical so the deck still loads and works on devices that
+     have the iOS / Android Reduce Motion setting enabled. */
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
     document.documentElement.classList.add('reduced-motion');
   }
