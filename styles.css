@@ -388,7 +388,7 @@ body :is(input, textarea) { cursor: auto; }
 .prose__text {
   font-family: var(--font-display);
   font-weight: 400;
-  font-size: clamp(1.3rem, 2vw, 1.65rem);
+  font-size: clamp(1.2rem, 1.8vw, 1.5rem);
   line-height: 1.32;
   letter-spacing: -0.005em;
   color: var(--ink);
