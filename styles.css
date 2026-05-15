@@ -420,6 +420,22 @@ body :is(input, textarea) { cursor: auto; }
 }
 
 /* =============================================================
+   CALL — bridge from experience flow into the letter. Bigger,
+   bolder than prose/impact so it visibly breaks the rhythm.
+   ============================================================= */
+.panel--call { background: var(--paper); }
+.call__content {
+  position: relative; z-index: 1;
+  max-width: min(64ch, 92vw); padding: 0 var(--gutter); text-align: center;
+}
+.call__text {
+  font-family: var(--font-display); font-weight: 400;
+  font-size: clamp(1.5rem, 2.6vw, 2.1rem);
+  line-height: 1.24; letter-spacing: -0.01em;
+  color: var(--ink); text-wrap: balance;
+}
+
+/* =============================================================
    LETTER
    ============================================================= */
 .panel--letter { background: var(--paper); }
@@ -433,7 +449,9 @@ body :is(input, textarea) { cursor: auto; }
 }
 .letter__heading {
   font-family: var(--font-display); font-weight: 400;
-  font-size: clamp(1.7rem, 3vw, 2.4rem);
+  /* min trimmed from 1.7rem so on iPhone widths each half of the
+     <br>-split heading fits on a single line (was breaking to 3). */
+  font-size: clamp(1.05rem, 4vw, 2.4rem);
   line-height: 1.18; letter-spacing: -0.01em;
   color: var(--ink);
   text-align: center;
@@ -575,7 +593,7 @@ body :is(input, textarea) { cursor: auto; }
   .prose__text { font-size: clamp(1.05rem, 4.5vw, 1.35rem); }
   .impact__text { font-size: clamp(1.3rem, 5.5vw, 1.8rem); }
   .letter__heading {
-    font-size: clamp(1.35rem, 6vw, 1.7rem);
+    font-size: clamp(1.05rem, 4.5vw, 1.5rem);
     margin-bottom: clamp(1.5rem, 3.5vh, 2rem);
   }
   .letter__body p { font-size: clamp(0.95rem, 3.8vw, 1.05rem); }
