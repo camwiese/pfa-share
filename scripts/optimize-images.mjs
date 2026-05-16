@@ -37,9 +37,9 @@ const SOURCES = [
   'exhibit-3.png',
   'exhibit-4.png',
   'exhibit-5.png',
+  'lab-1.png',
   'lab-2.png',
-  'lab-6.png',
-  'lab-9.png',
+  'lab-3.png',
 ];
 
 function fmtBytes(n) {
