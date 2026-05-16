@@ -390,16 +390,18 @@ body :is(input, textarea) { cursor: auto; }
 .panel--prose { background: var(--paper); }
 .prose__content {
   position: relative; z-index: 1;
-  max-width: min(110ch, 95vw);
-  padding: 0 var(--gutter);
+  max-width: min(120ch, 96vw);
+  padding: 0 calc(var(--gutter) * 0.5);
   text-align: center;
 }
 .prose__text {
   font-family: var(--font-display);
   font-weight: 400;
-  font-size: clamp(1.2rem, 1.8vw, 1.5rem);
-  line-height: 1.32;
-  letter-spacing: -0.005em;
+  /* Matches .letter__heading / .call__text so the deck's prose,
+     ask, and closing voice all share one scale. */
+  font-size: clamp(1.05rem, 4vw, 2.4rem);
+  line-height: 1.2;
+  letter-spacing: -0.01em;
   color: var(--ink);
   text-wrap: balance;
 }
@@ -414,8 +416,8 @@ body :is(input, textarea) { cursor: auto; }
 }
 .impact__text {
   font-family: var(--font-display); font-weight: 400;
-  font-size: clamp(1.3rem, 2vw, 1.65rem);
-  line-height: 1.32; letter-spacing: -0.005em;
+  font-size: clamp(1.05rem, 4vw, 2.4rem);
+  line-height: 1.2; letter-spacing: -0.01em;
   color: var(--ink); text-wrap: balance;
 }
 
@@ -592,8 +594,9 @@ body :is(input, textarea) { cursor: auto; }
   .ppie__line { font-size: clamp(0.92rem, 3.8vw, 1.1rem); }
   .welcome__heading { font-size: clamp(1.6rem, 7vw, 2.2rem); }
   .welcome__sub { font-size: clamp(0.95rem, 4vw, 1.1rem); }
-  .prose__text { font-size: clamp(1.05rem, 4.5vw, 1.35rem); }
-  .impact__text { font-size: clamp(1.3rem, 5.5vw, 1.8rem); }
+  /* .prose__text + .impact__text intentionally use the unified
+     clamp(1.05rem, 4vw, 2.4rem) from their base rules — no mobile
+     override, so they match .letter__heading at every viewport. */
   .letter__heading {
     font-size: clamp(1.05rem, 4.5vw, 1.5rem);
     margin-bottom: clamp(1.5rem, 3.5vh, 2rem);
@@ -661,9 +664,14 @@ body :is(input, textarea) { cursor: auto; }
   .welcome__heading  { font-size: clamp(1.4rem, 3.6vw, 1.9rem); }
   .welcome__sub      { font-size: clamp(0.85rem, 2vw, 1rem); }
   .welcome__year     { margin: clamp(0.35rem, 0.8vh, 0.6rem) 0 0; }
-  .prose__text       { font-size: clamp(0.95rem, 2.4vw, 1.2rem); }
-  .impact__text      { font-size: clamp(1.15rem, 3.2vw, 1.55rem); }
-  .letter__heading   { font-size: clamp(1.05rem, 2.6vw, 1.3rem); margin-bottom: clamp(0.45rem, 1.3vh, 0.85rem); }
+  /* Prose, impact, call, and letter heading share one clamp on
+     landscape mobile too — compact enough to fit 2–3 lines in a
+     short viewport while staying visually unified. */
+  .prose__text,
+  .impact__text,
+  .call__text,
+  .letter__heading   { font-size: clamp(1.05rem, 2.6vw, 1.4rem); }
+  .letter__heading   { margin-bottom: clamp(0.45rem, 1.3vh, 0.85rem); }
   .letter__body p    { font-size: clamp(0.78rem, 1.85vw, 0.92rem); line-height: 1.4; }
   .letter__body      { gap: clamp(0.25rem, 0.6vh, 0.45rem); }
   .letter__sign      { margin-top: clamp(0.6rem, 1.6vh, 1rem); }
