@@ -257,9 +257,11 @@ body :is(input, textarea) { cursor: auto; }
 .tagline__text {
   font-family: var(--font-display);
   font-weight: 350;
-  font-size: clamp(1.1rem, 1.75vw, 1.5rem);
-  line-height: 1.42;
-  letter-spacing: -0.003em;
+  /* Matches the unified prose / impact / call / letter-heading
+     scale so the deck reads in one voice. */
+  font-size: clamp(1.05rem, 4vw, 2.4rem);
+  line-height: 1.2;
+  letter-spacing: -0.01em;
   color: var(--ivory);
   text-wrap: balance;
 }
@@ -404,6 +406,10 @@ body :is(input, textarea) { cursor: auto; }
   letter-spacing: -0.01em;
   color: var(--ink);
   text-wrap: balance;
+  margin: 0;
+}
+.prose__text--follow {
+  margin-top: clamp(1rem, 2.5vh, 1.75rem);
 }
 
 /* =============================================================
@@ -589,7 +595,7 @@ body :is(input, textarea) { cursor: auto; }
    ============================================================= */
 @media (max-width: 860px) {
   .hero__title { font-size: clamp(1.5rem, 6.5vw, 2rem); }
-  .tagline__text { font-size: clamp(1.05rem, 4.5vw, 1.3rem); }
+  /* .tagline__text uses the unified clamp from its base rule. */
   .ppie__image { aspect-ratio: 3 / 1.4; }
   .ppie__line { font-size: clamp(0.92rem, 3.8vw, 1.1rem); }
   .welcome__heading { font-size: clamp(1.6rem, 7vw, 2.2rem); }
@@ -658,7 +664,7 @@ body :is(input, textarea) { cursor: auto; }
 
   /* Compact typography for short viewports. */
   .hero__title       { font-size: clamp(1.3rem, 4vw, 1.9rem); }
-  .tagline__text     { font-size: clamp(0.95rem, 2.6vw, 1.2rem); }
+  /* .tagline__text joins the unified landscape clamp below. */
   .ppie__intro,
   .ppie__line        { font-size: clamp(0.85rem, 1.9vw, 1.05rem); }
   .welcome__heading  { font-size: clamp(1.4rem, 3.6vw, 1.9rem); }
@@ -667,6 +673,7 @@ body :is(input, textarea) { cursor: auto; }
   /* Prose, impact, call, and letter heading share one clamp on
      landscape mobile too — compact enough to fit 2–3 lines in a
      short viewport while staying visually unified. */
+  .tagline__text,
   .prose__text,
   .impact__text,
   .call__text,
