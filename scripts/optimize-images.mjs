@@ -25,6 +25,7 @@ const FORMATS = [
 const SOURCES = [
   'header-image.png',
   '1915-PPIE-full.jpg',
+  'palace-only.png',
   'Park-Lagoon-2.png',
   'grounds-0.png',
   'grounds-1.png',
