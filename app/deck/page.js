@@ -3,6 +3,7 @@ import { getAdminEmails } from "../../lib/admin";
 import { redirect } from "next/navigation";
 import DeckPanels, { PANEL_COUNT } from "../../components/DeckPanels";
 import Deck from "../../components/Deck";
+import TrackerMount from "../../components/TrackerMount";
 import "../styles/deck.css";
 
 export const dynamic = "force-dynamic";
@@ -45,6 +46,7 @@ export default async function DeckPage({ searchParams }) {
         <DeckPanels />
       </main>
       <Deck startIndex={startIndex} />
+      <TrackerMount initEndpoint="/api/track/init" trackEndpoint="/api/track" />
     </>
   );
 }
