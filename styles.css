@@ -295,18 +295,24 @@ body :is(input, textarea) { cursor: auto; }
 }
 .ppie__content {
   position: relative; z-index: 1;
-  width: 100%; max-width: 1000px;
+  width: 100%; max-width: min(120ch, 96vw);
   margin: 0 auto;
+  padding: 0 calc(var(--gutter) * 0.5);
   display: flex; flex-direction: column; align-items: center;
+  gap: clamp(1rem, 2.5vh, 1.75rem);
 }
-.ppie__intro {
-  width: 100%;
-  margin-bottom: clamp(0.9rem, 2vh, 1.4rem);
-  display: flex; flex-direction: column;
-  gap: clamp(0.65rem, 1.5vh, 1rem);
+.ppie__text {
+  width: 100%; margin: 0;
+  font-family: var(--font-display); font-weight: 400;
+  /* Unified deck scale, same as prose / call / letter-heading. */
+  font-size: clamp(1.05rem, 4vw, 2.4rem);
+  line-height: 1.2; letter-spacing: -0.01em;
+  color: var(--ink);
+  text-align: center;
+  text-wrap: balance;
 }
 .ppie__figure {
-  width: 100%;
+  width: 100%; max-width: 1000px;
   border: 1px solid rgba(26,22,18,0.22);
   border-radius: 2px;
   overflow: hidden;
@@ -314,25 +320,14 @@ body :is(input, textarea) { cursor: auto; }
 }
 .ppie__image {
   width: 100%; height: auto; display: block;
-  aspect-ratio: 5 / 2;
+  /* Cap the image height so big-font slides still fit in viewport.
+     Source aspect (3393×1352 ≈ 5:2) is preserved by intrinsic ratio
+     unless this kicks in. */
+  max-height: 42vh;
   object-fit: cover;
 }
-.ppie__text {
-  width: 100%; padding-top: 10px;
-  display: flex; flex-direction: column;
-  gap: clamp(0.6rem, 1.5vh, 1rem);
-  text-align: center;
-  -webkit-mask-image: linear-gradient(to bottom, transparent 0px, black 10px, black 100%);
-          mask-image: linear-gradient(to bottom, transparent 0px, black 10px, black 100%);
-}
-.ppie__line {
-  font-family: var(--font-display); font-weight: 400;
-  font-size: clamp(1.05rem, 1.45vw, 1.25rem);
-  text-align: center;
-  text-wrap: balance;
-  line-height: 1.4; letter-spacing: -0.005em;
-  color: var(--ink); text-wrap: balance;
-}
+/* .ppie__line removed — PPIE now uses single <p class="ppie__text">
+   elements that share the unified deck font scale. */
 
 /* =============================================================
    WELCOME
@@ -596,8 +591,8 @@ body :is(input, textarea) { cursor: auto; }
 @media (max-width: 860px) {
   .hero__title { font-size: clamp(1.5rem, 6.5vw, 2rem); }
   /* .tagline__text uses the unified clamp from its base rule. */
-  .ppie__image { aspect-ratio: 3 / 1.4; }
-  .ppie__line { font-size: clamp(0.92rem, 3.8vw, 1.1rem); }
+  /* .ppie__text inherits the unified clamp from the mobile rule
+     below; image keeps its intrinsic aspect with max-height cap. */
   .welcome__heading { font-size: clamp(1.6rem, 7vw, 2.2rem); }
   .welcome__sub { font-size: clamp(0.95rem, 4vw, 1.1rem); }
   /* .prose__text + .impact__text intentionally use the unified
@@ -658,15 +653,14 @@ body :is(input, textarea) { cursor: auto; }
   .welcome__content { padding: clamp(0.75rem, 2vh, 1.25rem) var(--gutter); }
 
   /* Cap image heights so they never push other content off-screen. */
-  .ppie__image    { max-height: 38vh; aspect-ratio: 5 / 2; }
+  .ppie__image    { max-height: 38vh; }
   .welcome__figure { max-width: min(440px, 60vw); margin-top: clamp(0.5rem, 1.5vh, 0.9rem); }
   .welcome__image  { max-height: 32vh; object-fit: contain; }
 
   /* Compact typography for short viewports. */
   .hero__title       { font-size: clamp(1.3rem, 4vw, 1.9rem); }
   /* .tagline__text joins the unified landscape clamp below. */
-  .ppie__intro,
-  .ppie__line        { font-size: clamp(0.85rem, 1.9vw, 1.05rem); }
+  /* .ppie__text uses the unified landscape clamp below. */
   .welcome__heading  { font-size: clamp(1.4rem, 3.6vw, 1.9rem); }
   .welcome__sub      { font-size: clamp(0.85rem, 2vw, 1rem); }
   .welcome__year     { margin: clamp(0.35rem, 0.8vh, 0.6rem) 0 0; }
@@ -674,6 +668,7 @@ body :is(input, textarea) { cursor: auto; }
      landscape mobile too — compact enough to fit 2–3 lines in a
      short viewport while staying visually unified. */
   .tagline__text,
+  .ppie__text,
   .prose__text,
   .impact__text,
   .call__text,
