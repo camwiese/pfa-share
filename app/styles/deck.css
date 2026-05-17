@@ -144,7 +144,7 @@ body :is(input, textarea) { cursor: auto; }
   /* Plain JPEG — image-set() with type() annotations was causing
      blank hero on some iOS Safari builds. JPEG is universally
      supported and only ~310KB. */
-  background-image: url("images/opt/header-image-1672.jpg");
+  background-image: url("/images/opt/header-image-1672.jpg");
   background-position: center 35%;
   background-size: cover;
   background-repeat: no-repeat;
