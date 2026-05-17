@@ -1,1 +1,6 @@
-{ "framework": "nextjs" }
+{
+  "framework": "nextjs",
+  "crons": [
+    { "path": "/api/cron/close-idle", "schedule": "* * * * *" }
+  ]
+}
