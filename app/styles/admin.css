@@ -1,0 +1,32 @@
+.admin-shell {
+  min-height: 100vh;
+  background: #fcfbf8;
+  font-family: "Inter", system-ui, sans-serif;
+  color: #33403a;
+}
+
+.admin-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.admin-content h1 {
+  font-family: "Fraunces", Georgia, serif;
+  font-weight: 500;
+  font-size: 24px;
+  margin: 0 0 16px;
+}
+
+.admin-content h2 {
+  font-family: "Fraunces", Georgia, serif;
+  font-weight: 500;
+  font-size: 18px;
+  margin: 24px 0 12px;
+}
+
+@media (max-width: 768px) {
+  .admin-content {
+    padding: 16px;
+  }
+}
