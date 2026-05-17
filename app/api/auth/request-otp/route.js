@@ -3,6 +3,8 @@ import { createServiceClient } from "../../../../lib/supabase/server";
 import { getAdminEmails } from "../../../../lib/admin";
 import { isValidEmail, normalizeEmail } from "../../../../lib/email";
 import { isAnyAdmin } from "../../../../lib/adminAuth";
+import { notifyAccessRequest, notifyNewEmail } from "../../../../lib/notifications";
+import { geoFromHeaders } from "../../../../lib/geo";
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -75,6 +77,8 @@ export async function POST(request) {
         } catch (err) {
           console.error("[request-otp] access_requests insert failed:", err?.message);
         }
+        // Fire admin notification (best-effort, swallow errors).
+        notifyAccessRequest({ email: normalizedEmail, geo: geoFromHeaders(request.headers) }).catch(() => {});
         return NextResponse.json({ requires_approval: true });
       }
 
@@ -88,6 +92,8 @@ export async function POST(request) {
       } catch (err) {
         console.error("[request-otp] Failed to auto-add to allowed_emails:", err?.message);
       }
+      // Fire "new email verified" admin notification (best-effort).
+      notifyNewEmail({ email: normalizedEmail, geo: geoFromHeaders(request.headers) }).catch(() => {});
     }
   }
 

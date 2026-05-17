@@ -10,6 +10,7 @@ import {
   SESSION_COOKIE_NAME,
   SESSION_COOKIE_OPTIONS,
 } from "../../../lib/sessionCookie";
+import { notifyLinkOpened } from "../../../lib/notifications";
 import DeckPanels from "../../../components/DeckPanels";
 import Deck from "../../../components/Deck";
 import TrackerMount from "../../../components/TrackerMount";
@@ -112,6 +113,13 @@ export default async function PersonalLinkPage({ params }) {
       kind: "personal",
     });
     ck.set(SESSION_COOKIE_NAME, cookieValue, SESSION_COOKIE_OPTIONS);
+
+    // Fire admin "link opened" email (best-effort, fire-and-forget).
+    notifyLinkOpened({
+      link,
+      session: { ...result.session, geo: geoFromHeaders(hdrs) },
+      firstSession: (link.view_count || 0) === 0,
+    }).catch(() => {});
   }
 
   return (
