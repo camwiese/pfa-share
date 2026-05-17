@@ -92,15 +92,18 @@ export default function Deck({ startIndex = 0, withGate = false, freeCount = 5, 
 
     function setIndex(target) {
       if (target < 0) target = 0;
-      if (target >= panels.length) target = panels.length - 1;
-      if (target === currentIndex) return;
 
-      // Gate check: block forward transition past the free preview.
+      // Gate check: when the gate is active, advancing past the last free
+      // slide fires the gate even if the gated panels haven't been spliced
+      // in yet. We do this *before* the panels.length clamp.
       if (withGate && target >= freeCount && currentIndex < freeCount && !gateBlockedRef.current) {
         if (onGateRequestRef.current) onGateRequestRef.current(target);
         return;
       }
       if (gateBlockedRef.current && target >= freeCount) return;
+
+      if (target >= panels.length) target = panels.length - 1;
+      if (target === currentIndex) return;
 
       const direction = target > currentIndex ? "forward" : "backward";
       document.body.dataset.direction = direction;
