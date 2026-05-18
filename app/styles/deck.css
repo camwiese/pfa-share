@@ -598,7 +598,9 @@ body :is(input, textarea) { cursor: auto; }
    ============================================================= */
 @media (max-width: 860px) {
   .hero__title { font-size: clamp(1.5rem, 6.5vw, 2rem); }
-  /* .tagline__text uses the unified clamp from its base rule. */
+  /* Tagline bumped on mobile to match the hero scale instead of the
+     unified prose scale — it's a chapter opener, not body copy. */
+  .tagline__text { font-size: clamp(1.5rem, 6.5vw, 2rem); }
   /* .ppie__text inherits the unified clamp from the mobile rule
      below; image keeps its intrinsic aspect with max-height cap. */
   .welcome__heading { font-size: clamp(1.6rem, 7vw, 2.2rem); }

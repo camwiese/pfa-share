@@ -176,7 +176,6 @@ const PANELS = [
     key="7"
     idx={7}
     text="Modeled after the great pavilions of the 1915 Exposition, Tour into Tomorrow lets you walk through four visions of the future."
-    follow="Each inspired by real breakthroughs happening across the Bay Area."
   />,
   <ImagePanel key="8" idx={8} base="exhibit-1" alt="Clean energy facility" dims={{ w: 1683, h: 934 }} />,
   <ImagePanel key="9" idx={9} base="exhibit-2" alt="Tour into Tomorrow exhibit" dims={{ w: 1672, h: 941 }} />,
@@ -198,7 +197,7 @@ const PANELS = [
   // 25 — Impact
   <section className="panel panel--cream panel--impact" data-panel="25" key="25">
     <div className="impact__content">
-      <p className="impact__text" data-animate="1">Every visit leaves you with a sense of wonder&nbsp;&mdash; and a reason to come back.</p>
+      <p className="impact__text" data-animate="1">Every visit leaves you with a sense of wonder&nbsp;&mdash; and a reason to return.</p>
     </div>
   </section>,
   // 26 — Call

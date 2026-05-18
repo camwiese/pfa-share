@@ -6,23 +6,34 @@ import { describeDevice } from "../../../../lib/ua";
 import { parseUA } from "../../../../lib/ua";
 import { geoFromHeaders } from "../../../../lib/geo";
 import { signSessionCookie, verifySessionCookie, SESSION_COOKIE_NAME, SESSION_COOKIE_OPTIONS } from "../../../../lib/sessionCookie";
+import { getDummyAuthEmail } from "../../../../lib/dummyAuth";
 
 export async function POST(request) {
   let body = {};
   try { body = await request.json(); } catch {}
 
-  // 1. Resolve viewer email — either authed via Supabase or dev bypass.
+  // 1. Resolve viewer email. Three accepted sources:
+  //    - LOCAL_DEV_ADMIN_BYPASS (dev only)
+  //    - AUTH_DUMMY_MODE signed cookie (from the gate / admin sign-in flow)
+  //    - Real Supabase session
+  // Whichever wins becomes sessions.viewer_email so the visitor's email
+  // shows up in analytics under their own identifier.
   let email = null;
   const bypass =
     process.env.NODE_ENV === "development" && process.env.LOCAL_DEV_ADMIN_BYPASS === "true";
   if (bypass) {
     email = (getAdminEmails()[0] || "dev@example.com").toLowerCase();
   } else {
-    try {
-      const supabase = await createClient();
-      const { data: { user } } = await supabase.auth.getUser();
-      email = user?.email?.toLowerCase() || null;
-    } catch {}
+    const dummyEmail = await getDummyAuthEmail();
+    if (dummyEmail) {
+      email = dummyEmail;
+    } else {
+      try {
+        const supabase = await createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        email = user?.email?.toLowerCase() || null;
+      } catch {}
+    }
   }
   if (!email) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
