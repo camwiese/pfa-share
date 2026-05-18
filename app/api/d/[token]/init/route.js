@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import crypto from "crypto";
-import { createServiceClient } from "../../../../../lib/supabase/server";
+import { createClient, createServiceClient } from "../../../../../lib/supabase/server";
+import { getAdminEmails } from "../../../../../lib/admin";
+import { getDummyAuthEmail } from "../../../../../lib/dummyAuth";
 import { describeDevice, parseUA } from "../../../../../lib/ua";
 import { geoFromHeaders } from "../../../../../lib/geo";
 import {
@@ -25,6 +27,14 @@ export async function POST(request, { params }) {
 
   let body = {};
   try { body = await request.json(); } catch {}
+
+  // Admin previewing one of their own links — skip the whole session
+  // bootstrap so we don't pollute analytics with our own opens. Checks both
+  // the dummy-auth cookie (current production state) and any real Supabase
+  // session (post-Resend).
+  if (await isAdminVisitor()) {
+    return NextResponse.json({ skip: true, reason: "admin_preview" });
+  }
 
   let service;
   try {
@@ -134,6 +144,20 @@ async function createSession({ service, link, request, ua, incomingFp, body, rea
     SESSION_COOKIE_OPTIONS
   );
   return res;
+}
+
+async function isAdminVisitor() {
+  const admins = getAdminEmails();
+  if (admins.length === 0) return false;
+  const dummy = await getDummyAuthEmail();
+  if (dummy && admins.includes(dummy)) return true;
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    const email = user?.email?.toLowerCase();
+    if (email && admins.includes(email)) return true;
+  } catch {}
+  return false;
 }
 
 function hashIp(request) {

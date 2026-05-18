@@ -37,6 +37,13 @@ export async function POST(request) {
   }
   if (!email) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
+  // 1a. Admin preview — never tracked. Admins viewing /deck would otherwise
+  // pollute analytics with their own previews. Return {skip: true} so the
+  // TrackerMount client knows not to enable the heartbeat hook.
+  if (getAdminEmails().includes(email)) {
+    return NextResponse.json({ skip: true, reason: "admin_preview" });
+  }
+
   // 2. Reuse existing valid session cookie if it matches this viewer.
   const existing = verifySessionCookie(request.cookies.get(SESSION_COOKIE_NAME)?.value);
   let service;
