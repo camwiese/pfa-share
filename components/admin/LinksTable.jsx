@@ -241,13 +241,61 @@ export default function LinksTable() {
         <div className="row-list">
           {links.map((l) => {
               const stats = statsByLink[l.id];
+              const visitorCount = stats?.visitors ?? 0;
+              const sessionCount = l.view_count || 0;
               return (
                 <div
                   key={l.id}
-                  className={`row${!l.is_active ? " row--inactive" : ""}`}
+                  className={`row link-row${!l.is_active ? " row--inactive" : ""}`}
                   style={{ gridTemplateColumns: TABLE_COLS }}
                   onClick={() => setOpenId(l.id)}
                 >
+                  {/* Mobile-only structured summary. Hidden on desktop. */}
+                  <div className="link-row__mobile">
+                    <div className="link-row__mobile-head">
+                      <SharingDot signal={signalsByLink[l.id]} />
+                      <div className="link-row__mobile-name">
+                        <div className="row__primary">{l.name}</div>
+                        {l.note ? <div className="row__muted" style={{ fontSize: 11 }}>{l.note}</div> : null}
+                      </div>
+                      <label
+                        className="switch"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={l.is_active}
+                          onChange={(e) => toggleActive(l, e.target.checked)}
+                        />
+                        <span className="switch__track">
+                          <span className="switch__thumb" />
+                        </span>
+                      </label>
+                    </div>
+                    <button
+                      className="row__mono icon-btn link-row__mobile-token"
+                      onClick={(e) => { e.stopPropagation(); copyUrl(l.token, l.name); }}
+                      title="Copy URL"
+                    >
+                      /d/{l.token}
+                    </button>
+                    <div className="link-row__mobile-stats">
+                      <strong>{visitorCount}</strong> visitor{visitorCount === 1 ? "" : "s"}
+                      {" · "}
+                      <strong>{sessionCount}</strong> session{sessionCount === 1 ? "" : "s"}
+                      {" · "}
+                      <strong>{stats ? formatDuration(stats.totalSeconds) : "—"}</strong> view-time
+                    </div>
+                    <div className="link-row__mobile-meta">
+                      Created {formatRelative(l.created_at)}
+                      {" · "}
+                      <span className={l.last_viewed_at ? "" : "row__faint"}>
+                        {l.last_viewed_at ? `Last seen ${formatRelative(l.last_viewed_at)}` : "Not viewed yet"}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Desktop grid cells. Hidden on mobile. */}
                   <SharingDot signal={signalsByLink[l.id]} />
                   <div>
                     <div className="row__primary">{l.name}</div>
