@@ -4,7 +4,13 @@ A DocSend-style sharing tool for the Palace of Fine Arts deck. Per-recipient
 links, per-slide dwell tracking, an admin dashboard, and a gate for organic
 visitors after the free preview.
 
-Live at **pfa.worldsfair.co**.
+| Environment | URL | Branch |
+|---|---|---|
+| Production | **pfa.worldsfair.co** | `main` |
+| Staging | **pfa-staging.worldsfair.co** | `staging` |
+| Feature preview | auto-generated `*.vercel.app` URL per branch | any other branch |
+
+Workflow: feature branch → `staging` → `main`. See [`docs/WORKFLOW.md`](docs/WORKFLOW.md).
 
 ## What's in the box
 
@@ -184,8 +190,8 @@ anti-fingerprinting) and after major browser updates. Treat the signal as
 
 ## Deployment
 
-See [`docs/DEPLOY.md`](docs/DEPLOY.md) for the full Supabase + Resend +
-Vercel walkthrough.
+- **First-time setup** (Supabase + Resend + Vercel + DNS): [`docs/DEPLOY.md`](docs/DEPLOY.md)
+- **Day-to-day workflow** (feature → staging → main): [`docs/WORKFLOW.md`](docs/WORKFLOW.md)
 
 ## License
 
