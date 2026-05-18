@@ -121,11 +121,8 @@ export default function GateModal({ open, onVerified, onBack }) {
       >
         {step === "email" && (
           <>
-            <h2 style={titleStyle}>Please confirm your email to continue</h2>
-            <p style={subStyle}>
-              Project details are confidential. Please enter your email to continue.
-            </p>
-            <form onSubmit={sendCode} style={{ display: "grid", gap: 10 }}>
+            <h2 style={titleStyle}>To see our vision, please confirm your email</h2>
+            <form onSubmit={sendCode} style={{ display: "grid", gap: 10, marginTop: 14 }}>
               <input
                 ref={emailRef}
                 type="email"
