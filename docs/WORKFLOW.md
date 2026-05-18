@@ -13,7 +13,7 @@ feature branch  ──►  staging  ──►  main
 | Branch | Vercel role | Where it lives |
 |---|---|---|
 | `main` | Production | `pfa.worldsfair.co` |
-| `staging` | Stable staging (long-lived) | `pfa-staging.worldsfair.co` *(after step 4 below)* |
+| `staging` | Stable staging (long-lived) | `pfa-share.vercel.app` |
 | `feature/*` | Ephemeral preview | `pfa-share-git-<branch>-…vercel.app` |
 
 ## Day-to-day flow
@@ -42,7 +42,7 @@ feature branch  ──►  staging  ──►  main
    git merge --no-ff feature/short-name
    git push
    ```
-   Vercel deploys staging to `pfa-staging.worldsfair.co`. **Smoke-test there**
+   Vercel deploys staging to `pfa-share.vercel.app`. **Smoke-test there**
    against the production Supabase project (same env vars).
 4. **Promote `staging` → `main`** once staging looks good:
    ```bash
@@ -87,22 +87,21 @@ separate staging Supabase or a different `NEXT_PUBLIC_APP_URL`. We currently
 share everything across both — simpler and shared analytics during the
 pre-launch phase.
 
-## Vercel setup for staging URL (one-time)
+## Vercel setup for the staging URL (one-time, already done)
 
-> If this is already configured, skip.
+Staging uses the free Vercel-provided `pfa-share.vercel.app` subdomain
+mapped to the `staging` branch — no DNS needed. If you ever want to
+upgrade to a branded URL (e.g. `staging.pfa.worldsfair.co`):
 
 1. **Vercel dashboard** → project `pfa-share` → **Settings → Domains**
-2. Click **Add Domain** → `pfa-staging.worldsfair.co`
+2. **Add Domain** → `staging.pfa.worldsfair.co`
 3. When Vercel asks which Git branch to map it to, choose **`staging`**
 4. Vercel gives you a CNAME target. In `worldsfair.co` DNS, add:
    - Type: `CNAME`
-   - Host: `pfa-staging`
+   - Host: `staging.pfa`
    - Value: `cname.vercel-dns.com`
    - TTL: auto (300)
-5. Wait for the SSL cert to issue (usually < 5 minutes)
-
-Now every push to `staging` deploys to `pfa-staging.worldsfair.co`. Feature
-branches still get their own auto-generated `*.vercel.app` preview URLs.
+5. Wait for SSL to issue (~5 min).
 
 ## Production-branch setting (one-time)
 

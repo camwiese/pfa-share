@@ -7,7 +7,7 @@ visitors after the free preview.
 | Environment | URL | Branch |
 |---|---|---|
 | Production | **pfa.worldsfair.co** | `main` |
-| Staging | **pfa-staging.worldsfair.co** | `staging` |
+| Staging | **pfa-share.vercel.app** | `staging` |
 | Feature preview | auto-generated `*.vercel.app` URL per branch | any other branch |
 
 Workflow: feature branch → `staging` → `main`. See [`docs/WORKFLOW.md`](docs/WORKFLOW.md).
