@@ -26,7 +26,7 @@ const TAGLINE_HTML = (
   </section>
 );
 
-function PpiePanel({ idx, base, text, textAbove, textBelow, alt, dims }) {
+function PpiePanel({ idx, base, text, textAbove, textBelow, alt, dims, priority = false }) {
   // Three modes:
   //   - text only → text first, image below (original)
   //   - text + below-flag (textBelow=true with no textAbove) → image first, text below
@@ -45,7 +45,8 @@ function PpiePanel({ idx, base, text, textAbove, textBelow, alt, dims }) {
           sizes="(max-width: 860px) 92vw, 1000px"
           alt={alt}
           className="ppie__image"
-          loading="lazy"
+          loading={priority ? "eager" : "lazy"}
+          fetchPriority={priority ? "high" : "auto"}
           decoding="async"
           width={dims.w}
           height={dims.h}
@@ -132,6 +133,7 @@ const PANELS = [
     textBelow="They walked through the greatest achievements of their time, and left believing anything was possible."
     alt="The Panama-Pacific International Exposition, San Francisco, 1915"
     dims={{ w: 3393, h: 1352 }}
+    priority
   />,
   <PpiePanel
     key="3"
@@ -232,7 +234,44 @@ export default function DeckPanels({ start = 0, count = PANELS.length }) {
     <>
       {start === 0 ? (
         <>
-          <div className="hero-fixed" aria-hidden="true" />
+          {/* Preload the hero so the request starts in parallel with HTML
+              parsing. imageSrcSet lets the browser pick the right variant
+              for the viewport. Next.js hoists this <link> into <head>. */}
+          <link
+            rel="preload"
+            as="image"
+            type="image/avif"
+            href="/images/opt/header-image-1280.avif"
+            imageSrcSet="/images/opt/header-image-800.avif 800w, /images/opt/header-image-1280.avif 1280w, /images/opt/header-image-1672.avif 1672w"
+            imageSizes="100vw"
+            fetchPriority="high"
+          />
+          <div className="hero-fixed" aria-hidden="true">
+            {/* Real <picture> instead of a CSS background so AVIF/WebP are
+                delivered everywhere (CSS image-set() previously broke on some
+                iOS Safari builds). Image is fixed + cover-styled in deck.css. */}
+            <picture>
+              <source
+                type="image/avif"
+                srcSet="/images/opt/header-image-800.avif 800w, /images/opt/header-image-1280.avif 1280w, /images/opt/header-image-1672.avif 1672w"
+                sizes="100vw"
+              />
+              <source
+                type="image/webp"
+                srcSet="/images/opt/header-image-800.webp 800w, /images/opt/header-image-1280.webp 1280w, /images/opt/header-image-1672.webp 1672w"
+                sizes="100vw"
+              />
+              <img
+                src="/images/opt/header-image-1280.jpg"
+                srcSet="/images/opt/header-image-800.jpg 800w, /images/opt/header-image-1280.jpg 1280w, /images/opt/header-image-1672.jpg 1672w"
+                sizes="100vw"
+                alt=""
+                className="hero-fixed__img"
+                fetchPriority="high"
+                decoding="async"
+              />
+            </picture>
+          </div>
           <div className="hero-fixed__blur" aria-hidden="true" />
         </>
       ) : null}

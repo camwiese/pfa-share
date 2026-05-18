@@ -33,6 +33,7 @@ export default function LinkDrawer({ linkId, onClose, onAfterChange }) {
     setLoading(true);
     setExpandedSessionId(null);
     setConfirmingDelete(false);
+    setDeleting(false);
     Promise.all([
       fetch(`/api/admin/links?status=all`).then((r) => r.json()),
       fetch(`/api/admin/sessions?link_id=${linkId}&days=365&limit=200`).then((r) => r.json()),
@@ -107,6 +108,10 @@ export default function LinkDrawer({ linkId, onClose, onAfterChange }) {
         throw new Error(data?.error || "Failed to delete");
       }
       toast.success("Link deleted");
+      // Reset before unmount-via-onClose so any stale state never lingers
+      // into the next drawer open (LinksTable mounts a single drawer instance).
+      setDeleting(false);
+      setConfirmingDelete(false);
       onAfterChange?.();
       onClose?.();
     } catch (err) {
