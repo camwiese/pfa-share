@@ -136,7 +136,7 @@ export default function LinksTable() {
     }
   }
 
-  const TABLE_COLS = "16px 1.4fr 92px 60px 60px 70px 1fr 50px";
+  const TABLE_COLS = "16px 1.4fr 92px 60px 60px 70px 1fr 1fr 50px";
 
   return (
     <div>
@@ -209,6 +209,7 @@ export default function LinksTable() {
             <span>Visitors</span>
             <span>Sessions</span>
             <span>Time</span>
+            <span>Created</span>
             <span>Last seen</span>
             <span style={{ textAlign: "right" }}>Active</span>
           </div>
@@ -238,7 +239,10 @@ export default function LinksTable() {
                   <div>{stats?.visitors ?? "—"}</div>
                   <div>{l.view_count || 0}</div>
                   <div className="row__muted">{stats ? formatDuration(stats.totalSeconds) : "—"}</div>
-                  <div className="row__muted">{formatRelative(l.last_viewed_at)}</div>
+                  <div className="row__muted">{formatRelative(l.created_at)}</div>
+                  <div className={l.last_viewed_at ? "row__muted" : "row__faint"}>
+                    {l.last_viewed_at ? formatRelative(l.last_viewed_at) : "Not viewed"}
+                  </div>
                   <label
                     className="switch"
                     style={{ justifySelf: "end" }}

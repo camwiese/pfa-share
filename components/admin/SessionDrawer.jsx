@@ -21,6 +21,7 @@ export default function SessionDrawer({ sessionId, onClose, onOpenSession }) {
 
   const s = data?.session;
   const link = data?.link;
+  const linkStats = data?.linkStats;
   const related = data?.related || [];
 
   const isLive = s && !s.ended_at && Date.now() - new Date(s.last_tick_at).getTime() < 90_000;
@@ -42,6 +43,20 @@ export default function SessionDrawer({ sessionId, onClose, onOpenSession }) {
           <div className="empty-state">Loading…</div>
         ) : (
           <>
+            {link && linkStats ? (
+              <div className="link-context">
+                <div className="link-context__label">Across this link</div>
+                <div className="link-context__stats">
+                  <span><strong>{linkStats.visitors}</strong> visitor{linkStats.visitors === 1 ? "" : "s"}</span>
+                  <span className="row__muted">·</span>
+                  <span><strong>{linkStats.sessions}</strong> session{linkStats.sessions === 1 ? "" : "s"}</span>
+                  <span className="row__muted">·</span>
+                  <span><strong>{formatDuration(linkStats.totalSeconds)}</strong> total time</span>
+                  <span className="row__muted" style={{ marginLeft: "auto" }}>Created {formatRelative(link.created_at)}</span>
+                </div>
+              </div>
+            ) : null}
+
             <SessionSummary session={s} link={link} isLive={isLive} />
 
             <h3>Time per slide</h3>

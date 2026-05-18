@@ -24,6 +24,7 @@ export async function GET(request, { params }) {
   if (!session) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   let link = null;
+  let linkStats = null;
   if (session.link_id) {
     const { data } = await auth.service
       .from("links")
@@ -31,6 +32,19 @@ export async function GET(request, { params }) {
       .eq("id", session.link_id)
       .maybeSingle();
     link = data || null;
+
+    const { data: linkSessions } = await auth.service
+      .from("sessions")
+      .select("id, fp_hash, total_seconds, is_bot")
+      .eq("link_id", session.link_id);
+    if (linkSessions) {
+      const real = linkSessions.filter((s) => !s.is_bot);
+      linkStats = {
+        visitors: new Set(real.map((s) => s.fp_hash).filter(Boolean)).size,
+        sessions: real.length,
+        totalSeconds: real.reduce((a, s) => a + (Number(s.total_seconds) || 0), 0),
+      };
+    }
   }
 
   let related = [];
@@ -52,5 +66,5 @@ export async function GET(request, { params }) {
     .order("created_at", { ascending: true })
     .limit(200);
 
-  return NextResponse.json({ session, link, related, events: events || [] });
+  return NextResponse.json({ session, link, linkStats, related, events: events || [] });
 }

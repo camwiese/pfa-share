@@ -314,6 +314,7 @@
 .row__primary { font-weight: 500; color: var(--admin-ink); }
 .row__muted { color: var(--admin-ink-muted); }
 .row__mono { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 12px; color: var(--admin-ink-muted); }
+.row__faint { color: var(--admin-ink-faint); font-style: italic; font-size: 12px; }
 
 .empty-state {
   padding: 28px;
@@ -393,6 +394,32 @@
   margin-bottom: 14px;
 }
 .meta-grid strong { color: var(--admin-ink); font-weight: 500; margin-right: 4px; }
+
+/* ---- Link context (shown atop SessionDrawer when session belongs to a link) ---- */
+
+.link-context {
+  background: var(--admin-paper);
+  border: 1px solid var(--admin-ink-ghost);
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-bottom: 14px;
+}
+.link-context__label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--admin-ink-muted);
+  margin-bottom: 4px;
+}
+.link-context__stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: baseline;
+  font-size: 13px;
+  color: var(--admin-ink);
+}
+.link-context__stats strong { font-weight: 500; font-family: var(--admin-font-display); font-size: 15px; }
 
 /* ---- Session summary block (drawer top) ---- */
 
