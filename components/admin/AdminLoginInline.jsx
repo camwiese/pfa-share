@@ -2,20 +2,24 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import CodeInput from "../CodeInput";
 
 export default function AdminLoginInline() {
   const router = useRouter();
   const [step, setStep] = useState("email");
   const [email, setEmail] = useState("");
-  const [code, setCode] = useState("");
+  const [digits, setDigits] = useState(["", "", "", "", "", ""]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const emailRef = useRef(null);
-  const codeRef = useRef(null);
+  const verifiedRef = useRef(false);
 
   useEffect(() => {
     if (step === "email") emailRef.current?.focus();
-    if (step === "code") codeRef.current?.focus();
+  }, [step]);
+
+  useEffect(() => {
+    if (step !== "code") verifiedRef.current = false;
   }, [step]);
 
   async function submitEmail(e) {
@@ -35,6 +39,7 @@ export default function AdminLoginInline() {
         return;
       }
       setStep("code");
+      setDigits(["", "", "", "", "", ""]);
     } catch {
       setError("Network error. Try again.");
     } finally {
@@ -42,29 +47,28 @@ export default function AdminLoginInline() {
     }
   }
 
-  async function submitCode(e) {
-    e.preventDefault();
-    const t = code.trim();
-    if (t.length !== 6) {
-      setError("Enter the 6-digit code.");
-      return;
-    }
+  async function verifyCode(code) {
+    if (verifiedRef.current) return;
+    verifiedRef.current = true;
     setBusy(true);
     setError("");
     try {
       const res = await fetch("/api/auth/verify-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email.trim(), token: t }),
+        body: JSON.stringify({ email: email.trim(), token: code }),
       });
       const data = await res.json();
       if (!res.ok) {
         setError(data?.error || "Wrong code.");
+        setDigits(["", "", "", "", "", ""]);
+        verifiedRef.current = false;
         return;
       }
       router.refresh();
     } catch {
       setError("Network error. Try again.");
+      verifiedRef.current = false;
     } finally {
       setBusy(false);
     }
@@ -77,7 +81,7 @@ export default function AdminLoginInline() {
         <p className="admin-login__sub">
           {step === "email"
             ? "Enter your admin email. We'll send a 6-digit code."
-            : `Enter the code we just sent to ${email}.`}
+            : `Enter the code we sent to ${email}.`}
         </p>
 
         {step === "email" ? (
@@ -97,33 +101,31 @@ export default function AdminLoginInline() {
             </button>
           </form>
         ) : (
-          <form onSubmit={submitCode} style={{ display: "grid", gap: 10 }}>
-            <input
-              ref={codeRef}
-              type="text"
-              required
-              value={code}
-              onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
-              inputMode="numeric"
-              pattern="[0-9]*"
-              maxLength={6}
-              autoComplete="one-time-code"
-              placeholder="• • • • • •"
-              className="input"
-              style={{ letterSpacing: "0.4em", textAlign: "center", fontSize: 18 }}
+          <div style={{ display: "grid", gap: 12 }}>
+            <CodeInput
+              value={digits}
+              onChange={setDigits}
+              onComplete={verifyCode}
+              disabled={busy}
             />
-            <button type="submit" disabled={busy} className="btn btn--primary">
-              {busy ? "Verifying…" : "Verify"}
-            </button>
+            {busy ? (
+              <div style={{ textAlign: "center", fontSize: 13, color: "var(--admin-ink-muted)" }}>
+                Verifying…
+              </div>
+            ) : null}
             <button
               type="button"
-              onClick={() => { setStep("email"); setCode(""); setError(""); }}
+              onClick={() => {
+                setStep("email");
+                setDigits(["", "", "", "", "", ""]);
+                setError("");
+              }}
               className="btn btn--text"
               style={{ justifySelf: "center" }}
             >
               Use a different email
             </button>
-          </form>
+          </div>
         )}
 
         {error ? <div className="admin-login__error">{error}</div> : null}

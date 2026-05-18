@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import CodeInput from "./CodeInput";
 
 // Modal that gates the deck after the free preview. Three states:
 //   email | code | approval-pending
@@ -9,18 +10,21 @@ import { useEffect, useRef, useState } from "react";
 export default function GateModal({ open, onVerified, onBack }) {
   const [step, setStep] = useState("email");
   const [email, setEmail] = useState("");
-  const [code, setCode] = useState("");
+  const [digits, setDigits] = useState(["", "", "", "", "", ""]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [resendIn, setResendIn] = useState(0);
   const emailRef = useRef(null);
-  const codeRef = useRef(null);
+  const verifiedRef = useRef(false);
 
   useEffect(() => {
     if (!open) return;
     if (step === "email") emailRef.current?.focus();
-    if (step === "code") codeRef.current?.focus();
   }, [open, step]);
+
+  useEffect(() => {
+    if (step !== "code") verifiedRef.current = false;
+  }, [step]);
 
   useEffect(() => {
     if (resendIn <= 0) return;
@@ -52,6 +56,7 @@ export default function GateModal({ open, onVerified, onBack }) {
         return;
       }
       setStep("code");
+      setDigits(["", "", "", "", "", ""]);
       setResendIn(30);
     } catch {
       setError("Network error. Try again.");
@@ -60,29 +65,28 @@ export default function GateModal({ open, onVerified, onBack }) {
     }
   }
 
-  async function verify(e) {
-    e?.preventDefault();
-    const t = code.trim();
-    if (t.length !== 6) {
-      setError("Enter the 6-digit code.");
-      return;
-    }
+  async function verifyCode(code) {
+    if (verifiedRef.current) return;
+    verifiedRef.current = true;
     setBusy(true);
     setError("");
     try {
       const res = await fetch("/api/auth/verify-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email.trim(), token: t }),
+        body: JSON.stringify({ email: email.trim(), token: code }),
       });
       const data = await res.json();
       if (!res.ok) {
         setError(data?.error || "Wrong code.");
+        setDigits(["", "", "", "", "", ""]);
+        verifiedRef.current = false;
         return;
       }
       onVerified?.(email.trim());
     } catch {
       setError("Network error. Try again.");
+      verifiedRef.current = false;
     } finally {
       setBusy(false);
     }
@@ -140,25 +144,22 @@ export default function GateModal({ open, onVerified, onBack }) {
 
         {step === "code" && (
           <>
-            <h2 style={titleStyle}>Enter the code we just sent to <span style={{ color: "#3a473f" }}>{email}</span></h2>
+            <h2 style={titleStyle}>
+              Enter the code we sent to <span style={{ color: "#1a1612" }}>{email}</span>
+            </h2>
             <p style={subStyle}>It may take a moment to arrive.</p>
-            <form onSubmit={verify} style={{ display: "grid", gap: 10 }}>
-              <input
-                ref={codeRef}
-                type="text"
-                required
-                value={code}
-                onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                inputMode="numeric"
-                pattern="[0-9]*"
-                maxLength={6}
-                autoComplete="one-time-code"
-                placeholder="• • • • • •"
-                style={{ ...inputStyle, letterSpacing: "0.4em", textAlign: "center", fontSize: 20 }}
+            <div style={{ display: "grid", gap: 14 }}>
+              <CodeInput
+                value={digits}
+                onChange={setDigits}
+                onComplete={verifyCode}
+                disabled={busy}
               />
-              <button type="submit" disabled={busy} style={primaryBtn(busy)}>
-                {busy ? "Verifying…" : "Verify and continue"}
-              </button>
+              {busy ? (
+                <div style={{ textAlign: "center", fontSize: 13, color: "#7b8e80" }}>
+                  Verifying…
+                </div>
+              ) : null}
               <button
                 type="button"
                 disabled={resendIn > 0 || busy}
@@ -167,7 +168,7 @@ export default function GateModal({ open, onVerified, onBack }) {
               >
                 {resendIn > 0 ? `Resend in ${resendIn}s` : "Resend code"}
               </button>
-            </form>
+            </div>
           </>
         )}
 

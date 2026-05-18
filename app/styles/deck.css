@@ -746,3 +746,38 @@ body :is(input, textarea) { cursor: auto; }
 .reduced-motion .tap-hint {
   animation: none;
 }
+
+/* ---- OTP code input (6 cells) — for the gate modal on / ---- */
+.code-input {
+  display: flex;
+  gap: clamp(4px, 1.5vw, 8px);
+  justify-content: center;
+  width: 100%;
+}
+.code-input__cell {
+  flex: 1 1 0;
+  max-width: 48px;
+  height: 52px;
+  text-align: center;
+  font-family: ui-monospace, "SF Mono", "Fira Code", "Courier New", monospace;
+  font-size: 22px;
+  font-weight: 500;
+  color: var(--ink);
+  border: 1px solid rgba(26, 22, 18, 0.14);
+  border-radius: 6px;
+  outline: none;
+  background: #fff;
+  caret-color: var(--accent);
+  box-sizing: border-box;
+  transition: border-color 120ms, box-shadow 120ms;
+  padding: 0;
+}
+.code-input__cell:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(142, 40, 50, 0.18);
+}
+.code-input__cell:disabled {
+  background: var(--paper);
+  color: rgba(26, 22, 18, 0.55);
+  cursor: default;
+}
