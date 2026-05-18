@@ -134,22 +134,21 @@ export default function ActivityFeed() {
       ) : null}
 
       <h2>Recent sessions {dayFilter ? <span className="row__muted" style={{ fontSize: 13, fontFamily: "var(--admin-font-sans)", fontWeight: 400 }}>· filtered</span> : null}</h2>
+      <div className="table-head sessions-row" style={{ "--cols": "1.4fr 1fr 1fr 1fr" }}>
+        <span>Visitor</span>
+        <span>Location</span>
+        <span>Visit time</span>
+        <span>Date / time</span>
+      </div>
       {loading ? (
-        <div className="empty-state">Loading…</div>
+        <div className="empty-state empty-state--inline">Loading…</div>
       ) : filteredSessions.length === 0 ? (
-        <div className="empty-state">
+        <div className="empty-state empty-state--inline">
           {dayFilter ? "No sessions on this day." : "No sessions in this window yet."}
         </div>
       ) : (
-        <>
-          <div className="table-head sessions-row" style={{ "--cols": "1.4fr 1fr 1fr 1fr" }}>
-            <span>Visitor</span>
-            <span>Location</span>
-            <span>Visit time</span>
-            <span>Date / time</span>
-          </div>
-          <div className="row-list">
-            {filteredSessions.map((s) => (
+        <div className="row-list">
+          {filteredSessions.map((s) => (
               <button
                 key={s.id}
                 onClick={() => setOpenId(s.id)}
@@ -168,9 +167,8 @@ export default function ActivityFeed() {
                 <span style={{ whiteSpace: "nowrap" }}>{formatDuration(s.total_seconds)}</span>
                 <span className="row__muted" style={{ whiteSpace: "nowrap" }}>{formatExact(s.started_at)}</span>
               </button>
-            ))}
-          </div>
-        </>
+          ))}
+        </div>
       )}
 
       <SessionDrawer

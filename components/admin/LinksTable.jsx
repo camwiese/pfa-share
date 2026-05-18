@@ -196,25 +196,24 @@ export default function LinksTable() {
         </div>
       </div>
 
+      <div className="table-head" style={{ gridTemplateColumns: TABLE_COLS }}>
+        <span></span>
+        <span>Recipient</span>
+        <span>Token</span>
+        <span>Visitors</span>
+        <span>Sessions</span>
+        <span>Time</span>
+        <span>Created</span>
+        <span>Last seen</span>
+        <span style={{ textAlign: "right" }}>Active</span>
+      </div>
       {loading ? (
-        <div className="empty-state">Loading…</div>
+        <div className="empty-state empty-state--inline">Loading…</div>
       ) : links.length === 0 ? (
-        <div className="empty-state">No links yet. Create one above.</div>
+        <div className="empty-state empty-state--inline">No links yet. Create one above.</div>
       ) : (
-        <>
-          <div className="table-head" style={{ gridTemplateColumns: TABLE_COLS }}>
-            <span></span>
-            <span>Recipient</span>
-            <span>Token</span>
-            <span>Visitors</span>
-            <span>Sessions</span>
-            <span>Time</span>
-            <span>Created</span>
-            <span>Last seen</span>
-            <span style={{ textAlign: "right" }}>Active</span>
-          </div>
-          <div className="row-list">
-            {links.map((l) => {
+        <div className="row-list">
+          {links.map((l) => {
               const stats = statsByLink[l.id];
               return (
                 <div
@@ -261,7 +260,6 @@ export default function LinksTable() {
               );
             })}
           </div>
-        </>
       )}
 
       <LinkDrawer

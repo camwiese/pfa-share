@@ -41,12 +41,22 @@ export default function ApprovalsPanel() {
     }
   }
 
-  if (loading) return <div className="empty-state">Loading…</div>;
-  if (requests.length === 0) return <div className="empty-state">No pending requests.</div>;
+  const TABLE_COLS = "1.6fr 1fr 200px";
 
   return (
-    <div className="row-list">
-      {requests.map((r) => (
+    <>
+      <div className="table-head" style={{ gridTemplateColumns: TABLE_COLS }}>
+        <span>Email</span>
+        <span>Requested</span>
+        <span style={{ textAlign: "right" }}>Actions</span>
+      </div>
+      {loading ? (
+        <div className="empty-state empty-state--inline">Loading…</div>
+      ) : requests.length === 0 ? (
+        <div className="empty-state empty-state--inline">No pending requests.</div>
+      ) : (
+        <div className="row-list">
+          {requests.map((r) => (
         <div
           key={r.id}
           className="row row--static"
@@ -71,7 +81,9 @@ export default function ApprovalsPanel() {
             </button>
           </div>
         </div>
-      ))}
-    </div>
+          ))}
+        </div>
+      )}
+    </>
   );
 }
