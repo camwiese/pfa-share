@@ -12,9 +12,11 @@ import { emit as emitSlideChange } from "../lib/deckNav";
 export default function Deck({ startIndex = 0, withGate = false, freeCount = 5, onGateRequest, gateBlocked = false }) {
   const onGateRequestRef = useRef(onGateRequest);
   const gateBlockedRef = useRef(gateBlocked);
+  const withGateRef = useRef(withGate);
 
   useEffect(() => { onGateRequestRef.current = onGateRequest; }, [onGateRequest]);
   useEffect(() => { gateBlockedRef.current = gateBlocked; }, [gateBlocked]);
+  useEffect(() => { withGateRef.current = withGate; }, [withGate]);
 
   useEffect(() => {
     function setVH() {
@@ -95,8 +97,11 @@ export default function Deck({ startIndex = 0, withGate = false, freeCount = 5, 
 
       // Gate check: when the gate is active, advancing past the last free
       // slide fires the gate even if the gated panels haven't been spliced
-      // in yet. We do this *before* the panels.length clamp.
-      if (withGate && target >= freeCount && currentIndex < freeCount && !gateBlockedRef.current) {
+      // in yet. We do this *before* the panels.length clamp. Read withGate
+      // from the ref so that flipping it off after verification doesn't
+      // hit the stale-closure case (which would re-block the post-verify
+      // advance to slide freeCount).
+      if (withGateRef.current && target >= freeCount && currentIndex < freeCount && !gateBlockedRef.current) {
         if (onGateRequestRef.current) onGateRequestRef.current(target);
         return;
       }
