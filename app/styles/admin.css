@@ -571,6 +571,42 @@
   border-bottom: 1px solid var(--admin-ink-ghost);
 }
 
+/* ---- OTP code input (6 cells) — shared with deck.css gate modal ---- */
+
+.code-input {
+  display: flex;
+  gap: clamp(4px, 1.5vw, 8px);
+  justify-content: center;
+  width: 100%;
+}
+.code-input__cell {
+  flex: 1 1 0;
+  max-width: 48px;
+  height: 52px;
+  text-align: center;
+  font-family: ui-monospace, "SF Mono", "Fira Code", "Courier New", monospace;
+  font-size: 22px;
+  font-weight: 500;
+  color: var(--admin-ink);
+  border: 1px solid var(--admin-ink-ghost);
+  border-radius: 6px;
+  outline: none;
+  background: #fff;
+  caret-color: var(--admin-accent);
+  box-sizing: border-box;
+  transition: border-color 120ms, box-shadow 120ms;
+  padding: 0;
+}
+.code-input__cell:focus {
+  border-color: var(--admin-accent);
+  box-shadow: 0 0 0 2px rgba(142, 40, 50, 0.18);
+}
+.code-input__cell:disabled {
+  background: var(--admin-paper);
+  color: var(--admin-ink-muted);
+  cursor: default;
+}
+
 /* ---- Keyboard hint ---- */
 
 .kbd {
