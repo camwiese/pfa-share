@@ -3,11 +3,6 @@ import { requireAdmin } from "../../../../lib/requireAdmin";
 import { demo } from "../../../../lib/demoData";
 
 // Aggregated metrics for the Activity tab.
-//   - totalSessions
-//   - totalSeconds
-//   - uniqueFingerprints
-//   - liveNowCount (sessions ticked in last 90s)
-//
 // Excludes bot sessions from headline counts.
 
 export async function GET(request) {
@@ -36,7 +31,7 @@ export async function GET(request) {
 
   const { data } = await auth.service
     .from("sessions")
-    .select("id, total_seconds, fp_hash, last_tick_at, is_bot")
+    .select("id, total_seconds, fp_hash, started_at, last_tick_at, is_bot")
     .gte("started_at", since)
     .eq("is_bot", false);
 
@@ -51,9 +46,29 @@ export async function GET(request) {
     totalSessions,
     totalSeconds,
     uniqueFingerprints: fingerprints.size,
+    visitors: fingerprints.size,
     liveNowCount,
     days,
+    daily: buildDailySeries(sessions, days),
   });
+}
+
+function buildDailySeries(sessions, days) {
+  const buckets = {};
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  for (let i = days - 1; i >= 0; i--) {
+    const d = new Date(today.getTime() - i * 86400_000);
+    buckets[d.toISOString().slice(0, 10)] = { date: d.toISOString().slice(0, 10), sessions: 0, seconds: 0 };
+  }
+  for (const s of sessions) {
+    const key = new Date(s.started_at).toISOString().slice(0, 10);
+    if (buckets[key]) {
+      buckets[key].sessions += 1;
+      buckets[key].seconds += Number(s.total_seconds) || 0;
+    }
+  }
+  return Object.values(buckets);
 }
 
 function clamp(n, lo, hi) {

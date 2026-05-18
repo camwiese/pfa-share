@@ -13,19 +13,22 @@ const TOGGLES = [
 
 export default function SettingsPanel({ adminEmails = [] }) {
   const [settings, setSettings] = useState(null);
+  const [saved, setSaved] = useState(null);
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetch("/api/admin/settings")
       .then((r) => r.json())
-      .then((d) => { setSettings(d.settings); setLoading(false); })
+      .then((d) => { setSettings(d.settings); setSaved(d.settings); setLoading(false); })
       .catch(() => setLoading(false));
   }, []);
 
   function setField(key, value) {
     setSettings((prev) => ({ ...prev, [key]: value }));
   }
+
+  const dirty = settings && saved && JSON.stringify(settings) !== JSON.stringify(saved);
 
   async function save() {
     if (!settings) return;
@@ -42,6 +45,7 @@ export default function SettingsPanel({ adminEmails = [] }) {
         return;
       }
       setSettings(data.settings);
+      setSaved(data.settings);
       toast.success("Settings saved");
     } catch {
       toast.error("Network error");
@@ -145,8 +149,9 @@ export default function SettingsPanel({ adminEmails = [] }) {
         </div>
       </div>
 
-      <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 12 }}>
-        <button onClick={save} disabled={saving} className="btn btn--primary">
+      <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", gap: 12, marginTop: 12 }}>
+        {dirty ? <span className="row__muted" style={{ fontSize: 12 }}>Unsaved changes</span> : null}
+        <button onClick={save} disabled={saving || !dirty} className="btn btn--primary">
           {saving ? "Saving…" : "Save"}
         </button>
       </div>

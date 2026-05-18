@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { formatDuration, formatRelative } from "../../lib/format";
 import SessionDrawer from "./SessionDrawer";
+import ViewsByDayChart from "./ViewsByDayChart";
 
 const WINDOWS = [
   { label: "24h", days: 1 },
@@ -54,7 +55,7 @@ export default function ActivityFeed() {
 
   return (
     <div>
-      <div className="chip-group">
+      <div className="chip-group" style={{ marginBottom: 16 }}>
         {WINDOWS.map((w) => (
           <button
             key={w.days}
@@ -67,11 +68,34 @@ export default function ActivityFeed() {
       </div>
 
       <div className="metrics">
-        <Metric label="Total sessions" value={metrics?.totalSessions ?? "—"} />
-        <Metric label="View-time" value={metrics ? formatDuration(metrics.totalSeconds) : "—"} />
-        <Metric label="Unique fingerprints" value={metrics?.uniqueFingerprints ?? "—"} />
-        <Metric label="Live now" value={liveNow} highlight={liveNow > 0} />
+        <Metric
+          label="Visitors"
+          value={metrics?.visitors ?? "—"}
+          tooltip="Unique people, identified by browser fingerprint."
+        />
+        <Metric
+          label="Sessions"
+          value={metrics?.totalSessions ?? "—"}
+          tooltip="Total engagement periods. One visitor can have many sessions."
+        />
+        <Metric
+          label="View-time"
+          value={metrics ? formatDuration(metrics.totalSeconds) : "—"}
+          tooltip="Sum of seconds actively watching the deck across all sessions."
+        />
+        <Metric
+          label={liveNow > 0 ? "Live now" : "Live now"}
+          value={liveNow}
+          highlight={liveNow > 0}
+          tooltip="Sessions that have ticked within the last 90 seconds."
+        />
       </div>
+
+      {metrics?.daily?.length ? (
+        <div style={{ marginBottom: 22 }}>
+          <ViewsByDayChart data={metrics.daily} />
+        </div>
+      ) : null}
 
       <h2>Recent sessions</h2>
       {loading ? (
@@ -79,24 +103,35 @@ export default function ActivityFeed() {
       ) : sessions.length === 0 ? (
         <div className="empty-state">No sessions in this window yet.</div>
       ) : (
-        <div className="row-list">
-          {sessions.map((s) => (
-            <button
-              key={s.id}
-              onClick={() => setOpenId(s.id)}
-              className="row"
-              style={{ gridTemplateColumns: "1.6fr 1fr 1fr 1fr 80px" }}
-            >
-              <span className="row__primary">
-                {s.link?.name || (s.viewer_email ? `Organic · ${s.viewer_email}` : "Session")}
-              </span>
-              <span className="row__muted">{s.geo?.city || ""}</span>
-              <span className="row__muted">{s.device?.mobile ? "Mobile" : s.device?.browser || ""}</span>
-              <span className="row__muted">{formatRelative(s.started_at)}</span>
-              <span style={{ textAlign: "right" }}>{formatDuration(s.total_seconds)}</span>
-            </button>
-          ))}
-        </div>
+        <>
+          <div className="table-head" style={{ gridTemplateColumns: "1.6fr 1fr 1fr 1fr 80px" }}>
+            <span>Visitor</span>
+            <span>City</span>
+            <span>Device</span>
+            <span>When</span>
+            <span style={{ textAlign: "right" }}>Time</span>
+          </div>
+          <div className="row-list">
+            {sessions.map((s) => (
+              <button
+                key={s.id}
+                onClick={() => setOpenId(s.id)}
+                className="row"
+                style={{ gridTemplateColumns: "1.6fr 1fr 1fr 1fr 80px" }}
+              >
+                <span className="row__primary">
+                  {s.link?.name || s.viewer_email || "Anonymous session"}
+                </span>
+                <span className="row__muted">{s.geo?.city || "—"}</span>
+                <span className="row__muted">
+                  {s.device?.mobile ? "Mobile" : s.device?.browser || "—"}
+                </span>
+                <span className="row__muted">{formatRelative(s.started_at)}</span>
+                <span style={{ textAlign: "right" }}>{formatDuration(s.total_seconds)}</span>
+              </button>
+            ))}
+          </div>
+        </>
       )}
 
       <SessionDrawer
@@ -108,9 +143,9 @@ export default function ActivityFeed() {
   );
 }
 
-function Metric({ label, value, highlight }) {
+function Metric({ label, value, highlight, tooltip }) {
   return (
-    <div className="metric">
+    <div className="metric" title={tooltip || ""}>
       <div className="metric__label">{label}</div>
       <div className={`metric__value${highlight ? " metric__value--highlight" : ""}`}>{value}</div>
     </div>

@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
-import { formatRelative } from "../../lib/format";
+import { formatDuration, formatRelative } from "../../lib/format";
 import LinkDrawer from "./LinkDrawer";
 import SharingDot from "./SharingDot";
 import { sharingSignal } from "../../lib/sharingSignal";
@@ -17,6 +17,7 @@ export default function LinksTable() {
   const [name, setName] = useState("");
   const [note, setNote] = useState("");
   const [signalsByLink, setSignalsByLink] = useState({});
+  const [statsByLink, setStatsByLink] = useState({});
   const inputRef = useRef(null);
 
   const refresh = useCallback(() => {
@@ -40,13 +41,23 @@ export default function LinksTable() {
     if (links.length === 0) return;
     let mounted = true;
     (async () => {
-      const out = {};
+      const sig = {};
+      const stats = {};
       for (const l of links.slice(0, 20)) {
         const res = await fetch(`/api/admin/sessions?link_id=${l.id}&limit=50&days=365`).then((r) => r.ok ? r.json() : null);
         if (!res || !mounted) continue;
-        out[l.id] = sharingSignal(res.sessions || []);
+        const ss = res.sessions || [];
+        sig[l.id] = sharingSignal(ss);
+        const real = ss.filter((s) => !s.is_bot);
+        stats[l.id] = {
+          totalSeconds: real.reduce((a, s) => a + (Number(s.total_seconds) || 0), 0),
+          visitors: new Set(real.map((s) => s.fp_hash).filter(Boolean)).size,
+        };
       }
-      if (mounted) setSignalsByLink(out);
+      if (mounted) {
+        setSignalsByLink(sig);
+        setStatsByLink(stats);
+      }
     })();
     return () => { mounted = false; };
   }, [links]);
@@ -114,6 +125,19 @@ export default function LinksTable() {
     }
   }
 
+  async function copyUrl(token, name) {
+    const baseUrl = typeof window !== "undefined" ? window.location.origin : "";
+    const url = `${baseUrl}/d/${token}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      toast.success(`Copied · ${name}`);
+    } catch {
+      toast.error("Couldn't copy");
+    }
+  }
+
+  const TABLE_COLS = "16px 1.4fr 92px 60px 60px 70px 1fr 50px";
+
   return (
     <div>
       <form onSubmit={createLink} className="section">
@@ -169,36 +193,63 @@ export default function LinksTable() {
       ) : links.length === 0 ? (
         <div className="empty-state">No links yet. Create one above.</div>
       ) : (
-        <div className="row-list">
-          {links.map((l) => (
-            <div
-              key={l.id}
-              className={`row${!l.is_active ? " row--inactive" : ""}`}
-              style={{ gridTemplateColumns: "16px 1.4fr 90px 60px 1fr 80px" }}
-              onClick={() => setOpenId(l.id)}
-            >
-              <SharingDot signal={signalsByLink[l.id]} />
-              <div>
-                <div className="row__primary">{l.name}</div>
-                {l.note ? <div className="row__muted" style={{ fontSize: 11, marginTop: 2 }}>{l.note}</div> : null}
-              </div>
-              <div className="row__mono">{l.token}</div>
-              <div>{l.view_count || 0}</div>
-              <div className="row__muted">{formatRelative(l.last_viewed_at)}</div>
-              <label
-                style={{ justifySelf: "end", fontSize: 12, color: "var(--admin-ink-muted)" }}
-                onClick={(e) => e.stopPropagation()}
-              >
-                <input
-                  type="checkbox"
-                  checked={l.is_active}
-                  onChange={(e) => toggleActive(l, e.target.checked)}
-                />
-                {l.is_active ? " Active" : " Off"}
-              </label>
-            </div>
-          ))}
-        </div>
+        <>
+          <div className="table-head" style={{ gridTemplateColumns: TABLE_COLS }}>
+            <span></span>
+            <span>Recipient</span>
+            <span>Token</span>
+            <span>Visitors</span>
+            <span>Sessions</span>
+            <span>Time</span>
+            <span>Last seen</span>
+            <span style={{ textAlign: "right" }}>Active</span>
+          </div>
+          <div className="row-list">
+            {links.map((l) => {
+              const stats = statsByLink[l.id];
+              return (
+                <div
+                  key={l.id}
+                  className={`row${!l.is_active ? " row--inactive" : ""}`}
+                  style={{ gridTemplateColumns: TABLE_COLS }}
+                  onClick={() => setOpenId(l.id)}
+                >
+                  <SharingDot signal={signalsByLink[l.id]} />
+                  <div>
+                    <div className="row__primary">{l.name}</div>
+                    {l.note ? <div className="row__muted" style={{ fontSize: 11, marginTop: 2 }}>{l.note}</div> : null}
+                  </div>
+                  <button
+                    className="row__mono icon-btn"
+                    onClick={(e) => { e.stopPropagation(); copyUrl(l.token, l.name); }}
+                    title="Copy URL"
+                    style={{ fontFamily: "ui-monospace, monospace", padding: "3px 8px" }}
+                  >
+                    /d/{l.token}
+                  </button>
+                  <div>{stats?.visitors ?? "—"}</div>
+                  <div>{l.view_count || 0}</div>
+                  <div className="row__muted">{stats ? formatDuration(stats.totalSeconds) : "—"}</div>
+                  <div className="row__muted">{formatRelative(l.last_viewed_at)}</div>
+                  <label
+                    className="switch"
+                    style={{ justifySelf: "end" }}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={l.is_active}
+                      onChange={(e) => toggleActive(l, e.target.checked)}
+                    />
+                    <span className="switch__track">
+                      <span className="switch__thumb" />
+                    </span>
+                  </label>
+                </div>
+              );
+            })}
+          </div>
+        </>
       )}
 
       <LinkDrawer

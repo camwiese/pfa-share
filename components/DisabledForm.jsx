@@ -68,8 +68,8 @@ export default function DisabledForm() {
           padding: "12px 14px",
           border: 0,
           borderRadius: 8,
-          background: "#3a473f",
-          color: "#fcfbf8",
+          background: "#8e2832",
+          color: "#f1ece1",
           cursor: state === "sending" ? "default" : "pointer",
           opacity: state === "sending" ? 0.7 : 1,
         }}

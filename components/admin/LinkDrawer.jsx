@@ -6,6 +6,7 @@ import { formatDuration, formatRelative } from "../../lib/format";
 import { sharingSignal } from "../../lib/sharingSignal";
 import SharingDot from "./SharingDot";
 import SessionDrawer from "./SessionDrawer";
+import SlideDwellChart from "./SlideDwellChart";
 
 export default function LinkDrawer({ linkId, onClose, onAfterChange }) {
   const [link, setLink] = useState(null);
@@ -18,7 +19,7 @@ export default function LinkDrawer({ linkId, onClose, onAfterChange }) {
     setLoading(true);
     Promise.all([
       fetch(`/api/admin/links?status=all`).then((r) => r.json()),
-      fetch(`/api/admin/sessions?link_id=${linkId}&days=365&limit=100`).then((r) => r.json()),
+      fetch(`/api/admin/sessions?link_id=${linkId}&days=365&limit=200`).then((r) => r.json()),
     ])
       .then(([linksRes, sRes]) => {
         const found = (linksRes.links || []).find((l) => l.id === linkId);
@@ -34,6 +35,7 @@ export default function LinkDrawer({ linkId, onClose, onAfterChange }) {
   const baseUrl = typeof window !== "undefined" ? window.location.origin : "";
   const url = link ? `${baseUrl}/d/${link.token}` : "";
 
+  // Sessions grouped by fingerprint = unique visitors
   const groups = new Map();
   for (const s of sessions) {
     const key = s.fp_hash || "no-fp";
@@ -41,6 +43,21 @@ export default function LinkDrawer({ linkId, onClose, onAfterChange }) {
     groups.get(key).push(s);
   }
   const signal = sharingSignal(sessions);
+
+  // Aggregate metrics for this link
+  const realSessions = sessions.filter((s) => !s.is_bot);
+  const totalSeconds = realSessions.reduce((a, s) => a + (Number(s.total_seconds) || 0), 0);
+  const maxSlide = realSessions.reduce((m, s) => Math.max(m, s.max_slide_reached || 0), 0);
+  const visitors = groups.size - (groups.has("no-fp") ? 1 : 0) + (groups.has("no-fp") ? 1 : 0);
+
+  // Aggregated per-slide dwell across all sessions for this link.
+  const aggDwells = {};
+  for (const s of realSessions) {
+    const d = s.slide_dwells || {};
+    for (const k of Object.keys(d)) {
+      aggDwells[k] = (Number(aggDwells[k]) || 0) + Number(d[k]);
+    }
+  }
 
   async function copyUrl() {
     try {
@@ -77,60 +94,85 @@ export default function LinkDrawer({ linkId, onClose, onAfterChange }) {
           <div className="empty-state">Loading…</div>
         ) : (
           <>
-            <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, marginBottom: 10 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, marginBottom: 12 }}>
               <code style={{ background: "var(--admin-paper-2)", padding: "4px 8px", borderRadius: 4, fontFamily: "ui-monospace, monospace" }}>{url}</code>
               <button onClick={copyUrl} className="btn btn--ghost btn--small">Copy</button>
-            </div>
-            {link.note ? <div className="row__muted" style={{ fontSize: 13, marginBottom: 12 }}>{link.note}</div> : null}
-
-            <div className="meta-grid">
-              <div><strong>Visits:</strong>{link.view_count || 0}</div>
-              <div><strong>Last seen:</strong>{formatRelative(link.last_viewed_at)}</div>
-              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                <SharingDot signal={signal} />
-                <span className="row__muted">{signal.label}</span>
-              </div>
-              <label style={{ marginLeft: "auto", fontSize: 13 }}>
+              <label className="switch" style={{ marginLeft: "auto" }}>
                 <input
                   type="checkbox"
                   checked={!!link.is_active}
                   onChange={(e) => toggleActive(e.target.checked)}
                 />
-                {" "}{link.is_active ? "Active" : "Disabled"}
+                <span className="switch__track"><span className="switch__thumb" /></span>
+                <span>{link.is_active ? "Active" : "Disabled"}</span>
               </label>
             </div>
+            {link.note ? <div className="row__muted" style={{ fontSize: 13, marginBottom: 12 }}>{link.note}</div> : null}
 
-            <h3>Sessions by device</h3>
+            <div className="metrics" style={{ marginBottom: 18 }}>
+              <Metric label="Visitors" value={groups.size} />
+              <Metric label="Sessions" value={realSessions.length} />
+              <Metric label="View-time" value={formatDuration(totalSeconds)} />
+              <Metric label="Furthest slide" value={maxSlide} />
+            </div>
+
+            <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, marginBottom: 14 }}>
+              <SharingDot signal={signal} />
+              <span className="row__muted">{signal.label}</span>
+              <span style={{ marginLeft: "auto" }} className="row__muted">
+                Created {formatRelative(link.created_at)}
+              </span>
+            </div>
+
+            <h3>Per-slide dwell (aggregated)</h3>
+            <SlideDwellChart dwells={aggDwells} />
+
+            <h3 style={{ marginTop: 22 }}>Visitors</h3>
             {sessions.length === 0 ? (
               <div className="empty-state">No sessions yet.</div>
             ) : (
               <div style={{ display: "grid", gap: 12 }}>
-                {Array.from(groups.entries()).map(([fp, group]) => (
-                  <div key={fp} className="card" style={{ padding: 12 }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8, fontSize: 12, color: "var(--admin-ink-muted)" }}>
-                      <SharingDot signal={{ level: "green", label: fp }} />
-                      <span style={{ fontFamily: "ui-monospace, monospace" }}>
-                        {fp === "no-fp" ? "No fingerprint" : fp.slice(-8)}
-                      </span>
-                      <span>· {group.length} session{group.length === 1 ? "" : "s"}</span>
+                {Array.from(groups.entries()).map(([fp, group]) => {
+                  const first = [...group].sort((a, b) => new Date(a.started_at) - new Date(b.started_at))[0];
+                  const last = [...group].sort((a, b) => new Date(b.started_at) - new Date(a.started_at))[0];
+                  const groupTotal = group.reduce((a, s) => a + (Number(s.total_seconds) || 0), 0);
+                  const groupMax = group.reduce((m, s) => Math.max(m, s.max_slide_reached || 0), 0);
+                  return (
+                    <div key={fp} className="card" style={{ padding: 12 }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+                        <SharingDot signal={{ level: "green", label: fp }} />
+                        <span style={{ fontFamily: "ui-monospace, monospace", fontSize: 12, color: "var(--admin-ink-muted)" }}>
+                          {fp === "no-fp" ? "No fingerprint" : fp.slice(-8)}
+                        </span>
+                        <span className="row__muted" style={{ fontSize: 12 }}>
+                          · {group.length} session{group.length === 1 ? "" : "s"} · {formatDuration(groupTotal)} · slide {groupMax}
+                        </span>
+                      </div>
+                      <div style={{ display: "flex", gap: 12, fontSize: 12, color: "var(--admin-ink-muted)", marginBottom: 8 }}>
+                        <span>{first.geo?.city || ""}{first.geo?.country ? ", " + first.geo.country : ""}</span>
+                        <span>{first.device?.browser} · {first.device?.os}{first.device?.mobile ? " (mobile)" : ""}</span>
+                        <span style={{ marginLeft: "auto" }}>
+                          First {formatRelative(first.started_at)} · Last {formatRelative(last.started_at)}
+                        </span>
+                      </div>
+                      <div className="row-list">
+                        {[...group].sort((a, b) => new Date(b.started_at) - new Date(a.started_at)).map((s) => (
+                          <button
+                            key={s.id}
+                            onClick={() => setOpenSessionId(s.id)}
+                            className="row"
+                            style={{ gridTemplateColumns: "1.2fr 1fr 60px 80px" }}
+                          >
+                            <span>{new Date(s.started_at).toLocaleString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}</span>
+                            <span className="row__muted">{s.geo?.city || ""}</span>
+                            <span className="row__muted">slide {s.max_slide_reached}</span>
+                            <span style={{ textAlign: "right" }}>{formatDuration(s.total_seconds || 0)}</span>
+                          </button>
+                        ))}
+                      </div>
                     </div>
-                    <div className="row-list">
-                      {group.map((s) => (
-                        <button
-                          key={s.id}
-                          onClick={() => setOpenSessionId(s.id)}
-                          className="row"
-                          style={{ gridTemplateColumns: "1fr 1fr 1fr 80px" }}
-                        >
-                          <span>{formatRelative(s.started_at)}</span>
-                          <span className="row__muted">{s.geo?.city || ""}</span>
-                          <span className="row__muted">{s.device?.mobile ? "Mobile" : s.device?.browser || ""}</span>
-                          <span>{formatDuration(s.total_seconds || 0)}</span>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </>
@@ -142,6 +184,15 @@ export default function LinkDrawer({ linkId, onClose, onAfterChange }) {
         onClose={() => setOpenSessionId(null)}
         onOpenSession={(id) => setOpenSessionId(id)}
       />
+    </div>
+  );
+}
+
+function Metric({ label, value }) {
+  return (
+    <div className="metric">
+      <div className="metric__label">{label}</div>
+      <div className="metric__value">{value}</div>
     </div>
   );
 }

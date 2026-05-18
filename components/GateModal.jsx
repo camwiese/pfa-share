@@ -118,7 +118,7 @@ export default function GateModal({ open, onVerified, onBack }) {
           <>
             <h2 style={titleStyle}>Please confirm your email to continue</h2>
             <p style={subStyle}>
-              Enter your email and we&rsquo;ll send you a 6-digit code. We&rsquo;ll keep you signed in on this device for 90 days.
+              Projects are viewable by invite only. Please enter your email to continue.
             </p>
             <form onSubmit={sendCode} style={{ display: "grid", gap: 10 }}>
               <input
@@ -209,10 +209,11 @@ const primaryBtn = (busy) => ({
   padding: "12px 14px",
   border: 0,
   borderRadius: 8,
-  background: "#3a473f",
-  color: "#fcfbf8",
+  background: "#8e2832",
+  color: "#f1ece1",
   cursor: busy ? "default" : "pointer",
   opacity: busy ? 0.7 : 1,
+  transition: "background 120ms",
 });
 const linkBtn = {
   fontFamily: "Inter, system-ui, sans-serif",
