@@ -213,7 +213,6 @@ const PANELS = [
       <div className="letter__sign" data-animate="2">
         <img className="letter__signature" src="/images/cameron-wiese-signature.png" alt="Cameron Wiese" width={932} height={630} />
         <p className="letter__name">Cameron Wiese</p>
-        <p className="letter__title">CEO, The World&rsquo;s Fair Company</p>
         <p className="letter__contact">
           <a href="tel:+13603184480">360-318-4480</a>
           <span className="letter__sep" aria-hidden="true">|</span>

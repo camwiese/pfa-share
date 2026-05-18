@@ -996,31 +996,71 @@
   font-size: 13px;
 }
 
+/* ---- Mobile link row (desktop-hidden) ---- */
+
+.link-row__mobile {
+  display: none;
+}
+.link-row__mobile-head {
+  display: grid;
+  grid-template-columns: 14px 1fr auto;
+  gap: 10px;
+  align-items: start;
+  margin-bottom: 8px;
+}
+.link-row__mobile-head .sharing-dot { margin-top: 6px; }
+.link-row__mobile-name { min-width: 0; }
+.link-row__mobile-token {
+  margin-bottom: 8px;
+  align-self: start;
+}
+.link-row__mobile-stats {
+  font-size: 13px;
+  color: var(--admin-ink-soft);
+  margin-bottom: 4px;
+}
+.link-row__mobile-stats strong {
+  color: var(--admin-ink);
+  font-weight: 600;
+}
+.link-row__mobile-meta {
+  font-size: 12px;
+  color: var(--admin-ink-muted);
+}
+
 /* ---- Mobile ---- */
 
 @media (max-width: 768px) {
   .admin-content { padding: 20px 16px 40px; }
   /* Belt-and-braces against any wide child causing the page to scroll
-     horizontally on mobile. The admin shell is the outer container; any
-     overflow gets clipped here. */
+     horizontally on mobile. */
   .admin-shell { overflow-x: hidden; }
 
-  /* Collapse the table-head and rows into a single column on narrow
-     screens. The table-head also has inline grid-template-columns that
-     would otherwise overflow — !important forces the collapse. */
+  /* Collapse generic rows into a single column. The table-head has
+     inline grid-template-columns that would otherwise overflow; we hide
+     it because the row body carries its own structure on mobile. */
   .row { grid-template-columns: 1fr !important; }
   .table-head { display: none !important; }
 
-  /* Make rows readable when stacked: drop the alignment to start so each
-     "cell" sits on its own line and the row__primary stays at the top. */
   .row, .row.sessions-row {
     align-items: start;
   }
   .row > * { text-align: left !important; }
 
+  /* Link-row: hide the desktop grid cells and show the structured
+     mobile block instead. */
+  .link-row {
+    display: block !important;
+    padding: 14px 8px;
+  }
+  .link-row > :not(.link-row__mobile) {
+    display: none !important;
+  }
+  .link-row__mobile { display: block; }
+
   .drawer { width: 100vw; }
 
-  /* Chips and metric tiles should always wrap, not overflow. */
+  /* Chips and metric tiles wrap on mobile. */
   .metrics { grid-template-columns: 1fr 1fr; gap: 8px; }
   .metric { padding: 12px; }
   .metric__value { font-size: 22px; }
