@@ -94,6 +94,7 @@ export default function GateModal({ open, onVerified, onBack }) {
 
   return (
     <div
+      className="gate-modal__backdrop"
       style={{
         position: "fixed",
         inset: 0,
@@ -103,19 +104,19 @@ export default function GateModal({ open, onVerified, onBack }) {
         WebkitBackdropFilter: "blur(20px)",
         display: "grid",
         placeItems: "center",
-        padding: 24,
       }}
     >
       <div
+        className="gate-modal__card"
         style={{
           width: "100%",
           maxWidth: 540,
           background: "#fcfbf8",
           border: "1px solid #dedad0",
           borderRadius: 2,
-          padding: 28,
           boxShadow: "0 24px 64px rgba(0,0,0,0.3)",
           fontFamily: "Inter, system-ui, sans-serif",
+          boxSizing: "border-box",
         }}
       >
         {step === "email" && (
@@ -191,7 +192,7 @@ export default function GateModal({ open, onVerified, onBack }) {
   );
 }
 
-const titleStyle = { fontFamily: "Fraunces, Georgia, serif", fontSize: 20, lineHeight: 1.2, margin: "0 0 8px", color: "#33403a", fontWeight: 500, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" };
+const titleStyle = { fontFamily: "Fraunces, Georgia, serif", fontSize: 20, lineHeight: 1.25, margin: "0 0 8px", color: "#33403a", fontWeight: 500, wordBreak: "break-word" };
 const subStyle = { fontFamily: "Inter, system-ui, sans-serif", fontSize: 14, color: "#7b8e80", margin: "0 0 18px", lineHeight: 1.5 };
 const inputStyle = {
   fontFamily: "Inter, system-ui, sans-serif",

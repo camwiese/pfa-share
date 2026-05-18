@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
+import crypto from "crypto";
 import { createServiceClient } from "../../../../../lib/supabase/server";
-import { describeDevice } from "../../../../../lib/ua";
+import { describeDevice, parseUA } from "../../../../../lib/ua";
 import { geoFromHeaders } from "../../../../../lib/geo";
 import {
   signSessionCookie,
@@ -8,6 +9,15 @@ import {
   SESSION_COOKIE_NAME,
   SESSION_COOKIE_OPTIONS,
 } from "../../../../../lib/sessionCookie";
+import { notifyLinkOpened } from "../../../../../lib/notifications";
+
+// Bootstraps a personal-link session.
+//   - validates the token, returns 410 if missing / inactive / expired
+//   - resumes an existing valid session if the cookie matches this link
+//   - otherwise creates a fresh sessions row, signs a cookie, bumps the
+//     link's view_count, fires the "link opened" admin email
+//   - if a different fp_hash shows up on a session that already had one,
+//     splits off a new session row (different device on same link)
 
 export async function POST(request, { params }) {
   const { token } = await params;
@@ -17,14 +27,16 @@ export async function POST(request, { params }) {
   try { body = await request.json(); } catch {}
 
   let service;
-  try { service = createServiceClient(); } catch (err) {
+  try {
+    service = createServiceClient();
+  } catch (err) {
     console.error("[d/init] service client failed:", err?.message);
     return NextResponse.json({ error: "Service unavailable" }, { status: 503 });
   }
 
   const { data: link } = await service
     .from("links")
-    .select("id, is_active, expires_at")
+    .select("id, token, name, is_active, expires_at, view_count")
     .eq("token", token)
     .maybeSingle();
   if (!link || !link.is_active) return NextResponse.json({ error: "Gone" }, { status: 410 });
@@ -32,66 +44,111 @@ export async function POST(request, { params }) {
     return NextResponse.json({ error: "Gone" }, { status: 410 });
   }
 
-  const cookie = verifySessionCookie(request.cookies.get(SESSION_COOKIE_NAME)?.value);
-  if (!cookie?.session_id || cookie.link_id !== link.id) {
-    return NextResponse.json({ error: "No session" }, { status: 401 });
-  }
+  const ua = request.headers.get("user-agent") || "";
+  const incomingFp = body.fp_hash || null;
+  const existingCookie = verifySessionCookie(request.cookies.get(SESSION_COOKIE_NAME)?.value);
 
-  const { data: row } = await service
-    .from("sessions")
-    .select("id, fp_hash, ended_at, device, geo")
-    .eq("id", cookie.session_id)
-    .maybeSingle();
-  if (!row || row.ended_at) return NextResponse.json({ error: "Session gone" }, { status: 410 });
-
-  const incoming = body.fp_hash || null;
-
-  // If we already have a fp_hash and it doesn't match, the device differs:
-  // create a new session row instead of clobbering the existing one.
-  if (row.fp_hash && incoming && row.fp_hash !== incoming) {
-    const ua = request.headers.get("user-agent") || "";
-    const device = describeDevice({ ua, screen: body.screen, tz: body.tz });
-    const geo = geoFromHeaders(request.headers);
-
-    const { data: fresh, error: insErr } = await service
+  // ---- Resume path: cookie present + bound to this link + session still open
+  if (existingCookie?.session_id && existingCookie.link_id === link.id) {
+    const { data: row } = await service
       .from("sessions")
-      .insert({
-        link_id: link.id,
-        viewer_email: null,
-        device,
-        geo,
-        fp_hash: incoming,
-      })
-      .select("id")
-      .single();
-    if (insErr || !fresh) {
-      return NextResponse.json({ error: "Insert failed" }, { status: 500 });
+      .select("id, fp_hash, ended_at")
+      .eq("id", existingCookie.session_id)
+      .maybeSingle();
+
+    if (row && !row.ended_at) {
+      // Fingerprint mismatch → branch a new session row (different device).
+      if (row.fp_hash && incomingFp && row.fp_hash !== incomingFp) {
+        return createSession({
+          service, link, request, ua, incomingFp, body,
+          reason: "fingerprint_mismatch", isResume: false,
+        });
+      }
+      // Patch fp / device on the existing row.
+      const patch = {};
+      if (incomingFp && !row.fp_hash) patch.fp_hash = incomingFp;
+      if (body.screen || body.tz) {
+        patch.device = describeDevice({ ua, screen: body.screen, tz: body.tz });
+      }
+      if (Object.keys(patch).length > 0) {
+        await service.from("sessions").update(patch).eq("id", row.id);
+      }
+      return NextResponse.json({ session_id: row.id, resumed: true });
     }
-    await service.from("events").insert({
-      session_id: fresh.id,
-      kind: "view_start",
-      payload: { link_id: link.id, token, reason: "fingerprint_mismatch" },
-    });
-
-    const res = NextResponse.json({ session_id: fresh.id, switched: true });
-    res.cookies.set(
-      SESSION_COOKIE_NAME,
-      signSessionCookie({ session_id: fresh.id, link_id: link.id, kind: "personal" }),
-      SESSION_COOKIE_OPTIONS
-    );
-    return res;
   }
 
-  // Patch the device/fp on the existing session.
-  const patch = {};
-  if (incoming && !row.fp_hash) patch.fp_hash = incoming;
-  if (body.screen || body.tz) {
-    const ua = request.headers.get("user-agent") || "";
-    patch.device = describeDevice({ ua, screen: body.screen, tz: body.tz });
-  }
-  if (Object.keys(patch).length > 0) {
-    await service.from("sessions").update(patch).eq("id", row.id);
+  // ---- Fresh session path: no cookie / cookie stale / session closed.
+  return createSession({ service, link, request, ua, incomingFp, body, reason: "view_start", isResume: false });
+}
+
+async function createSession({ service, link, request, ua, incomingFp, body, reason }) {
+  const device = describeDevice({ ua, screen: body.screen, tz: body.tz });
+  const geo = geoFromHeaders(request.headers);
+  const ipHash = hashIp(request);
+  const isBot = parseUA(ua).bot;
+  const firstSession = (link.view_count || 0) === 0;
+
+  const { data: inserted, error: insErr } = await service
+    .from("sessions")
+    .insert({
+      link_id: link.id,
+      viewer_email: null,
+      device,
+      geo,
+      ip_hash: ipHash,
+      fp_hash: incomingFp,
+      is_bot: isBot,
+    })
+    .select("id, fp_hash")
+    .single();
+  if (insErr || !inserted) {
+    console.error("[d/init] insert session failed:", insErr?.message);
+    return NextResponse.json({ error: "Insert failed" }, { status: 500 });
   }
 
-  return NextResponse.json({ session_id: row.id });
+  await service.from("events").insert({
+    session_id: inserted.id,
+    kind: "view_start",
+    payload: { link_id: link.id, token: link.token, reason },
+  });
+
+  await service
+    .from("links")
+    .update({
+      view_count: (link.view_count || 0) + 1,
+      last_viewed_at: new Date().toISOString(),
+    })
+    .eq("id", link.id);
+
+  // Fire admin "link opened" email (best-effort, fire-and-forget).
+  notifyLinkOpened({
+    link,
+    session: { ...inserted, geo },
+    firstSession,
+  }).catch(() => {});
+
+  const res = NextResponse.json({ session_id: inserted.id, resumed: false });
+  res.cookies.set(
+    SESSION_COOKIE_NAME,
+    signSessionCookie({ session_id: inserted.id, link_id: link.id, kind: "personal" }),
+    SESSION_COOKIE_OPTIONS
+  );
+  return res;
+}
+
+function hashIp(request) {
+  try {
+    const ip =
+      request.headers.get("x-real-ip") ||
+      request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+      "";
+    if (!ip) return null;
+    return crypto
+      .createHash("sha256")
+      .update(ip + (process.env.SESSION_SECRET || ""))
+      .digest("hex")
+      .slice(0, 24);
+  } catch {
+    return null;
+  }
 }

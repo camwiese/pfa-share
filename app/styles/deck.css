@@ -781,3 +781,7 @@ body :is(input, textarea) { cursor: auto; }
   color: rgba(26, 22, 18, 0.55);
   cursor: default;
 }
+
+/* ---- Gate modal responsive padding ---- */
+.gate-modal__backdrop { padding: clamp(12px, 4vw, 24px); }
+.gate-modal__card { padding: clamp(20px, 5vw, 28px); }
