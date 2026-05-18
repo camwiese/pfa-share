@@ -15,12 +15,19 @@ export default function GateModal({ open, onVerified, onBack }) {
   const [error, setError] = useState("");
   const [resendIn, setResendIn] = useState(0);
   const emailRef = useRef(null);
+  const codeRef = useRef(null);
   const verifiedRef = useRef(false);
 
   useEffect(() => {
     if (!open) return;
     if (step === "email") emailRef.current?.focus();
+    if (step === "code") setTimeout(() => codeRef.current?.focus(), 0);
   }, [open, step]);
+
+  function handleDigitsChange(next) {
+    setDigits(next);
+    if (error) setError("");
+  }
 
   useEffect(() => {
     if (step !== "code") verifiedRef.current = false;
@@ -78,15 +85,18 @@ export default function GateModal({ open, onVerified, onBack }) {
       });
       const data = await res.json();
       if (!res.ok) {
-        setError(data?.error || "Wrong code.");
+        setError(data?.error || "Wrong code. Try again.");
         setDigits(["", "", "", "", "", ""]);
         verifiedRef.current = false;
+        setTimeout(() => codeRef.current?.focus(), 0);
         return;
       }
       onVerified?.(email.trim());
     } catch {
       setError("Network error. Try again.");
+      setDigits(["", "", "", "", "", ""]);
       verifiedRef.current = false;
+      setTimeout(() => codeRef.current?.focus(), 0);
     } finally {
       setBusy(false);
     }
@@ -148,8 +158,9 @@ export default function GateModal({ open, onVerified, onBack }) {
             <p style={subStyle}>It may take a moment to arrive.</p>
             <div style={{ display: "grid", gap: 14 }}>
               <CodeInput
+                ref={codeRef}
                 value={digits}
-                onChange={setDigits}
+                onChange={handleDigitsChange}
                 onComplete={verifyCode}
                 disabled={busy}
               />
