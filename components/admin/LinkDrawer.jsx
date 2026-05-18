@@ -13,6 +13,19 @@ export default function LinkDrawer({ linkId, onClose, onAfterChange }) {
   const [loading, setLoading] = useState(true);
   const [expandedSessionId, setExpandedSessionId] = useState(null);
 
+  // Close on Escape (collapses any open inline session first).
+  useEffect(() => {
+    if (!linkId) return;
+    function onKey(e) {
+      if (e.key !== "Escape") return;
+      e.stopPropagation();
+      if (expandedSessionId) setExpandedSessionId(null);
+      else onClose?.();
+    }
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [linkId, expandedSessionId, onClose]);
+
   useEffect(() => {
     if (!linkId) return;
     setLoading(true);

@@ -17,6 +17,19 @@ export default function SessionDrawer({ sessionId, onClose, onOpenSession }) {
       .catch(() => setLoading(false));
   }, [sessionId]);
 
+  // Close on Escape.
+  useEffect(() => {
+    if (!sessionId) return;
+    function onKey(e) {
+      if (e.key === "Escape") {
+        e.stopPropagation();
+        onClose?.();
+      }
+    }
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [sessionId, onClose]);
+
   if (!sessionId) return null;
 
   const s = data?.session;

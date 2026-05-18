@@ -11,7 +11,7 @@ import sharp from 'sharp';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..');
-const SRC_DIR = join(ROOT, 'images');
+const SRC_DIR = join(ROOT, 'public', 'images');
 const OUT_DIR = join(SRC_DIR, 'opt');
 
 const WIDTHS = [800, 1280, 1672];
@@ -29,7 +29,7 @@ const SOURCES = [
   'Park-Lagoon-2.png',
   'grounds-0.png',
   'grounds-1.png',
-  'grounds-3.jpeg',
+  'grounds-3.png',
   'grounds-4-pop.png',
   'fare-1.png',
   'fare-3.png',
