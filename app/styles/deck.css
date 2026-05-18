@@ -1,0 +1,748 @@
+/* =============================================================
+   Future Palace v2 — Cinematic panels
+   ============================================================= */
+:root {
+  --paper:        #f5f5f5;
+  --paper-2:      #ebebeb;
+  --paper-3:      #e0e0e0;
+  --ink:          #1a1612;
+  --ink-soft:     rgba(26, 22, 18, 0.78);
+  --ink-muted:    rgba(26, 22, 18, 0.55);
+  --ink-faint:    rgba(26, 22, 18, 0.32);
+  --ink-ghost:    rgba(26, 22, 18, 0.14);
+  --ivory:        #f1ece1;
+  --ivory-soft:   rgba(241, 236, 225, 0.78);
+  --accent:       #8e2832;
+  --font-display: 'Fraunces', 'Cormorant Garamond', Georgia, serif;
+  --font-sans:    'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --gutter:       clamp(1.25rem, 4vw, 2.5rem);
+  --vh: 1vh;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html, body, h1, h2, h3, p, figure { margin: 0; padding: 0; }
+a  { color: inherit; text-decoration: none; }
+img { max-width: 100%; display: block; }
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  -webkit-text-size-adjust: 100%;
+  /* iOS Safari can swallow click events when this is `none`. `manipulation`
+     keeps tap→click intact, just disables double-tap-zoom and pinch. */
+  touch-action: manipulation;
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 1.0625rem;
+  line-height: 1.6;
+  font-weight: 300;
+  font-feature-settings: "ss01", "kern";
+  -webkit-tap-highlight-color: transparent;
+  cursor: pointer;
+}
+body :is(a, button) { cursor: pointer; }
+body :is(input, textarea) { cursor: auto; }
+
+/* ── Paper grain texture on cream panels ─────────────────── */
+.panel--cream::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: var(--paper);
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  background-size: 200px 200px;
+  pointer-events: none;
+}
+
+/* =============================================================
+   Panel base
+   ============================================================= */
+.panel {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100vh;
+  height: calc(var(--vh) * 100);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 1;
+  /* Default state for a panel that hasn't been reached yet:
+     parked below, waiting to slide up into view. Vertical motion
+     reads as a deck-style scroll instead of a horizontal swipe. */
+  transform: translateY(24px);
+  transition:
+    opacity 540ms cubic-bezier(0.4, 0, 0.2, 1),
+    transform 620ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.panel.is-active {
+  opacity: 1;
+  pointer-events: auto;
+  z-index: 2;
+  transform: translateY(0);
+}
+.panel.is-past {
+  opacity: 0;
+  transform: translateY(-24px);
+}
+
+/* =============================================================
+   CINEMATIC TRANSITIONS — ENTER + EXIT
+   ============================================================= */
+.panel [data-animate] {
+  opacity: 0;
+  transform: translateY(24px) scale(0.985);
+  transition:
+    opacity 0.9s cubic-bezier(0.22, 0.61, 0.36, 1),
+    transform 1s cubic-bezier(0.22, 0.61, 0.36, 1);
+  will-change: opacity, transform;
+}
+.panel.is-active [data-animate] {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+.panel.is-active [data-animate="1"] { transition-delay: 0.05s; }
+.panel.is-active [data-animate="2"] { transition-delay: 0.18s; }
+.panel.is-active [data-animate="3"] { transition-delay: 0.3s; }
+.panel.is-active [data-animate="4"] { transition-delay: 0.42s; }
+.panel.is-active [data-animate="5"] { transition-delay: 0.52s; }
+.panel.is-active [data-animate="6"] { transition-delay: 0.62s; }
+
+.panel:not(.is-active) [data-animate] {
+  opacity: 0;
+  transform: translateY(-8px) scale(0.97);
+  transition:
+    opacity 0.5s cubic-bezier(0.55, 0.085, 0.68, 0.53),
+    transform 0.55s cubic-bezier(0.55, 0.085, 0.68, 0.53);
+  transition-delay: 0s !important;
+}
+
+/* Image panels render statically — no Ken Burns. */
+
+/* =============================================================
+   FIXED HERO IMAGE — shared between hero + tagline panels
+   ============================================================= */
+.hero-fixed {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background-color: #1c1610;
+  /* Plain JPEG — image-set() with type() annotations was causing
+     blank hero on some iOS Safari builds. JPEG is universally
+     supported and only ~310KB. */
+  background-image: url("/images/opt/header-image-1672.jpg");
+  background-position: center 35%;
+  background-size: cover;
+  background-repeat: no-repeat;
+  will-change: opacity;
+  transition: opacity 0.8s ease;
+}
+.hero-fixed.is-hidden { opacity: 0; pointer-events: none; }
+
+.hero-fixed__blur {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  -webkit-backdrop-filter: blur(0px);
+          backdrop-filter: blur(0px);
+  background-color: rgba(0, 0, 0, 0);
+  will-change: backdrop-filter, background-color;
+  transition:
+    opacity 0.6s ease,
+    -webkit-backdrop-filter 0.94s cubic-bezier(0.4, 0, 0.2, 1),
+    backdrop-filter 0.94s cubic-bezier(0.4, 0, 0.2, 1),
+    background-color 0.94s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.hero-fixed__blur.is-blurred {
+  -webkit-backdrop-filter: blur(18px);
+          backdrop-filter: blur(18px);
+  background-color: rgba(0, 0, 0, 0.3);
+}
+.hero-fixed__blur.is-hidden { opacity: 0; pointer-events: none; }
+
+/* =============================================================
+   HERO
+   ============================================================= */
+.panel--hero {
+  background: transparent;
+  align-items: flex-end;
+  z-index: 1;
+}
+.hero__veil {
+  position: absolute; inset: 0; z-index: 1;
+  background:
+    linear-gradient(to bottom, transparent 0%, transparent 30%, rgba(0,0,0,0.6) 100%),
+    linear-gradient(to right, rgba(0,0,0,0.4) 0%, transparent 55%);
+  pointer-events: none;
+  transition: opacity 0.6s ease;
+}
+.panel--hero:not(.is-active) .hero__veil { opacity: 0; }
+
+.hero__content {
+  position: relative; z-index: 2;
+  width: 100%; max-width: 1060px;
+  margin: 0 auto;
+  padding: 0 clamp(1.5rem, 6vw, 5rem) clamp(4.5rem, 10vh, 7rem);
+}
+.hero__title {
+  font-family: var(--font-display);
+  font-weight: 350;
+  font-size: clamp(1.65rem, 3.4vw, 2.85rem);
+  line-height: 1.12;
+  letter-spacing: -0.01em;
+  max-width: 24ch;
+  color: var(--ivory);
+  text-wrap: balance;
+  animation: heroIn 1.6s cubic-bezier(0.22, 0.61, 0.36, 1) 0.4s both;
+}
+@keyframes heroIn {
+  from { opacity: 0; transform: translateY(22px); }
+  to   { opacity: 1; transform: none; }
+}
+.panel--hero:not(.is-active) .hero__title {
+  animation: none;
+  opacity: 0;
+  transform: translateY(-10px) scale(1.02);
+  transition: opacity 0.6s ease-in, transform 0.7s ease-in;
+}
+.panel--hero.is-active .hero__title {
+  opacity: 1; transform: none;
+}
+
+.hero__scroll {
+  display: none;
+}
+.hero__scroll-line {
+  width: 1px; height: 28px;
+  background: linear-gradient(to bottom, rgba(241,236,225,0.5), transparent);
+  animation: scrollPulse 2.4s ease-in-out infinite;
+}
+@keyframes scrollPulse {
+  0%, 100% { opacity: 0.5; transform: scaleY(1); }
+  50%      { opacity: 0.2; transform: scaleY(0.6); }
+}
+.panel--hero:not(.is-active) .hero__scroll {
+  animation: none; opacity: 0;
+  transition: opacity 0.3s ease-in;
+}
+
+/* =============================================================
+   TAGLINE
+   ============================================================= */
+.panel--tagline {
+  background: transparent;
+  z-index: 1;
+}
+.tagline__content {
+  position: relative; z-index: 2;
+  width: 100%; max-width: min(80ch, 92vw);
+  padding: 0 clamp(1.5rem, 6vw, 4rem);
+  text-align: center;
+}
+.tagline__text {
+  font-family: var(--font-display);
+  font-weight: 350;
+  /* Matches the unified prose / impact / call / letter-heading
+     scale so the deck reads in one voice. */
+  font-size: clamp(1.05rem, 4vw, 2.4rem);
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  color: var(--ivory);
+  text-wrap: balance;
+}
+
+/* =============================================================
+   CHAPTER BRIDGE
+   ============================================================= */
+.panel--chapter { background: var(--paper); }
+.chapter__content {
+  position: relative; z-index: 1;
+  max-width: 32ch;
+  padding: 0 var(--gutter);
+  text-align: center;
+}
+.chapter__text {
+  font-family: var(--font-display);
+  font-weight: 350;
+  font-size: clamp(1.65rem, 3.4vw, 2.85rem);
+  line-height: 1.16;
+  letter-spacing: -0.012em;
+  color: var(--ink);
+  text-wrap: balance;
+}
+
+/* =============================================================
+   PPIE
+   ============================================================= */
+.panel--ppie {
+  flex-direction: column;
+  padding: clamp(2rem, 5vh, 4rem) var(--gutter);
+}
+.ppie__content {
+  position: relative; z-index: 1;
+  width: 100%; max-width: min(120ch, 96vw);
+  margin: 0 auto;
+  padding: 0 calc(var(--gutter) * 0.5);
+  display: flex; flex-direction: column; align-items: center;
+  gap: clamp(1rem, 2.5vh, 1.75rem);
+}
+.ppie__text {
+  width: 100%; margin: 0;
+  font-family: var(--font-display); font-weight: 400;
+  /* Unified deck scale, same as prose / call / letter-heading. */
+  font-size: clamp(1.05rem, 4vw, 2.4rem);
+  line-height: 1.2; letter-spacing: -0.01em;
+  color: var(--ink);
+  text-align: center;
+  text-wrap: balance;
+}
+.ppie__figure {
+  width: 100%; max-width: 1000px;
+  border: 1px solid rgba(26,22,18,0.22);
+  border-radius: 2px;
+  overflow: hidden;
+  background: var(--paper-2);
+}
+.ppie__image {
+  width: 100%; height: auto; display: block;
+  /* Cap the image height so big-font slides still fit in viewport.
+     Source aspect (3393×1352 ≈ 5:2) is preserved by intrinsic ratio
+     unless this kicks in. */
+  max-height: 42vh;
+  object-fit: cover;
+  /* Bias the visible crop toward the lower portion of the source so the
+     full Palace dome + base shows on both PPIE slides. */
+  object-position: center 70%;
+}
+/* .ppie__line removed — PPIE now uses single <p class="ppie__text">
+   elements that share the unified deck font scale. */
+
+/* =============================================================
+   WELCOME
+   ============================================================= */
+.welcome__content {
+  position: relative; z-index: 1;
+  display: flex; flex-direction: column; align-items: center;
+  text-align: center;
+  max-width: 960px;
+  width: 100%;
+  padding: clamp(2.5rem, 6vh, 4.5rem) var(--gutter);
+}
+.welcome__heading {
+  font-family: var(--font-display); font-weight: 350;
+  font-size: clamp(2rem, 4.4vw, 3.2rem);
+  line-height: 1.1; letter-spacing: -0.005em;
+  color: var(--ink); text-wrap: balance;
+  max-width: 22ch;
+}
+.welcome__sub {
+  font-family: var(--font-display);
+  font-style: italic; font-weight: 350;
+  font-size: clamp(1rem, 1.5vw, 1.25rem);
+  line-height: 1.48; color: var(--ink-soft);
+  margin: clamp(0.85rem, 2vh, 1.2rem) 0 0;
+  text-wrap: balance;
+  max-width: 46ch;
+}
+.welcome__year {
+  font-family: var(--font-sans); font-weight: 500;
+  font-size: 0.75rem; color: var(--ink-muted);
+  letter-spacing: 0.25em; text-transform: uppercase;
+  margin: clamp(1.25rem, 3vh, 1.85rem) 0 0;
+}
+.welcome__figure {
+  width: 100%;
+  max-width: 760px;
+  margin: clamp(1.75rem, 4vh, 2.75rem) 0 0;
+}
+.welcome__image {
+  width: 100%; height: auto; display: block;
+}
+
+/* =============================================================
+   IMAGE PANELS
+   ============================================================= */
+.panel--image { background: var(--paper-2); padding: 0; }
+.panel__img {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+}
+
+/* =============================================================
+   PROSE
+   ============================================================= */
+.panel--prose { background: var(--paper); }
+.prose__content {
+  position: relative; z-index: 1;
+  max-width: min(120ch, 96vw);
+  padding: 0 calc(var(--gutter) * 0.5);
+  text-align: center;
+}
+.prose__text {
+  font-family: var(--font-display);
+  font-weight: 400;
+  /* Matches .letter__heading / .call__text so the deck's prose,
+     ask, and closing voice all share one scale. */
+  font-size: clamp(1.05rem, 4vw, 2.4rem);
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  text-wrap: balance;
+  margin: 0;
+}
+.prose__text--follow {
+  margin-top: clamp(1rem, 2.5vh, 1.75rem);
+}
+
+/* =============================================================
+   IMPACT
+   ============================================================= */
+.panel--impact { background: var(--paper); }
+.impact__content {
+  position: relative; z-index: 1;
+  max-width: min(70ch, 92vw); padding: 0 var(--gutter); text-align: center;
+}
+.impact__text {
+  font-family: var(--font-display); font-weight: 400;
+  font-size: clamp(1.05rem, 4vw, 2.4rem);
+  line-height: 1.2; letter-spacing: -0.01em;
+  color: var(--ink); text-wrap: balance;
+}
+
+/* =============================================================
+   CALL — bridge from experience flow into the letter. Bigger,
+   bolder than prose/impact so it visibly breaks the rhythm.
+   ============================================================= */
+.panel--call { background: var(--paper); }
+.call__content {
+  position: relative; z-index: 1;
+  max-width: min(96ch, 95vw); padding: 0 var(--gutter); text-align: center;
+}
+.call__text {
+  /* Same scale as .letter__heading so this slide visibly steps out
+     of the prose flow and into the same voice as the closing ask. */
+  font-family: var(--font-display); font-weight: 400;
+  font-size: clamp(1.05rem, 4vw, 2.4rem);
+  line-height: 1.2; letter-spacing: -0.01em;
+  color: var(--ink); text-wrap: balance;
+}
+
+/* =============================================================
+   LETTER
+   ============================================================= */
+.panel--letter { background: var(--paper); }
+.letter__content {
+  position: relative; z-index: 1;
+  display: flex; flex-direction: column; align-items: center;
+  text-align: center;
+  max-width: 760px;
+  padding: clamp(2rem, 5vh, 4rem) var(--gutter);
+  gap: 0;
+}
+.letter__heading {
+  font-family: var(--font-display); font-weight: 400;
+  /* min trimmed from 1.7rem so on iPhone widths each half of the
+     <br>-split heading fits on a single line (was breaking to 3). */
+  font-size: clamp(1.05rem, 4vw, 2.4rem);
+  line-height: 1.18; letter-spacing: -0.01em;
+  color: var(--ink);
+  text-align: center;
+  /* Explicit <br> in markup controls the split. No balance so it
+     doesn't re-wrap. Wide max so each half fits on one line. */
+  max-width: 38ch;
+  margin: 0 auto clamp(2rem, 4.5vh, 3rem);
+}
+.letter__sign {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 0.05rem;
+  margin: 0;
+}
+.letter__signature {
+  display: block;
+  width: clamp(120px, 14vw, 150px);
+  height: auto;
+  margin-bottom: 0.5rem;
+  mix-blend-mode: multiply;
+  user-select: none;
+}
+.letter__name,
+.letter__title,
+.letter__contact {
+  font-family: var(--font-sans);
+  font-size: 0.86rem;
+  font-weight: 400;
+  color: var(--ink-muted);
+  letter-spacing: 0.03em;
+  line-height: 1.5;
+  margin: 0;
+}
+.letter__name { color: var(--ink-soft); font-weight: 500; }
+.letter__title { color: var(--ink-muted); margin-top: 0.05rem; }
+.letter__contact { margin-top: 0.45rem; }
+.letter__contact a { color: inherit; transition: color 0.3s; }
+.letter__contact a:hover { color: var(--accent); }
+.letter__sep { display: inline-block; margin: 0 0.55em; color: var(--ink-faint); }
+
+/* CTA + footer in normal flow, beneath the signature block. */
+.panel--letter .letter__ctas {
+  margin: clamp(1.75rem, 4vh, 2.75rem) 0 0;
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  text-align: center;
+}
+.panel--letter .letter__cta {
+  color: var(--ink-soft);
+  border-bottom: 1px solid var(--ink-faint);
+  padding: 0.15rem 0.1rem;
+  transition: color 0.3s, border-color 0.3s;
+}
+.panel--letter .letter__cta:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+.panel--letter .letter__footer {
+  position: absolute;
+  left: 0; right: 0;
+  bottom: clamp(1.25rem, 3vh, 2rem);
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: 0.68rem;
+  font-weight: 400;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  text-align: center;
+}
+
+/* =============================================================
+   PROGRESS DOTS
+   ============================================================= */
+.progress {
+  position: fixed;
+  right: clamp(10px, 2vw, 18px);
+  top: 50%; transform: translateY(-50%);
+  z-index: 100;
+  display: flex; flex-direction: column;
+  gap: 6px;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+.progress.is-visible { opacity: 1; }
+.progress__dot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--ink-ghost);
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  transition: background 0.4s ease, transform 0.4s ease;
+}
+.progress__dot.is-current {
+  background: var(--ink-muted);
+  transform: scale(1.4);
+}
+.progress.on-dark .progress__dot { background: rgba(241, 236, 225, 0.2); }
+.progress.on-dark .progress__dot.is-current { background: rgba(241, 236, 225, 0.6); }
+
+/* =============================================================
+   Tap hint — shown once, fades after first interaction
+   ============================================================= */
+.tap-hint {
+  display: none;
+  position: fixed;
+  left: 50%;
+  bottom: clamp(1.25rem, 3.5vh, 2.5rem);
+  transform: translateX(-50%);
+  z-index: 90;
+  font-family: var(--font-sans);
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: rgba(241, 236, 225, 0.55);
+  pointer-events: none;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.35);
+  animation: hintIn 0.8s ease 1.6s both, hintPulse 2.8s ease-in-out 2.4s infinite;
+  transition: opacity 0.5s ease;
+}
+/* Only show on touch devices (mobile / tablet). */
+@media (hover: none) and (pointer: coarse) {
+  .tap-hint { display: block; }
+}
+.tap-hint.is-gone { opacity: 0; animation: none; }
+@keyframes hintIn  { from { opacity: 0; transform: translate(-50%, 6px); } to { opacity: 1; transform: translate(-50%, 0); } }
+@keyframes hintPulse { 0%, 100% { opacity: 0.45; } 50% { opacity: 0.85; } }
+
+/* =============================================================
+   Mobile (portrait + narrow desktop)
+   ============================================================= */
+@media (max-width: 860px) {
+  .hero__title { font-size: clamp(1.5rem, 6.5vw, 2rem); }
+  /* .tagline__text uses the unified clamp from its base rule. */
+  /* .ppie__text inherits the unified clamp from the mobile rule
+     below; image keeps its intrinsic aspect with max-height cap. */
+  .welcome__heading { font-size: clamp(1.6rem, 7vw, 2.2rem); }
+  .welcome__sub { font-size: clamp(0.95rem, 4vw, 1.1rem); }
+  /* .prose__text + .impact__text intentionally use the unified
+     clamp(1.05rem, 4vw, 2.4rem) from their base rules — no mobile
+     override, so they match .letter__heading at every viewport. */
+  .letter__heading {
+    font-size: clamp(1.05rem, 4.5vw, 1.5rem);
+    margin-bottom: clamp(1.5rem, 3.5vh, 2rem);
+  }
+  .letter__body p { font-size: clamp(0.95rem, 3.8vw, 1.05rem); }
+  .letter__ctas { font-size: 0.66rem; }
+
+  /* Keep these panels flex-centered like everything else; the sizing
+     above (clamped fonts, capped image heights) keeps their content
+     within viewport on mobile. overflow-y:auto stays as a safety net
+     in case content somehow overflows on a very small phone — flex
+     centering still works, and the panel becomes scrollable rather
+     than clipped. */
+  .panel--ppie,
+  .panel--letter,
+  .panel--welcome {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
+  }
+  .letter__sign { margin-top: clamp(1.5rem, 4vh, 2rem); }
+
+  .progress { right: 8px; gap: 5px; }
+  .progress__dot { width: 4px; height: 4px; }
+
+  /* 16:9 letterbox on portrait phones */
+  .panel--image { background: var(--paper); }
+  .panel__img {
+    position: relative;
+    inset: auto;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+  }
+}
+
+/* =============================================================
+   Landscape phones — short viewport, prioritize fit-in-screen
+   ============================================================= */
+@media (orientation: landscape) and (max-height: 520px) {
+  /* No internal scroll — every slide fits viewport. */
+  .panel--ppie,
+  .panel--letter,
+  .panel--welcome {
+    overflow: hidden;
+    align-items: center;
+    touch-action: none;
+  }
+
+  /* Tighten container paddings so content reaches more vertical space. */
+  .panel--ppie { padding: clamp(0.75rem, 2vh, 1.25rem) var(--gutter); }
+  .panel--letter .letter__content { padding: clamp(0.75rem, 2vh, 1.25rem) var(--gutter); }
+  .welcome__content { padding: clamp(0.75rem, 2vh, 1.25rem) var(--gutter); }
+
+  /* Cap image heights so they never push other content off-screen. */
+  .ppie__image    { max-height: 38vh; }
+  .welcome__figure { max-width: min(440px, 60vw); margin-top: clamp(0.5rem, 1.5vh, 0.9rem); }
+  .welcome__image  { max-height: 32vh; object-fit: contain; }
+
+  /* Compact typography for short viewports. */
+  .hero__title       { font-size: clamp(1.3rem, 4vw, 1.9rem); }
+  /* .tagline__text joins the unified landscape clamp below. */
+  /* .ppie__text uses the unified landscape clamp below. */
+  .welcome__heading  { font-size: clamp(1.4rem, 3.6vw, 1.9rem); }
+  .welcome__sub      { font-size: clamp(0.85rem, 2vw, 1rem); }
+  .welcome__year     { margin: clamp(0.35rem, 0.8vh, 0.6rem) 0 0; }
+  /* Prose, impact, call, and letter heading share one clamp on
+     landscape mobile too — compact enough to fit 2–3 lines in a
+     short viewport while staying visually unified. */
+  .tagline__text,
+  .ppie__text,
+  .prose__text,
+  .impact__text,
+  .call__text,
+  .letter__heading   { font-size: clamp(1.05rem, 2.6vw, 1.4rem); }
+  .letter__heading   { margin-bottom: clamp(0.45rem, 1.3vh, 0.85rem); }
+  .letter__body p    { font-size: clamp(0.78rem, 1.85vw, 0.92rem); line-height: 1.4; }
+  .letter__body      { gap: clamp(0.25rem, 0.6vh, 0.45rem); }
+  .letter__sign      { margin-top: clamp(0.6rem, 1.6vh, 1rem); }
+  .letter__signature { width: clamp(78px, 9vw, 100px); margin-bottom: 0.15rem; }
+  .letter__ctas      { margin-top: clamp(0.6rem, 1.6vh, 1rem); font-size: 0.6rem; }
+  .letter__rule      { margin-top: clamp(0.45rem, 1.2vh, 0.8rem); }
+  .letter__footer    { margin-top: clamp(0.3rem, 0.8vh, 0.6rem); font-size: 0.6rem; }
+
+  /* Horizontal dots along the bottom — less crowded than a side rail. */
+  .progress {
+    top: auto;
+    bottom: 12px;
+    right: 50%;
+    transform: translateX(50%);
+    flex-direction: row;
+    gap: 5px;
+  }
+  .progress__dot { width: 4px; height: 4px; }
+
+  /* No need for the tap hint on short landscape — the deck is obvious
+     once a tap has happened anyway, and bottom space is precious. */
+  .tap-hint { display: none; }
+
+  /* Image panels: full-bleed cover instead of letterbox to use the
+     wide landscape canvas. */
+  .panel--image { background: #1c1610; }
+  .panel__img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    aspect-ratio: auto;
+    object-fit: cover;
+  }
+}
+
+/* =============================================================
+   Reduced motion: same deck, no animation.
+   Layout / interactions stay identical; we only flatten the
+   slide+fade between panels into an instant cut and skip the
+   content reveal animations.
+   ============================================================= */
+.reduced-motion .panel {
+  transition: none;
+  transform: none;
+}
+.reduced-motion .panel.is-past { transform: none; }
+.reduced-motion .panel [data-animate] {
+  opacity: 1;
+  transform: none;
+  transition: none;
+}
+.reduced-motion .hero__title {
+  animation: none;
+  opacity: 1;
+  transform: none;
+}
+.reduced-motion .hero-fixed,
+.reduced-motion .hero-fixed__blur {
+  transition: none;
+}
+.reduced-motion .tap-hint {
+  animation: none;
+}

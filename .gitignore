@@ -1,4 +1,28 @@
-.claude/
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
 .DS_Store
 *.log
-node_modules/
+*.pem
+*.swp
+.claude/
+
+# env files
+.env*
+!.env.example
+
+# vercel
+.vercel
+
+# testing
+/coverage
