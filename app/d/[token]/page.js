@@ -79,11 +79,14 @@ async function resolveSession({ link, ua, hdrs, existingCookie }) {
 
 export default async function PersonalLinkPage({ params }) {
   const { token } = await params;
-  if (!token) redirect("/disabled");
+  // Stale, missing, inactive, or expired tokens fall through to the public
+  // preview deck instead of a hard "disabled" page — visitors can still see
+  // the first slides and request access via the gate modal.
+  if (!token) redirect("/");
 
   let service;
   try { service = createServiceClient(); } catch {
-    redirect("/disabled");
+    redirect("/");
   }
 
   const { data: link } = await service
@@ -92,10 +95,10 @@ export default async function PersonalLinkPage({ params }) {
     .eq("token", token)
     .maybeSingle();
 
-  if (!link) redirect("/disabled");
-  if (!link.is_active) redirect("/disabled");
+  if (!link) redirect("/");
+  if (!link.is_active) redirect("/");
   if (link.expires_at && new Date(link.expires_at).getTime() < Date.now()) {
-    redirect("/disabled");
+    redirect("/");
   }
 
   const ck = await cookies();
