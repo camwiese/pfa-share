@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createServiceClient } from "../../../lib/supabase/server";
 import { verifySessionCookie, SESSION_COOKIE_NAME } from "../../../lib/sessionCookie";
+import { maybeLazyCloseIdle } from "../../../lib/closeIdle";
 
 export async function POST(request) {
   let body = {};
@@ -74,6 +75,10 @@ export async function POST(request) {
     kind: "tick",
     payload: { slideIdx, seconds },
   });
+
+  // Lazy fallback: opportunistically close other idle sessions and fire
+  // their summary emails. Throttled per-instance to once every 30s.
+  maybeLazyCloseIdle(service);
 
   return NextResponse.json({ ok: true });
 }

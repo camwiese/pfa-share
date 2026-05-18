@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createServiceClient } from "../../../../../lib/supabase/server";
 import { verifySessionCookie, SESSION_COOKIE_NAME } from "../../../../../lib/sessionCookie";
+import { maybeLazyCloseIdle } from "../../../../../lib/closeIdle";
 
 export async function POST(request, { params }) {
   const { token } = await params;
@@ -71,6 +72,10 @@ export async function POST(request, { params }) {
   if (updErr) {
     return NextResponse.json({ error: "Update failed" }, { status: 500 });
   }
+
+  // Lazy fallback: sweep any other idle sessions and fire their summary
+  // emails. Throttled per-instance to once every 30s so this is cheap.
+  maybeLazyCloseIdle(service);
 
   return NextResponse.json({ ok: true });
 }
