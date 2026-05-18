@@ -158,6 +158,7 @@ Development**.
 | `NEXT_PUBLIC_APP_URL` | `https://pfa.worldsfair.co` |
 | `SESSION_SECRET` | run `openssl rand -hex 32` locally; paste output |
 | `CRON_SECRET` | run `openssl rand -hex 32` locally; paste output |
+| `AUTH_DUMMY_MODE` | `true` while Resend SMTP isn't wired yet (accepts any 6-digit OTP code). Flip to `false` once real email delivery is live. |
 
 **Do not** set `LOCAL_DEV_ADMIN_BYPASS` here. That flag is for local dev only.
 

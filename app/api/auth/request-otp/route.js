@@ -5,6 +5,7 @@ import { isValidEmail, normalizeEmail } from "../../../../lib/email";
 import { isAnyAdmin } from "../../../../lib/adminAuth";
 import { notifyAccessRequest, notifyNewEmail } from "../../../../lib/notifications";
 import { geoFromHeaders } from "../../../../lib/geo";
+import { isDummyAuthMode } from "../../../../lib/dummyAuth";
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -21,6 +22,12 @@ export async function POST(request) {
   const { email } = body;
   if (!isValidEmail(email)) {
     return NextResponse.json({ error: "Valid email is required" }, { status: 400 });
+  }
+
+  // Dummy mode: skip Supabase, just tell the client to show the code-entry
+  // step. verify-otp will accept any 6-digit code below.
+  if (isDummyAuthMode()) {
+    return NextResponse.json({ dummy: true });
   }
 
   if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {

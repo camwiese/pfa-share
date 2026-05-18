@@ -1,8 +1,20 @@
 import { NextResponse } from "next/server";
 import { createClient, createServiceClient } from "../../../../lib/supabase/server";
 import { getAdminEmails } from "../../../../lib/admin";
+import { getDummyAuthEmail } from "../../../../lib/dummyAuth";
 
 export async function GET() {
+  // Dummy mode: trust the signed cookie.
+  const dummyEmail = await getDummyAuthEmail();
+  if (dummyEmail) {
+    const adminEmails = getAdminEmails();
+    return NextResponse.json({
+      verified: true,
+      email: dummyEmail,
+      isAdmin: adminEmails.includes(dummyEmail),
+    });
+  }
+
   try {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();

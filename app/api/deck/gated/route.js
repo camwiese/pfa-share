@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient, createServiceClient } from "../../../../lib/supabase/server";
 import { getAdminEmails } from "../../../../lib/admin";
+import { getDummyAuthEmail } from "../../../../lib/dummyAuth";
 import { getPanelsHtml, TOTAL_PANELS } from "../../../../lib/panelHtml";
 
 export async function GET(request) {
@@ -8,18 +9,26 @@ export async function GET(request) {
     process.env.NODE_ENV === "development" && process.env.LOCAL_DEV_ADMIN_BYPASS === "true";
 
   let email = null;
+  let trusted = bypass; // bypass + dummy mode trust the email without DB check
+
   if (bypass) {
     email = (getAdminEmails()[0] || "dev@example.com").toLowerCase();
   } else {
-    try {
-      const supabase = await createClient();
-      const { data: { user } } = await supabase.auth.getUser();
-      email = user?.email?.toLowerCase() || null;
-    } catch {}
+    const dummyEmail = await getDummyAuthEmail();
+    if (dummyEmail) {
+      email = dummyEmail;
+      trusted = true;
+    } else {
+      try {
+        const supabase = await createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        email = user?.email?.toLowerCase() || null;
+      } catch {}
+    }
   }
   if (!email) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  if (!bypass) {
+  if (!trusted) {
     try {
       const service = createServiceClient();
       const adminEmails = getAdminEmails();
