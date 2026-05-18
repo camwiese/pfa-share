@@ -1,6 +1,9 @@
 {
   "framework": "nextjs",
   "crons": [
-    { "path": "/api/cron/close-idle", "schedule": "* * * * *" }
+    {
+      "path": "/api/cron/close-idle",
+      "schedule": "0 12 * * *"
+    }
   ]
 }

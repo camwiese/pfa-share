@@ -167,13 +167,11 @@ see §3.5.)
 
 ### 3.4 Verify the cron job
 
-**Project Settings → Cron Jobs**: you should see one entry, `/api/cron/close-idle`,
-schedule `* * * * *` (every minute). This is declared in `vercel.json`. The
-cron closes idle sessions and fires the session-summary email.
-
-If you're on the Hobby tier and the cron doesn't appear, the app has a
-lazy-close fallback in every track endpoint — sessions will still close,
-just less precisely.
+**Project Settings → Cron Jobs**: you should see one entry,
+`/api/cron/close-idle`, schedule `0 12 * * *` (daily at 12:00 UTC). This
+is declared in `vercel.json` and is the most frequent Hobby tier allows.
+On Pro you can change it to `* * * * *` for minute-level session close
+and near-real-time summary emails.
 
 ### 3.5 Add the Vercel preview domain to Supabase
 
