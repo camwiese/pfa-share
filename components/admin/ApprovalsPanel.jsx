@@ -41,40 +41,31 @@ export default function ApprovalsPanel() {
     }
   }
 
-  if (loading) return <div style={{ color: "#7b8e80", fontSize: 13 }}>Loading…</div>;
-  if (requests.length === 0) return <div style={{ color: "#7b8e80", fontSize: 13 }}>No pending requests.</div>;
+  if (loading) return <div className="empty-state">Loading…</div>;
+  if (requests.length === 0) return <div className="empty-state">No pending requests.</div>;
 
   return (
-    <div style={{ display: "grid", gap: 6, fontFamily: "Inter, system-ui, sans-serif" }}>
+    <div className="row-list">
       {requests.map((r) => (
         <div
           key={r.id}
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1.4fr 1fr 200px",
-            alignItems: "center",
-            gap: 10,
-            padding: "10px 12px",
-            border: "1px solid #eee9dc",
-            background: "#fff",
-            borderRadius: 6,
-            fontSize: 13,
-          }}
+          className="row row--static"
+          style={{ gridTemplateColumns: "1.6fr 1fr 200px" }}
         >
-          <span style={{ fontWeight: 500 }}>{r.email}</span>
-          <span style={{ color: "#7b8e80" }}>{formatRelative(r.requested_at)}</span>
+          <span className="row__primary">{r.email}</span>
+          <span className="row__muted">{formatRelative(r.requested_at)}</span>
           <div style={{ display: "flex", gap: 6, justifyContent: "flex-end" }}>
             <button
               onClick={() => act(r.id, "approve")}
               disabled={!!busy[r.id]}
-              style={btnPrimary(busy[r.id] === "approve")}
+              className="btn btn--primary btn--small"
             >
               {busy[r.id] === "approve" ? "Approving…" : "Approve"}
             </button>
             <button
               onClick={() => act(r.id, "deny")}
               disabled={!!busy[r.id]}
-              style={btnSecondary(busy[r.id] === "deny")}
+              className="btn btn--ghost btn--small"
             >
               {busy[r.id] === "deny" ? "Denying…" : "Deny"}
             </button>
@@ -84,26 +75,3 @@ export default function ApprovalsPanel() {
     </div>
   );
 }
-
-const btnPrimary = (busy) => ({
-  fontFamily: "Inter, system-ui, sans-serif",
-  fontSize: 12,
-  padding: "6px 12px",
-  border: 0,
-  background: "#3a473f",
-  color: "#fcfbf8",
-  borderRadius: 6,
-  cursor: busy ? "default" : "pointer",
-  opacity: busy ? 0.7 : 1,
-});
-const btnSecondary = (busy) => ({
-  fontFamily: "Inter, system-ui, sans-serif",
-  fontSize: 12,
-  padding: "6px 12px",
-  border: "1px solid #dedad0",
-  background: "#fff",
-  color: "#33403a",
-  borderRadius: 6,
-  cursor: busy ? "default" : "pointer",
-  opacity: busy ? 0.7 : 1,
-});

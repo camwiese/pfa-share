@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireAdmin } from "../../../../../lib/requireAdmin";
+import { demo } from "../../../../../lib/demoData";
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -16,6 +17,12 @@ export async function POST(request, { params }) {
   const action = body.action;
   if (action !== "approve" && action !== "deny") {
     return NextResponse.json({ error: "Invalid action" }, { status: 400 });
+  }
+
+  if (auth.demo) {
+    const r = demo.actOnApproval(id, action);
+    if (!r) return NextResponse.json({ error: "Not found" }, { status: 404 });
+    return NextResponse.json({ ok: true });
   }
 
   const { data: req, error: readErr } = await auth.service

@@ -3,23 +3,24 @@
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
-const FIELDS = [
-  { key: "email_on_request", label: "Email me on access requests", group: "notifications" },
-  { key: "email_on_new_email", label: "Email me when a new email verifies", group: "notifications" },
-  { key: "email_on_link_open", label: "Email me when a personal link is opened", group: "notifications" },
-  { key: "email_on_link_open_every", label: "…every session (off = first session only)", group: "notifications" },
-  { key: "email_on_session_end", label: "Email me a session summary when a viewer leaves", group: "notifications" },
+const TOGGLES = [
+  { key: "email_on_request", label: "Email me on access requests" },
+  { key: "email_on_new_email", label: "Email me when a new email verifies" },
+  { key: "email_on_link_open", label: "Email me when a personal link is opened" },
+  { key: "email_on_link_open_every", label: "…every session (off = first session only)" },
+  { key: "email_on_session_end", label: "Email me a session summary when a viewer leaves" },
 ];
 
 export default function SettingsPanel({ adminEmails = [] }) {
   const [settings, setSettings] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetch("/api/admin/settings")
       .then((r) => r.json())
-      .then((d) => setSettings(d.settings))
-      .catch(() => {});
+      .then((d) => { setSettings(d.settings); setLoading(false); })
+      .catch(() => setLoading(false));
   }, []);
 
   function setField(key, value) {
@@ -49,46 +50,49 @@ export default function SettingsPanel({ adminEmails = [] }) {
     }
   }
 
-  if (!settings) {
-    return <div style={{ color: "#7b8e80", fontSize: 13 }}>Loading…</div>;
-  }
+  if (loading) return <div className="empty-state">Loading…</div>;
+  if (!settings) return <div className="empty-state">Couldn&rsquo;t load settings.</div>;
 
   return (
-    <div style={{ display: "grid", gap: 22, fontFamily: "Inter, system-ui, sans-serif" }}>
-      <Section title="Access mode">
-        <label style={radioRow}>
+    <div>
+      <div className="section">
+        <h2>Access mode</h2>
+        <label className="field-row--block">
           <input
             type="radio"
             name="access"
             checked={settings.public_access}
             onChange={() => setField("public_access", true)}
+            style={{ marginTop: 4 }}
           />
           <div>
-            <div style={{ fontSize: 14, fontWeight: 500 }}>Public (verify email)</div>
-            <div style={{ fontSize: 12, color: "#7b8e80" }}>
+            <div className="field-row__title">Public (verify email)</div>
+            <div className="field-row__sub">
               Anyone can request access; a 6-digit code is emailed and they continue.
             </div>
           </div>
         </label>
-        <label style={radioRow}>
+        <label className="field-row--block" style={{ marginTop: 10 }}>
           <input
             type="radio"
             name="access"
             checked={!settings.public_access}
             onChange={() => setField("public_access", false)}
+            style={{ marginTop: 4 }}
           />
           <div>
-            <div style={{ fontSize: 14, fontWeight: 500 }}>Approval required</div>
-            <div style={{ fontSize: 12, color: "#7b8e80" }}>
+            <div className="field-row__title">Approval required</div>
+            <div className="field-row__sub">
               Requests show up in the Approvals tab. Each approval emails a magic link.
             </div>
           </div>
         </label>
-      </Section>
+      </div>
 
-      <Section title="Notifications">
-        {FIELDS.map((f) => (
-          <label key={f.key} style={checkboxRow}>
+      <div className="section">
+        <h2>Notifications</h2>
+        {TOGGLES.map((f) => (
+          <label key={f.key} className="field-row">
             <input
               type="checkbox"
               checked={!!settings[f.key]}
@@ -97,86 +101,55 @@ export default function SettingsPanel({ adminEmails = [] }) {
             <span>{f.label}</span>
           </label>
         ))}
-        <div style={{ display: "flex", gap: 8, alignItems: "center", marginTop: 4 }}>
-          <span style={{ fontSize: 13 }}>Min gap (seconds)</span>
+        <div className="field-row" style={{ marginTop: 6 }}>
+          <span>Min gap between same-trigger emails (seconds)</span>
           <input
             type="number"
             min={0}
             max={3600}
             value={settings.notification_min_gap_seconds}
             onChange={(e) => setField("notification_min_gap_seconds", Number(e.target.value) || 0)}
-            style={smallInput}
+            className="input input--small"
           />
         </div>
-      </Section>
+      </div>
 
-      <Section title="Display">
-        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-          <span style={{ fontSize: 13 }}>Free-preview slide count</span>
+      <div className="section">
+        <h2>Display</h2>
+        <div className="field-row">
+          <span>Free-preview slide count</span>
           <input
             type="number"
             min={1}
             max={10}
             value={settings.free_slide_count}
             onChange={(e) => setField("free_slide_count", Number(e.target.value) || 5)}
-            style={smallInput}
+            className="input input--small"
           />
         </div>
-      </Section>
+      </div>
 
-      <Section title="Admin allowlist">
-        <div style={{ fontSize: 13, color: "#7b8e80", lineHeight: 1.6 }}>
+      <div className="section">
+        <h2>Admin allowlist</h2>
+        <div className="field-row__sub" style={{ lineHeight: 1.7 }}>
           {adminEmails.length > 0 ? (
             <>
-              <div style={{ marginBottom: 4 }}>From <code>GP_EMAIL</code>:</div>
-              <ul style={{ margin: 0, paddingLeft: 18 }}>
+              From <code>GP_EMAIL</code>:
+              <ul style={{ margin: "6px 0 0", paddingLeft: 18 }}>
                 {adminEmails.map((e) => <li key={e}>{e}</li>)}
               </ul>
             </>
           ) : (
-            <div>No admin emails configured in <code>GP_EMAIL</code>.</div>
+            <>No admin emails configured in <code>GP_EMAIL</code>.</>
           )}
         </div>
-      </Section>
+      </div>
 
-      <div style={{ display: "flex", justifyContent: "flex-end" }}>
-        <button onClick={save} disabled={saving} style={primaryBtn(saving)}>
+      <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 12 }}>
+        <button onClick={save} disabled={saving} className="btn btn--primary">
           {saving ? "Saving…" : "Save"}
         </button>
       </div>
     </div>
   );
 }
-
-function Section({ title, children }) {
-  return (
-    <div style={{ background: "#fff", border: "1px solid #dedad0", borderRadius: 10, padding: 16 }}>
-      <h2 style={{ fontFamily: "Fraunces, Georgia, serif", fontWeight: 500, fontSize: 16, margin: "0 0 10px" }}>
-        {title}
-      </h2>
-      <div style={{ display: "grid", gap: 10 }}>{children}</div>
-    </div>
-  );
-}
-
-const radioRow = { display: "flex", alignItems: "flex-start", gap: 10, cursor: "pointer" };
-const checkboxRow = { display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: "#33403a", cursor: "pointer" };
-const smallInput = {
-  fontSize: 13,
-  padding: "6px 10px",
-  border: "1px solid #dedad0",
-  borderRadius: 6,
-  width: 80,
-};
-const primaryBtn = (saving) => ({
-  fontFamily: "Inter, system-ui, sans-serif",
-  fontSize: 13,
-  fontWeight: 600,
-  padding: "10px 16px",
-  border: 0,
-  borderRadius: 8,
-  background: "#3a473f",
-  color: "#fcfbf8",
-  cursor: saving ? "default" : "pointer",
-  opacity: saving ? 0.7 : 1,
-});

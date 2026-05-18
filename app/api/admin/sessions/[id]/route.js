@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireAdmin } from "../../../../../lib/requireAdmin";
+import { demo } from "../../../../../lib/demoData";
 
 export async function GET(request, { params }) {
   const auth = await requireAdmin();
@@ -7,6 +8,12 @@ export async function GET(request, { params }) {
 
   const { id } = await params;
   if (!id) return NextResponse.json({ error: "Missing id" }, { status: 400 });
+
+  if (auth.demo) {
+    const result = demo.getSession(id);
+    if (!result) return NextResponse.json({ error: "Not found" }, { status: 404 });
+    return NextResponse.json(result);
+  }
 
   const { data: session, error } = await auth.service
     .from("sessions")

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireAdmin } from "../../../../../lib/requireAdmin";
+import { demo } from "../../../../../lib/demoData";
 
 export async function PATCH(request, { params }) {
   const auth = await requireAdmin();
@@ -16,6 +17,12 @@ export async function PATCH(request, { params }) {
   if (typeof body.name === "string") patch.name = body.name.trim();
   if (typeof body.note === "string") patch.note = body.note.trim() || null;
   if (Object.keys(patch).length === 0) return NextResponse.json({ error: "No fields" }, { status: 400 });
+
+  if (auth.demo) {
+    const link = demo.updateLink(id, patch);
+    if (!link) return NextResponse.json({ error: "Not found" }, { status: 404 });
+    return NextResponse.json({ link });
+  }
 
   const { data, error } = await auth.service
     .from("links")
@@ -42,6 +49,11 @@ export async function DELETE(request, { params }) {
 
   const { id } = await params;
   if (!id) return NextResponse.json({ error: "Missing id" }, { status: 400 });
+
+  if (auth.demo) {
+    demo.deleteLink(id);
+    return NextResponse.json({ ok: true });
+  }
 
   const { error } = await auth.service.from("links").delete().eq("id", id);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });

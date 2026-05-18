@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { COLORS, SANS } from "../../constants/theme";
 
 const LINKS = [
   { href: "/admin", label: "Activity" },
@@ -20,16 +19,7 @@ function isActive(pathname, href) {
 export default function AdminTopNav({ adminEmail, showApprovals = true }) {
   const pathname = usePathname();
   const router = useRouter();
-  const [isMobile, setIsMobile] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-
-  useEffect(() => {
-    const mq = window.matchMedia("(max-width: 820px)");
-    setIsMobile(mq.matches);
-    const handleChange = (e) => setIsMobile(e.matches);
-    mq.addEventListener("change", handleChange);
-    return () => mq.removeEventListener("change", handleChange);
-  }, []);
 
   const links = useMemo(
     () => LINKS.filter((l) => l.href !== "/admin/approvals" || showApprovals),
@@ -51,163 +41,64 @@ export default function AdminTopNav({ adminEmail, showApprovals = true }) {
   }
 
   return (
-    <header style={{ background: COLORS.green900, borderBottom: `1px solid ${COLORS.green800}`, position: "sticky", top: 0, zIndex: 20 }}>
-      <div
-        style={{
-          maxWidth: 1200,
-          margin: "0 auto",
-          padding: "12px 20px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: 16,
-        }}
-      >
-        <div style={{ color: COLORS.cream50, fontFamily: SANS, fontSize: 14, fontWeight: 600 }}>
-          PFA · {activeLabel}
-        </div>
+    <header className="admin-nav">
+      <div className="admin-nav__inner">
+        <div className="admin-nav__brand">PFA · {activeLabel}</div>
 
-        {isMobile ? (
-          <>
-            <button
-              type="button"
-              onClick={() => setMenuOpen((p) => !p)}
-              aria-expanded={menuOpen}
-              aria-label="Toggle admin navigation"
-              style={{
-                border: `1px solid ${COLORS.green700}`,
-                background: COLORS.green800,
-                color: COLORS.cream50,
-                borderRadius: 6,
-                padding: "8px 10px",
-                fontSize: 13,
-                fontFamily: SANS,
-                cursor: "pointer",
-              }}
-            >
-              Menu
-            </button>
-            {menuOpen && (
-              <div
-                style={{ position: "fixed", inset: 0, background: "rgba(4,22,32,0.45)", zIndex: 30 }}
-                onClick={() => setMenuOpen(false)}
+        <nav className="admin-nav__tabs">
+          {links.map((link) => {
+            const active = isActive(pathname || "", link.href);
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={`admin-nav__tab${active ? " is-active" : ""}`}
               >
-                <div
-                  style={{
-                    position: "absolute",
-                    top: 56,
-                    right: 16,
-                    left: 16,
-                    background: COLORS.white,
-                    borderRadius: 10,
-                    border: `1px solid ${COLORS.border}`,
-                    padding: 12,
-                  }}
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <div style={{ display: "grid", gap: 6 }}>
-                    {links.map((link) => {
-                      const active = isActive(pathname || "", link.href);
-                      return (
-                        <Link
-                          key={link.href}
-                          href={link.href}
-                          onClick={() => setMenuOpen(false)}
-                          style={{
-                            fontFamily: SANS,
-                            fontSize: 14,
-                            fontWeight: active ? 600 : 500,
-                            color: active ? COLORS.green900 : COLORS.text700,
-                            textDecoration: "none",
-                            border: `1px solid ${active ? COLORS.green400 : COLORS.border}`,
-                            background: active ? COLORS.green100 : COLORS.white,
-                            borderRadius: 6,
-                            padding: "10px 12px",
-                          }}
-                        >
-                          {link.label}
-                        </Link>
-                      );
-                    })}
-                    {adminEmail ? (
-                      <button
-                        type="button"
-                        onClick={handleLogout}
-                        style={{
-                          marginTop: 6,
-                          fontFamily: SANS,
-                          fontSize: 13,
-                          padding: "8px 10px",
-                          border: `1px solid ${COLORS.border}`,
-                          background: COLORS.gray100,
-                          borderRadius: 6,
-                          cursor: "pointer",
-                        }}
-                      >
-                        Log out {adminEmail}
-                      </button>
-                    ) : null}
-                  </div>
-                </div>
-              </div>
-            )}
-          </>
-        ) : (
-          <nav
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-              flexWrap: "nowrap",
-              justifyContent: "flex-end",
-              overflowX: "auto",
-              scrollbarWidth: "none",
-            }}
-          >
-            {links.map((link) => {
-              const active = isActive(pathname || "", link.href);
-              return (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  style={{
-                    fontFamily: SANS,
-                    fontSize: 13,
-                    fontWeight: active ? 600 : 500,
-                    color: active ? COLORS.cream50 : COLORS.green300,
-                    textDecoration: "none",
-                    border: active ? `1px solid ${COLORS.green600}` : "1px solid transparent",
-                    background: active ? COLORS.green800 : "transparent",
-                    borderRadius: 4,
-                    padding: "7px 10px",
-                    lineHeight: 1.2,
-                  }}
-                >
-                  {link.label}
-                </Link>
-              );
-            })}
-            {adminEmail ? (
-              <button
-                type="button"
-                onClick={handleLogout}
-                style={{
-                  marginLeft: 8,
-                  fontFamily: SANS,
-                  fontSize: 12,
-                  padding: "6px 10px",
-                  border: `1px solid ${COLORS.green700}`,
-                  background: "transparent",
-                  color: COLORS.green300,
-                  borderRadius: 4,
-                  cursor: "pointer",
-                }}
-                title={adminEmail}
-              >
-                Log out
-              </button>
-            ) : null}
-          </nav>
+                {link.label}
+              </Link>
+            );
+          })}
+        </nav>
+
+        {adminEmail ? (
+          <button onClick={handleLogout} className="admin-nav__logout" title={adminEmail}>
+            Sign out
+          </button>
+        ) : null}
+
+        <button
+          type="button"
+          onClick={() => setMenuOpen((p) => !p)}
+          aria-expanded={menuOpen}
+          aria-label="Toggle admin navigation"
+          className="admin-nav__menu-btn"
+        >
+          Menu
+        </button>
+
+        {menuOpen && (
+          <div className="admin-nav__menu-overlay" onClick={() => setMenuOpen(false)}>
+            <div className="admin-nav__menu" onClick={(e) => e.stopPropagation()}>
+              {links.map((link) => {
+                const active = isActive(pathname || "", link.href);
+                return (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    onClick={() => setMenuOpen(false)}
+                    className={`admin-nav__tab${active ? " is-active" : ""}`}
+                  >
+                    {link.label}
+                  </Link>
+                );
+              })}
+              {adminEmail ? (
+                <button onClick={handleLogout} className="btn btn--ghost btn--small" style={{ marginTop: 6 }}>
+                  Sign out {adminEmail}
+                </button>
+              ) : null}
+            </div>
+          </div>
         )}
       </div>
     </header>

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { requireAdmin } from "../../../../lib/requireAdmin";
 import { generateToken } from "../../../../lib/nanoid";
+import { demo } from "../../../../lib/demoData";
 
 export async function GET(request) {
   const auth = await requireAdmin();
@@ -9,6 +10,10 @@ export async function GET(request) {
   const url = new URL(request.url);
   const q = url.searchParams.get("q")?.trim().toLowerCase() || "";
   const status = url.searchParams.get("status") || "all"; // all | active | disabled
+
+  if (auth.demo) {
+    return NextResponse.json({ links: demo.listLinks({ q, status }) });
+  }
 
   let query = auth.service
     .from("links")
@@ -40,8 +45,15 @@ export async function POST(request) {
   const note = (body.note || "").trim() || null;
   if (!name) return NextResponse.json({ error: "Name required" }, { status: 400 });
 
-  // Retry on token collision (very rare with 30-bit space).
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") || "http://localhost:3000";
+
+  if (auth.demo) {
+    const token = generateToken();
+    const link = demo.createLink({ name, note, token, createdBy: auth.email });
+    return NextResponse.json({ link, url: `${baseUrl}/d/${token}` });
+  }
+
+  // Retry on token collision (very rare with 30-bit space).
   for (let attempt = 0; attempt < 5; attempt++) {
     const token = generateToken();
     const { data, error } = await auth.service

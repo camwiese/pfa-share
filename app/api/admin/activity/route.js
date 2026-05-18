@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireAdmin } from "../../../../lib/requireAdmin";
+import { demo } from "../../../../lib/demoData";
 
 // Aggregated metrics for the Activity tab.
 //   - totalSessions
@@ -17,6 +18,11 @@ export async function GET(request) {
   const live = url.searchParams.get("live") === "1";
   const days = clamp(Number(url.searchParams.get("days") || 30), 1, 365);
   const since = new Date(Date.now() - days * 86400_000).toISOString();
+
+  if (auth.demo) {
+    if (live) return NextResponse.json({ liveNowCount: demo.liveCount() });
+    return NextResponse.json(demo.activity({ days }));
+  }
 
   if (live) {
     const liveSince = new Date(Date.now() - 90_000).toISOString();

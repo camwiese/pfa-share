@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireAdmin } from "../../../../lib/requireAdmin";
+import { demo } from "../../../../lib/demoData";
 
 export async function GET(request) {
   const auth = await requireAdmin();
@@ -9,6 +10,12 @@ export async function GET(request) {
   const windowDays = clamp(Number(url.searchParams.get("days") || 30), 1, 365);
   const limit = clamp(Number(url.searchParams.get("limit") || 50), 1, 200);
   const onlyLinkId = url.searchParams.get("link_id") || null;
+
+  if (auth.demo) {
+    return NextResponse.json({
+      sessions: demo.listSessions({ days: windowDays, limit, linkId: onlyLinkId }),
+    });
+  }
 
   const since = new Date(Date.now() - windowDays * 86400_000).toISOString();
 

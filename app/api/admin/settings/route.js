@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireAdmin } from "../../../../lib/requireAdmin";
+import { demo } from "../../../../lib/demoData";
 
 const FIELDS = [
   "public_access",
@@ -15,6 +16,10 @@ const FIELDS = [
 export async function GET() {
   const auth = await requireAdmin();
   if (auth.error) return NextResponse.json({ error: auth.error }, { status: auth.status });
+
+  if (auth.demo) {
+    return NextResponse.json({ settings: demo.getSettings() });
+  }
 
   const { data, error } = await auth.service
     .from("settings")
@@ -40,6 +45,10 @@ export async function PATCH(request) {
     return NextResponse.json({ error: "No fields" }, { status: 400 });
   }
   patch.updated_at = new Date().toISOString();
+
+  if (auth.demo) {
+    return NextResponse.json({ settings: demo.patchSettings(patch) });
+  }
 
   const { data, error } = await auth.service
     .from("settings")

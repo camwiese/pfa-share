@@ -34,7 +34,22 @@ export default function RootLayout({ children }) {
       </head>
       <body>
         {children}
-        <Toaster position="top-center" toastOptions={{ duration: 4000 }} />
+        <Toaster
+          position="top-center"
+          toastOptions={{
+            duration: 4000,
+            style: {
+              fontFamily: "'Inter', -apple-system, sans-serif",
+              fontSize: "13px",
+              borderRadius: "8px",
+              background: "#1a1612",
+              color: "#f1ece1",
+              padding: "10px 14px",
+            },
+            success: { iconTheme: { primary: "#8e2832", secondary: "#f1ece1" } },
+            error: { iconTheme: { primary: "#8e2832", secondary: "#f1ece1" } },
+          }}
+        />
       </body>
     </html>
   );
