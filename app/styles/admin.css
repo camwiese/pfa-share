@@ -200,6 +200,17 @@
 
 .btn--small { font-size: 12px; padding: 6px 10px; }
 
+.btn--danger {
+  background: transparent;
+  color: #b3261e;
+  border-color: rgba(179, 38, 30, 0.4);
+}
+.btn--danger:hover:not(:disabled) {
+  background: #b3261e;
+  color: #fff;
+  border-color: #b3261e;
+}
+
 /* ---- Inputs ---- */
 
 .input,
@@ -544,6 +555,24 @@
   border-radius: 0 6px 6px 0;
 }
 
+.link-summary__danger {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--admin-ink-ghost);
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+.link-summary__danger-trigger {
+  color: var(--admin-ink-soft);
+}
+.link-summary__danger-trigger:hover:not(:disabled) {
+  color: #b3261e;
+  border-color: rgba(179, 38, 30, 0.4);
+}
+
 /* ---- Visitor group (LinkDrawer) ---- */
 
 .visitor-group {
@@ -606,6 +635,8 @@
 }
 .code-input__cell {
   flex: 1 1 0;
+  min-width: 0; /* Overrides the browser default min-width on inputs so cells
+                   actually shrink below their intrinsic size on narrow screens. */
   max-width: 48px;
   height: 52px;
   text-align: center;
@@ -966,7 +997,7 @@
   min-height: 80vh;
   display: grid;
   place-items: center;
-  padding: 24px;
+  padding: clamp(12px, 4vw, 24px);
   background: var(--admin-ivory);
 }
 .admin-login__card {
@@ -975,7 +1006,8 @@
   background: #fff;
   border: 1px solid var(--admin-ink-ghost);
   border-radius: 10px;
-  padding: 28px;
+  padding: clamp(18px, 5vw, 28px);
+  box-sizing: border-box;
 }
 .admin-login__title {
   font-family: var(--admin-font-display);

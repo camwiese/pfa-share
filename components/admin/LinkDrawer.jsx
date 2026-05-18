@@ -12,6 +12,8 @@ export default function LinkDrawer({ linkId, onClose, onAfterChange }) {
   const [sessions, setSessions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [expandedSessionId, setExpandedSessionId] = useState(null);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   // Close on Escape (collapses any open inline session first).
   useEffect(() => {
@@ -30,6 +32,7 @@ export default function LinkDrawer({ linkId, onClose, onAfterChange }) {
     if (!linkId) return;
     setLoading(true);
     setExpandedSessionId(null);
+    setConfirmingDelete(false);
     Promise.all([
       fetch(`/api/admin/links?status=all`).then((r) => r.json()),
       fetch(`/api/admin/sessions?link_id=${linkId}&days=365&limit=200`).then((r) => r.json()),
@@ -91,6 +94,25 @@ export default function LinkDrawer({ linkId, onClose, onAfterChange }) {
       toast.success("URL copied");
     } catch {
       toast.error("Couldn't copy");
+    }
+  }
+
+  async function deleteLink() {
+    if (deleting) return;
+    setDeleting(true);
+    try {
+      const res = await fetch(`/api/admin/links/${linkId}`, { method: "DELETE" });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data?.error || "Failed to delete");
+      }
+      toast.success("Link deleted");
+      onAfterChange?.();
+      onClose?.();
+    } catch (err) {
+      toast.error(err?.message || "Failed to delete");
+      setDeleting(false);
+      setConfirmingDelete(false);
     }
   }
 
@@ -164,6 +186,39 @@ export default function LinkDrawer({ linkId, onClose, onAfterChange }) {
                 <span className="row__muted">Created {formatRelative(link.created_at)}</span>
               </div>
               {link.note ? <div className="link-summary__note">{link.note}</div> : null}
+              <div className="link-summary__danger">
+                {confirmingDelete ? (
+                  <>
+                    <span className="row__muted" style={{ fontSize: 12 }}>
+                      Delete this link and all of its sessions? This can&rsquo;t be undone.
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setConfirmingDelete(false)}
+                      disabled={deleting}
+                      className="btn btn--ghost btn--small"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="button"
+                      onClick={deleteLink}
+                      disabled={deleting}
+                      className="btn btn--danger btn--small"
+                    >
+                      {deleting ? "Deleting…" : "Delete link"}
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setConfirmingDelete(true)}
+                    className="btn btn--ghost btn--small link-summary__danger-trigger"
+                  >
+                    Delete link
+                  </button>
+                )}
+              </div>
             </div>
 
             <h3>Time per slide (all visitors)</h3>
