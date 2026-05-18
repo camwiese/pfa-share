@@ -65,7 +65,7 @@ Do this **after** you've created a Resend API key in section 2.
 | Port | `465` |
 | Username | `resend` |
 | Password | your Resend API key |
-| Sender email | `admin@worldsfair.co` |
+| Sender email | `hello@worldsfair.co` |
 | Sender name | `World's Fair Co.` |
 
 ### 1.5 Customize the OTP email template
@@ -151,7 +151,7 @@ Development**.
 | `SUPABASE_SERVICE_ROLE_KEY` | from §1.3 |
 | `GP_EMAIL` | `camwiese@gmail.com` |
 | `RESEND_API_KEY` | from §2.2 |
-| `AUTH_SENDER_EMAIL` | `admin@worldsfair.co` |
+| `AUTH_SENDER_EMAIL` | `hello@worldsfair.co` |
 | `NEXT_PUBLIC_APP_URL` | `https://pfa.worldsfair.co` |
 | `SESSION_SECRET` | run `openssl rand -hex 32` locally; paste output |
 | `CRON_SECRET` | run `openssl rand -hex 32` locally; paste output |
@@ -218,7 +218,7 @@ In a fresh incognito window:
 
 1. **Admin login**. `https://pfa.worldsfair.co/admin` → enter
    `camwiese@gmail.com` → check inbox for the 6-digit code from
-   `admin@worldsfair.co` → enter code → land on the Activity tab (will be
+   `hello@worldsfair.co` → enter code → land on the Activity tab (will be
    empty).
 2. **Create a personal link**. Links tab → type "Test viewer" → Enter →
    toast should fire saying `Copied: https://pfa.worldsfair.co/d/xxxxxx`.

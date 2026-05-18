@@ -57,7 +57,7 @@ through the full UI immediately:
 LOCAL_DEV_ADMIN_BYPASS=true
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 GP_EMAIL=camwiese@gmail.com
-AUTH_SENDER_EMAIL=admin@worldsfair.co
+AUTH_SENDER_EMAIL=hello@worldsfair.co
 SESSION_SECRET=dev-only-not-secret-replace-before-deploy-1234567890abcdef
 ```
 
@@ -76,7 +76,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=...
 SUPABASE_SERVICE_ROLE_KEY=...
 RESEND_API_KEY=re_...
 GP_EMAIL=camwiese@gmail.com
-AUTH_SENDER_EMAIL=admin@worldsfair.co
+AUTH_SENDER_EMAIL=hello@worldsfair.co
 SESSION_SECRET=<openssl rand -hex 32>
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
