@@ -26,10 +26,16 @@ const TAGLINE_HTML = (
   </section>
 );
 
-function PpiePanel({ idx, base, text, alt, dims, textBelow = false }) {
-  const textEl = <p className="ppie__text" data-animate={textBelow ? "2" : "1"}>{text}</p>;
+function PpiePanel({ idx, base, text, textAbove, textBelow, alt, dims }) {
+  // Three modes:
+  //   - text only → text first, image below (original)
+  //   - text + below-flag (textBelow=true with no textAbove) → image first, text below
+  //   - textAbove + textBelow → sentence above image, sentence below image
+  const useSplit = typeof textAbove === "string" && typeof textBelow === "string";
+  const legacyBelow = !useSplit && textBelow === true;
+
   const figureEl = (
-    <figure className="ppie__figure" data-animate={textBelow ? "1" : "2"}>
+    <figure className="ppie__figure" data-animate="1">
       <picture>
         <source type="image/avif" srcSet={`/images/opt/${base}-800.avif 800w, /images/opt/${base}-1280.avif 1280w, /images/opt/${base}-1672.avif 1672w`} sizes="(max-width: 860px) 92vw, 1000px" />
         <source type="image/webp" srcSet={`/images/opt/${base}-800.webp 800w, /images/opt/${base}-1280.webp 1280w, /images/opt/${base}-1672.webp 1672w`} sizes="(max-width: 860px) 92vw, 1000px" />
@@ -47,11 +53,35 @@ function PpiePanel({ idx, base, text, alt, dims, textBelow = false }) {
       </picture>
     </figure>
   );
+
+  let inner;
+  if (useSplit) {
+    inner = (
+      <>
+        <p className="ppie__text" data-animate="1">{textAbove}</p>
+        {figureEl}
+        <p className="ppie__text" data-animate="1">{textBelow}</p>
+      </>
+    );
+  } else if (legacyBelow) {
+    inner = (
+      <>
+        {figureEl}
+        <p className="ppie__text" data-animate="1">{text}</p>
+      </>
+    );
+  } else {
+    inner = (
+      <>
+        <p className="ppie__text" data-animate="1">{text}</p>
+        {figureEl}
+      </>
+    );
+  }
+
   return (
     <section className="panel panel--cream panel--ppie" data-panel={idx}>
-      <div className="ppie__content">
-        {textBelow ? <>{figureEl}{textEl}</> : <>{textEl}{figureEl}</>}
-      </div>
+      <div className="ppie__content">{inner}</div>
     </section>
   );
 }
@@ -98,10 +128,10 @@ const PANELS = [
     key="2"
     idx={2}
     base="1915-PPIE-full"
-    text="In 1915, the Panama-Pacific International Exposition welcomed 19 million people to San Francisco. They walked through the greatest achievements of their time, and left believing anything was possible."
+    textAbove="In 1915, the Panama-Pacific International Exposition welcomed 19 million people to San Francisco."
+    textBelow="They walked through the greatest achievements of their time, and left believing anything was possible."
     alt="The Panama-Pacific International Exposition, San Francisco, 1915"
     dims={{ w: 3393, h: 1352 }}
-    textBelow
   />,
   <PpiePanel
     key="3"

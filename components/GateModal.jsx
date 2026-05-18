@@ -118,7 +118,7 @@ export default function GateModal({ open, onVerified, onBack }) {
           <>
             <h2 style={titleStyle}>Please confirm your email to continue</h2>
             <p style={subStyle}>
-              Projects are viewable by invite only. Please enter your email to continue.
+              Project details are confidential. Please enter your email to continue.
             </p>
             <form onSubmit={sendCode} style={{ display: "grid", gap: 10 }}>
               <input
