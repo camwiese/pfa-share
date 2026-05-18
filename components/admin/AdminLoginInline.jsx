@@ -1,11 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
 import CodeInput from "../CodeInput";
 
 export default function AdminLoginInline() {
-  const router = useRouter();
   const [step, setStep] = useState("email");
   const [email, setEmail] = useState("");
   const [digits, setDigits] = useState(["", "", "", "", "", ""]);
@@ -74,7 +72,10 @@ export default function AdminLoginInline() {
         setTimeout(() => codeRef.current?.focus(), 0);
         return;
       }
-      router.refresh();
+      // Hard navigation — more reliable than router.refresh() across
+      // Safari/Firefox cookie-commit timing. Browser will send the freshly
+      // set pfa_dummy_auth cookie on the next request.
+      window.location.replace("/admin");
     } catch {
       setError("Network error. Try again.");
       setDigits(["", "", "", "", "", ""]);
