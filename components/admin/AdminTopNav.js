@@ -9,6 +9,7 @@ const LINKS = [
   { href: "/admin/links", label: "Links" },
   { href: "/admin/approvals", label: "Approvals" },
   { href: "/admin/settings", label: "Settings" },
+  { href: "/deck", label: "Deck", external: true },
 ];
 
 function isActive(pathname, href) {
@@ -27,11 +28,11 @@ export default function AdminTopNav({ adminEmail, showApprovals = true }) {
   );
 
   useEffect(() => {
-    links.forEach((l) => router.prefetch(l.href));
+    links.forEach((l) => { if (!l.external) router.prefetch(l.href); });
   }, [links, router]);
 
   const activeLabel = useMemo(() => {
-    const a = links.find((l) => isActive(pathname || "", l.href));
+    const a = links.find((l) => !l.external && isActive(pathname || "", l.href));
     return a?.label || "Admin";
   }, [pathname, links]);
 
@@ -47,6 +48,21 @@ export default function AdminTopNav({ adminEmail, showApprovals = true }) {
 
         <nav className="admin-nav__tabs">
           {links.map((link) => {
+            if (link.external) {
+              return (
+                <a
+                  key={link.href}
+                  href={link.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="admin-nav__tab admin-nav__tab--external"
+                  title={`Open ${link.label} in a new tab`}
+                >
+                  {link.label}
+                  <span className="admin-nav__tab-arrow" aria-hidden>↗</span>
+                </a>
+              );
+            }
             const active = isActive(pathname || "", link.href);
             return (
               <Link
@@ -80,6 +96,21 @@ export default function AdminTopNav({ adminEmail, showApprovals = true }) {
           <div className="admin-nav__menu-overlay" onClick={() => setMenuOpen(false)}>
             <div className="admin-nav__menu" onClick={(e) => e.stopPropagation()}>
               {links.map((link) => {
+                if (link.external) {
+                  return (
+                    <a
+                      key={link.href}
+                      href={link.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => setMenuOpen(false)}
+                      className="admin-nav__tab admin-nav__tab--external"
+                    >
+                      {link.label}
+                      <span className="admin-nav__tab-arrow" aria-hidden>↗</span>
+                    </a>
+                  );
+                }
                 const active = isActive(pathname || "", link.href);
                 return (
                   <Link

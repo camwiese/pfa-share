@@ -106,6 +106,17 @@
   color: var(--admin-ink);
   background: var(--admin-paper-2);
 }
+.admin-nav__tab--external {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.admin-nav__tab-arrow {
+  font-size: 11px;
+  color: var(--admin-ink-faint);
+  line-height: 1;
+}
+.admin-nav__tab--external:hover .admin-nav__tab-arrow { color: var(--admin-ink-muted); }
 .admin-nav__logout {
   font-family: var(--admin-font-sans);
   font-size: 12px;
