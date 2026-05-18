@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { forwardRef, useImperativeHandle, useRef } from "react";
 
 // Six-cell OTP code input. Mirrors WSV's UX:
 //   - one digit per cell, auto-advances focus on type
@@ -8,10 +8,24 @@ import { useRef } from "react";
 //   - paste fills all six cells in one shot
 //   - calls onComplete(code) when the six digits are filled (typed or pasted)
 //
+// Exposes an imperative .focus() so parents can refocus the first cell
+// after a verify failure (the cells are disabled during the network round
+// trip, which drops focus — without an explicit refocus the user has to
+// click back in to retry).
+//
 // Controlled via an array-of-6 string value, parent owns state.
 
-export default function CodeInput({ value, onChange, onComplete, disabled, autoFocus = true }) {
+function CodeInput({ value, onChange, onComplete, disabled, autoFocus = true }, ref) {
   const refs = useRef([]);
+
+  useImperativeHandle(ref, () => ({
+    focus: () => refs.current[0]?.focus(),
+    focusEmpty: () => {
+      const idx = value.findIndex((d) => !d);
+      const target = idx === -1 ? 0 : idx;
+      refs.current[target]?.focus();
+    },
+  }), [value]);
 
   function handleInput(i, e) {
     const digit = e.target.value.replace(/\D/g, "").slice(-1);
@@ -83,3 +97,5 @@ export default function CodeInput({ value, onChange, onComplete, disabled, autoF
     </div>
   );
 }
+
+export default forwardRef(CodeInput);

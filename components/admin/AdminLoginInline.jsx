@@ -12,15 +12,22 @@ export default function AdminLoginInline() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const emailRef = useRef(null);
+  const codeRef = useRef(null);
   const verifiedRef = useRef(false);
 
   useEffect(() => {
     if (step === "email") emailRef.current?.focus();
+    if (step === "code") setTimeout(() => codeRef.current?.focus(), 0);
   }, [step]);
 
   useEffect(() => {
     if (step !== "code") verifiedRef.current = false;
   }, [step]);
+
+  function handleDigitsChange(next) {
+    setDigits(next);
+    if (error) setError("");
+  }
 
   async function submitEmail(e) {
     e.preventDefault();
@@ -60,15 +67,19 @@ export default function AdminLoginInline() {
       });
       const data = await res.json();
       if (!res.ok) {
-        setError(data?.error || "Wrong code.");
+        setError(data?.error || "Wrong code. Try again.");
         setDigits(["", "", "", "", "", ""]);
         verifiedRef.current = false;
+        // Refocus the first cell so the user can immediately retype.
+        setTimeout(() => codeRef.current?.focus(), 0);
         return;
       }
       router.refresh();
     } catch {
       setError("Network error. Try again.");
+      setDigits(["", "", "", "", "", ""]);
       verifiedRef.current = false;
+      setTimeout(() => codeRef.current?.focus(), 0);
     } finally {
       setBusy(false);
     }
@@ -103,8 +114,9 @@ export default function AdminLoginInline() {
         ) : (
           <div style={{ display: "grid", gap: 12 }}>
             <CodeInput
+              ref={codeRef}
               value={digits}
-              onChange={setDigits}
+              onChange={handleDigitsChange}
               onComplete={verifyCode}
               disabled={busy}
             />
