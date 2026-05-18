@@ -331,6 +331,20 @@
   border-radius: 8px;
   background: #fff;
 }
+/* Inline variant: lives directly under a table-head, no border so it
+   reads as the body of the table rather than a separate card. Reserves
+   the same vertical rhythm as a couple of rows would, preventing the
+   layout shift when data arrives. */
+.empty-state--inline {
+  padding: 28px 8px;
+  text-align: left;
+  border: 0;
+  border-bottom: 1px solid var(--admin-ink-ghost);
+  background: transparent;
+  border-radius: 0;
+  color: var(--admin-ink-faint);
+  font-style: italic;
+}
 
 /* ---- Drawer (right slide-over) ---- */
 
