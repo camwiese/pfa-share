@@ -23,8 +23,15 @@ export default function TrackerMount({ initEndpoint, trackEndpoint }) {
           body: JSON.stringify(body),
         });
         if (cancelled) return;
-        if (res.ok) setReady(true);
-        else console.warn("[tracker] init failed:", res.status);
+        if (!res.ok) {
+          console.warn("[tracker] init failed:", res.status);
+          return;
+        }
+        const data = await res.json().catch(() => ({}));
+        // Server signaled "don't track this visitor" (e.g. admin preview).
+        // Leave ready=false so the heartbeat hook stays dormant.
+        if (data.skip) return;
+        setReady(true);
       } catch (err) {
         console.warn("[tracker] init error:", err?.message);
       }
