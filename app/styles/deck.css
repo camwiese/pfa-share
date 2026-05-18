@@ -325,6 +325,9 @@ body :is(input, textarea) { cursor: auto; }
      unless this kicks in. */
   max-height: 42vh;
   object-fit: cover;
+  /* Bias the visible crop toward the lower portion of the source so the
+     full Palace dome + base shows on both PPIE slides. */
+  object-position: center 70%;
 }
 /* .ppie__line removed — PPIE now uses single <p class="ppie__text">
    elements that share the unified deck font scale. */
@@ -565,6 +568,7 @@ body :is(input, textarea) { cursor: auto; }
    Tap hint — shown once, fades after first interaction
    ============================================================= */
 .tap-hint {
+  display: none;
   position: fixed;
   left: 50%;
   bottom: clamp(1.25rem, 3.5vh, 2.5rem);
@@ -580,6 +584,10 @@ body :is(input, textarea) { cursor: auto; }
   text-shadow: 0 1px 6px rgba(0, 0, 0, 0.35);
   animation: hintIn 0.8s ease 1.6s both, hintPulse 2.8s ease-in-out 2.4s infinite;
   transition: opacity 0.5s ease;
+}
+/* Only show on touch devices (mobile / tablet). */
+@media (hover: none) and (pointer: coarse) {
+  .tap-hint { display: block; }
 }
 .tap-hint.is-gone { opacity: 0; animation: none; }
 @keyframes hintIn  { from { opacity: 0; transform: translate(-50%, 6px); } to { opacity: 1; transform: translate(-50%, 0); } }

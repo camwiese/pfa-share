@@ -105,10 +105,10 @@ export default function GateModal({ open, onVerified, onBack }) {
       <div
         style={{
           width: "100%",
-          maxWidth: 420,
+          maxWidth: 540,
           background: "#fcfbf8",
           border: "1px solid #dedad0",
-          borderRadius: 14,
+          borderRadius: 2,
           padding: 28,
           boxShadow: "0 24px 64px rgba(0,0,0,0.3)",
           fontFamily: "Inter, system-ui, sans-serif",
@@ -190,7 +190,7 @@ export default function GateModal({ open, onVerified, onBack }) {
   );
 }
 
-const titleStyle = { fontFamily: "Fraunces, Georgia, serif", fontSize: 22, lineHeight: 1.25, margin: "0 0 8px", color: "#33403a", fontWeight: 500 };
+const titleStyle = { fontFamily: "Fraunces, Georgia, serif", fontSize: 20, lineHeight: 1.2, margin: "0 0 8px", color: "#33403a", fontWeight: 500, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" };
 const subStyle = { fontFamily: "Inter, system-ui, sans-serif", fontSize: 14, color: "#7b8e80", margin: "0 0 18px", lineHeight: 1.5 };
 const inputStyle = {
   fontFamily: "Inter, system-ui, sans-serif",

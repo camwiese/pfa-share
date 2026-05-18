@@ -275,17 +275,18 @@
 .table-head {
   display: grid;
   gap: 12px;
-  padding: 8px 14px;
+  padding: 8px 8px;
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: var(--admin-ink-muted);
   font-weight: 500;
-  border-bottom: 1px solid var(--admin-ink-ghost);
-  margin-bottom: 6px;
 }
 
-.row-list { display: grid; gap: 4px; }
+.row-list {
+  display: block;
+  border-top: 1px solid var(--admin-ink-ghost);
+}
 
 .sessions-row {
   grid-template-columns: var(--cols);
@@ -297,19 +298,24 @@
 .row {
   display: grid;
   gap: 12px;
-  padding: 11px 14px;
-  border: 1px solid var(--admin-ink-ghost);
-  border-radius: 6px;
-  background: #fff;
+  padding: 12px 8px;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--admin-ink-ghost);
+  border-radius: 0;
   font-size: 13px;
   align-items: center;
   cursor: pointer;
-  transition: border-color 120ms, background 120ms;
+  width: 100%;
+  text-align: left;
+  font-family: inherit;
+  color: inherit;
+  transition: background 120ms;
 }
-.row:hover { border-color: var(--admin-ink-faint); background: #fafaf7; }
-.row--inactive { background: var(--admin-paper); opacity: 0.85; }
+.row:hover { background: rgba(26, 22, 18, 0.03); }
+.row--inactive { opacity: 0.55; }
 .row--static { cursor: default; }
-.row--static:hover { border-color: var(--admin-ink-ghost); background: #fff; }
+.row--static:hover { background: transparent; }
 
 .row__primary { font-weight: 500; color: var(--admin-ink); }
 .row__muted { color: var(--admin-ink-muted); }
@@ -516,11 +522,10 @@
 /* ---- Visitor group (LinkDrawer) ---- */
 
 .visitor-group {
-  background: #fff;
-  border: 1px solid var(--admin-ink-ghost);
-  border-radius: 10px;
-  padding: 14px 14px 10px;
+  padding: 16px 0 8px;
+  border-top: 1px solid var(--admin-ink-ghost);
 }
+.visitor-group:first-child { border-top: 0; padding-top: 0; }
 .visitor-group__header {
   display: flex;
   justify-content: space-between;
@@ -558,15 +563,12 @@
   text-align: right;
 }
 .row.is-open {
-  background: var(--admin-paper);
-  border-color: var(--admin-ink-faint);
+  background: rgba(26, 22, 18, 0.04);
 }
 .visitor-session-detail {
-  border-left: 2px solid var(--admin-accent);
-  margin: 2px 0 6px 8px;
-  padding: 10px 12px;
-  background: #fff;
-  border-radius: 0 6px 6px 0;
+  padding: 12px 8px 14px;
+  background: rgba(26, 22, 18, 0.025);
+  border-bottom: 1px solid var(--admin-ink-ghost);
 }
 
 /* ---- Keyboard hint ---- */

@@ -26,28 +26,31 @@ const TAGLINE_HTML = (
   </section>
 );
 
-function PpiePanel({ idx, base, text, alt, dims }) {
+function PpiePanel({ idx, base, text, alt, dims, textBelow = false }) {
+  const textEl = <p className="ppie__text" data-animate={textBelow ? "2" : "1"}>{text}</p>;
+  const figureEl = (
+    <figure className="ppie__figure" data-animate={textBelow ? "1" : "2"}>
+      <picture>
+        <source type="image/avif" srcSet={`/images/opt/${base}-800.avif 800w, /images/opt/${base}-1280.avif 1280w, /images/opt/${base}-1672.avif 1672w`} sizes="(max-width: 860px) 92vw, 1000px" />
+        <source type="image/webp" srcSet={`/images/opt/${base}-800.webp 800w, /images/opt/${base}-1280.webp 1280w, /images/opt/${base}-1672.webp 1672w`} sizes="(max-width: 860px) 92vw, 1000px" />
+        <img
+          src={`/images/opt/${base}-1280.jpg`}
+          srcSet={`/images/opt/${base}-800.jpg 800w, /images/opt/${base}-1280.jpg 1280w, /images/opt/${base}-1672.jpg 1672w`}
+          sizes="(max-width: 860px) 92vw, 1000px"
+          alt={alt}
+          className="ppie__image"
+          loading="lazy"
+          decoding="async"
+          width={dims.w}
+          height={dims.h}
+        />
+      </picture>
+    </figure>
+  );
   return (
     <section className="panel panel--cream panel--ppie" data-panel={idx}>
       <div className="ppie__content">
-        <p className="ppie__text" data-animate="1">{text}</p>
-        <figure className="ppie__figure" data-animate="2">
-          <picture>
-            <source type="image/avif" srcSet={`/images/opt/${base}-800.avif 800w, /images/opt/${base}-1280.avif 1280w, /images/opt/${base}-1672.avif 1672w`} sizes="(max-width: 860px) 92vw, 1000px" />
-            <source type="image/webp" srcSet={`/images/opt/${base}-800.webp 800w, /images/opt/${base}-1280.webp 1280w, /images/opt/${base}-1672.webp 1672w`} sizes="(max-width: 860px) 92vw, 1000px" />
-            <img
-              src={`/images/opt/${base}-1280.jpg`}
-              srcSet={`/images/opt/${base}-800.jpg 800w, /images/opt/${base}-1280.jpg 1280w, /images/opt/${base}-1672.jpg 1672w`}
-              sizes="(max-width: 860px) 92vw, 1000px"
-              alt={alt}
-              className="ppie__image"
-              loading="lazy"
-              decoding="async"
-              width={dims.w}
-              height={dims.h}
-            />
-          </picture>
-        </figure>
+        {textBelow ? <>{figureEl}{textEl}</> : <>{textEl}{figureEl}</>}
       </div>
     </section>
   );
@@ -98,6 +101,7 @@ const PANELS = [
     text="In 1915, the Panama-Pacific International Exposition welcomed 19 million people to San Francisco. They walked through the greatest achievements of their time, and left believing anything was possible."
     alt="The Panama-Pacific International Exposition, San Francisco, 1915"
     dims={{ w: 3393, h: 1352 }}
+    textBelow
   />,
   <PpiePanel
     key="3"
@@ -116,9 +120,9 @@ const PANELS = [
   <section className="panel panel--cream panel--welcome" data-panel="5" key="5">
     <div className="welcome__content">
       <h2 className="welcome__heading" data-animate="1">Welcome to the Future</h2>
-      <p className="welcome__sub" data-animate="2">Our vision for San Francisco&rsquo;s new home of progress.</p>
-      <p className="welcome__year" data-animate="3">Palace of Fine Arts &middot; 2030</p>
-      <figure className="welcome__figure" data-animate="4">
+      <p className="welcome__sub" data-animate="1">Our vision for San Francisco&rsquo;s new home of progress.</p>
+      <p className="welcome__year" data-animate="1">Palace of Fine Arts &middot; 2030</p>
+      <figure className="welcome__figure" data-animate="1">
         <picture>
           <source type="image/avif" srcSet="/images/opt/Park-Lagoon-2-800.avif 800w, /images/opt/Park-Lagoon-2-1280.avif 1280w, /images/opt/Park-Lagoon-2-1672.avif 1672w" sizes="(max-width: 860px) 90vw, 760px" />
           <source type="image/webp" srcSet="/images/opt/Park-Lagoon-2-800.webp 800w, /images/opt/Park-Lagoon-2-1280.webp 1280w, /images/opt/Park-Lagoon-2-1672.webp 1672w" sizes="(max-width: 860px) 90vw, 760px" />
