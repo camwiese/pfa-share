@@ -32,7 +32,14 @@ export default function PublicDeck({ freeCount = 5 }) {
   }
 
   async function handleVerified() {
-    await injectGatedPanels(freeCount);
+    const ok = await injectGatedPanels(freeCount);
+    if (!ok) {
+      // The cookie from /api/auth/verify-otp couldn't be read back in time.
+      // A hard reload is the cleanest recovery — the auth-check on mount
+      // will now see the cookie and inject panels normally.
+      window.location.reload();
+      return;
+    }
     setVerified(true);
     setModalOpen(false);
     setGateBlocked(false);
@@ -66,10 +73,20 @@ export default function PublicDeck({ freeCount = 5 }) {
 }
 
 async function injectGatedPanels(start) {
-  const res = await fetch(`/api/deck/gated?start=${start}`);
-  if (!res.ok) {
-    console.warn("[public-deck] gated fetch failed:", res.status);
-    return;
+  // The pfa_dummy_auth cookie set by verify-otp can lag a few ms before
+  // it's readable by the next fetch (Safari + Firefox especially). Retry
+  // a couple of times before giving up so the caller can decide to reload.
+  let res = null;
+  for (let attempt = 0; attempt < 4; attempt++) {
+    try {
+      res = await fetch(`/api/deck/gated?start=${start}`, { cache: "no-store" });
+      if (res.ok) break;
+    } catch {}
+    await new Promise((r) => setTimeout(r, 200));
+  }
+  if (!res || !res.ok) {
+    console.warn("[public-deck] gated fetch failed:", res?.status);
+    return false;
   }
   const data = await res.json();
   const mount = document.getElementById("gated-mount");
@@ -78,4 +95,5 @@ async function injectGatedPanels(start) {
   }
   // Tell the deck to re-scan panels and rebuild dots.
   if (window.__pfaDeck?.refresh) window.__pfaDeck.refresh();
+  return true;
 }
