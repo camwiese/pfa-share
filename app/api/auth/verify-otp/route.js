@@ -1,5 +1,11 @@
 import { NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
+import {
+  DUMMY_COOKIE_NAME,
+  DUMMY_COOKIE_OPTIONS,
+  isDummyAuthMode,
+  signDummyAuth,
+} from "../../../../lib/dummyAuth";
 
 export async function POST(request) {
   try {
@@ -8,6 +14,22 @@ export async function POST(request) {
 
     if (!email || !token || typeof email !== "string" || !email.includes("@")) {
       return NextResponse.json({ error: "Invalid request" }, { status: 400 });
+    }
+
+    // Dummy mode: any 6-digit code wins. Sets a signed cookie that admin
+    // layout, deck page, and gated panels all check.
+    if (isDummyAuthMode()) {
+      const t = String(token).trim();
+      if (!/^\d{6}$/.test(t)) {
+        return NextResponse.json({ error: "Enter the 6-digit code." }, { status: 400 });
+      }
+      const res = NextResponse.json({ success: true, dummy: true });
+      res.cookies.set(
+        DUMMY_COOKIE_NAME,
+        signDummyAuth({ email: email.trim().toLowerCase() }),
+        DUMMY_COOKIE_OPTIONS
+      );
+      return res;
     }
 
     const response = NextResponse.json({ success: true });

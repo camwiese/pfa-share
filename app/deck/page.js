@@ -1,5 +1,6 @@
 import { createClient, createServiceClient } from "../../lib/supabase/server";
 import { getAdminEmails } from "../../lib/admin";
+import { getDummyAuthEmail } from "../../lib/dummyAuth";
 import { redirect } from "next/navigation";
 import DeckPanels, { PANEL_COUNT } from "../../components/DeckPanels";
 import Deck from "../../components/Deck";
@@ -12,6 +13,9 @@ async function getViewerEmail() {
   const bypass =
     process.env.NODE_ENV === "development" && process.env.LOCAL_DEV_ADMIN_BYPASS === "true";
   if (bypass) return (getAdminEmails()[0] || "dev@example.com");
+
+  const dummyEmail = await getDummyAuthEmail();
+  if (dummyEmail) return dummyEmail;
 
   try {
     const supabase = await createClient();
