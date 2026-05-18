@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { formatDuration, formatRelative } from "../../lib/format";
-import SlideDwellChart from "./SlideDwellChart";
+import SlideBars from "./SlideBars";
 
 export default function SessionDrawer({ sessionId, onClose, onOpenSession }) {
   const [data, setData] = useState(null);
@@ -23,13 +23,18 @@ export default function SessionDrawer({ sessionId, onClose, onOpenSession }) {
   const link = data?.link;
   const related = data?.related || [];
 
+  const isLive = s && !s.ended_at && Date.now() - new Date(s.last_tick_at).getTime() < 90_000;
+
   return (
     <div className="drawer-backdrop" onClick={onClose}>
       <aside className="drawer" onClick={(e) => e.stopPropagation()}>
-        <div className="drawer__header">
-          <h2 className="drawer__title">
-            {link?.name || (s?.viewer_email ? `Organic · ${s.viewer_email}` : "Session")}
-          </h2>
+        <div className="drawer__header drawer__header--sticky">
+          <div>
+            <h2 className="drawer__title">
+              {link?.name || s?.viewer_email || "Session"}
+            </h2>
+            {link?.token ? <div className="drawer__sub">/d/{link.token}</div> : null}
+          </div>
           <button onClick={onClose} className="drawer__close">Close</button>
         </div>
 
@@ -37,38 +42,14 @@ export default function SessionDrawer({ sessionId, onClose, onOpenSession }) {
           <div className="empty-state">Loading…</div>
         ) : (
           <>
-            <div className="meta-grid">
-              <div><strong>Total:</strong>{formatDuration(s.total_seconds)}</div>
-              <div><strong>Max slide:</strong>{s.max_slide_reached}</div>
-              <div><strong>Started:</strong>{formatRelative(s.started_at)}</div>
-              <div><strong>Last tick:</strong>{formatRelative(s.last_tick_at)}</div>
-              {s.ended_at ? <div><strong>Ended:</strong>{formatRelative(s.ended_at)}</div> : null}
-            </div>
+            <SessionSummary session={s} link={link} isLive={isLive} />
 
-            <h3>Per-slide dwell</h3>
-            <SlideDwellChart dwells={s.slide_dwells} />
-
-            <h3>Where</h3>
-            <div className="meta-grid">
-              <div><strong>City:</strong>{s.geo?.city || "—"}</div>
-              <div><strong>Region:</strong>{s.geo?.region || "—"}</div>
-              <div><strong>Country:</strong>{s.geo?.country || "—"}</div>
-            </div>
-
-            <h3>Device</h3>
-            <div className="meta-grid">
-              <div><strong>Browser:</strong>{s.device?.browser || "—"}</div>
-              <div><strong>OS:</strong>{s.device?.os || "—"}</div>
-              <div><strong>Form:</strong>{s.device?.mobile ? "Mobile" : "Desktop"}</div>
-              {s.device?.screen ? <div><strong>Screen:</strong>{s.device.screen.w}×{s.device.screen.h}</div> : null}
-              {s.device?.tz ? <div><strong>Timezone:</strong>{s.device.tz}</div> : null}
-              {s.fp_hash ? <div title={s.fp_hash}><strong>Fingerprint:</strong><code style={{ fontFamily: "monospace" }}>{s.fp_hash.slice(-8)}</code></div> : null}
-              {s.is_bot ? <div style={{ color: "var(--admin-accent)" }}><strong>Bot detected</strong></div> : null}
-            </div>
+            <h3>Time per slide</h3>
+            <SlideBars dwells={s.slide_dwells} visits={s.slide_visits} />
 
             {related.length > 0 ? (
               <>
-                <h3>Also seen on this device</h3>
+                <h3 style={{ marginTop: 22 }}>Other sessions from this device</h3>
                 <div className="row-list">
                   {related.map((r) => (
                     <button
@@ -78,7 +59,7 @@ export default function SessionDrawer({ sessionId, onClose, onOpenSession }) {
                       style={{ gridTemplateColumns: "1fr 1fr 80px" }}
                     >
                       <span>{formatRelative(r.started_at)}</span>
-                      <span className="row__muted">{r.geo?.city || ""}</span>
+                      <span className="row__muted">{r.geo?.city || "—"}</span>
                       <span>{formatDuration(r.total_seconds || 0)}</span>
                     </button>
                   ))}
@@ -88,6 +69,65 @@ export default function SessionDrawer({ sessionId, onClose, onOpenSession }) {
           </>
         )}
       </aside>
+    </div>
+  );
+}
+
+function SessionSummary({ session, link, isLive }) {
+  const device = session.device || {};
+  const formFactor = device.mobile ? "Mobile" : "Desktop";
+  const browser = device.browser || "Unknown browser";
+  const os = device.os || "";
+  const cityLine = session.geo?.city
+    ? `${session.geo.city}${session.geo.country ? ", " + session.geo.country : ""}`
+    : "Location unknown";
+  const fp = session.fp_hash ? session.fp_hash.slice(-8) : null;
+  const tz = device.tz || null;
+
+  return (
+    <div className="session-summary">
+      <div className="session-summary__row">
+        <div className="session-summary__stat">
+          <div className="metric__label">Total time</div>
+          <div className="metric__value">{formatDuration(session.total_seconds)}</div>
+        </div>
+        <div className="session-summary__stat">
+          <div className="metric__label">Furthest slide</div>
+          <div className="metric__value">{session.max_slide_reached}</div>
+        </div>
+        <div className="session-summary__stat">
+          <div className="metric__label">{isLive ? "Status" : session.ended_at ? "Ended" : "Last seen"}</div>
+          <div className="metric__value" style={isLive ? { color: "var(--admin-accent)", fontSize: 18 } : { fontSize: 18 }}>
+            {isLive ? <><span className="live-dot" />Live</> : formatRelative(session.ended_at || session.last_tick_at)}
+          </div>
+        </div>
+      </div>
+
+      <div className="session-summary__detail">
+        <div>
+          <span className="session-summary__icon" aria-hidden>{device.mobile ? "📱" : "🖥"}</span>
+          <strong>{browser}</strong>{os ? ` · ${os}` : ""}{` · ${formFactor}`}
+          {device.screen ? <span className="row__muted"> · {device.screen.w}×{device.screen.h}</span> : null}
+        </div>
+        <div>
+          <span className="session-summary__icon" aria-hidden>📍</span>
+          {cityLine}
+          {session.geo?.region ? <span className="row__muted"> · {session.geo.region}</span> : null}
+          {tz ? <span className="row__muted"> · {tz}</span> : null}
+        </div>
+        <div>
+          <span className="session-summary__icon" aria-hidden>🆔</span>
+          <span className="row__muted">Visitor </span>
+          <code style={{ fontFamily: "ui-monospace, monospace" }}>{fp || "unknown"}</code>
+        </div>
+        <div className="row__muted" style={{ fontSize: 12 }}>
+          Started {formatRelative(session.started_at)}
+        </div>
+      </div>
+
+      {session.is_bot ? (
+        <div className="session-summary__bot">⚠︎ Bot detected — excluded from headline counts.</div>
+      ) : null}
     </div>
   );
 }

@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { formatDuration, formatRelative } from "../../lib/format";
 import SessionDrawer from "./SessionDrawer";
-import ViewsByDayChart from "./ViewsByDayChart";
+import ViewsLineChart from "./ViewsLineChart";
 
 const WINDOWS = [
   { label: "24h", days: 1 },
@@ -19,12 +19,13 @@ export default function ActivityFeed() {
   const [sessions, setSessions] = useState([]);
   const [openId, setOpenId] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [dayFilter, setDayFilter] = useState(null);
 
   useEffect(() => {
     setLoading(true);
     Promise.all([
       fetch(`/api/admin/activity?days=${days}`).then((r) => r.json()),
-      fetch(`/api/admin/sessions?days=${days}&limit=50`).then((r) => r.json()),
+      fetch(`/api/admin/sessions?days=${days}&limit=100`).then((r) => r.json()),
     ])
       .then(([m, s]) => {
         setMetrics(m);
@@ -53,6 +54,34 @@ export default function ActivityFeed() {
     };
   }, []);
 
+  // Reset filter when the window changes.
+  useEffect(() => { setDayFilter(null); }, [days]);
+
+  const filteredSessions = useMemo(() => {
+    if (!dayFilter) return sessions;
+    return sessions.filter((s) => s.started_at?.slice(0, 10) === dayFilter);
+  }, [sessions, dayFilter]);
+
+  // Device split by unique visitor (fingerprint), taking each visitor's most
+  // recent session as their device.
+  const deviceSplit = useMemo(() => {
+    const lastByFp = new Map();
+    for (const s of sessions) {
+      if (s.is_bot) continue;
+      if (!s.fp_hash) continue;
+      const prev = lastByFp.get(s.fp_hash);
+      if (!prev || new Date(s.started_at) > new Date(prev.started_at)) {
+        lastByFp.set(s.fp_hash, s);
+      }
+    }
+    const out = { Mobile: 0, Desktop: 0 };
+    for (const s of lastByFp.values()) {
+      if (s.device?.mobile) out.Mobile++;
+      else out.Desktop++;
+    }
+    return out;
+  }, [sessions]);
+
   return (
     <div>
       <div className="chip-group" style={{ marginBottom: 16 }}>
@@ -68,66 +97,76 @@ export default function ActivityFeed() {
       </div>
 
       <div className="metrics">
-        <Metric
-          label="Visitors"
-          value={metrics?.visitors ?? "—"}
-          tooltip="Unique people, identified by browser fingerprint."
-        />
-        <Metric
-          label="Sessions"
-          value={metrics?.totalSessions ?? "—"}
-          tooltip="Total engagement periods. One visitor can have many sessions."
-        />
-        <Metric
-          label="View-time"
-          value={metrics ? formatDuration(metrics.totalSeconds) : "—"}
-          tooltip="Sum of seconds actively watching the deck across all sessions."
-        />
-        <Metric
-          label={liveNow > 0 ? "Live now" : "Live now"}
-          value={liveNow}
-          highlight={liveNow > 0}
-          tooltip="Sessions that have ticked within the last 90 seconds."
-        />
+        <Metric label="Visitors" value={metrics?.visitors ?? "—"} tooltip="Unique people, by browser fingerprint." />
+        <Metric label="Sessions" value={metrics?.totalSessions ?? "—"} tooltip="Distinct engagement periods. One visitor may have several." />
+        <Metric label="View-time" value={metrics ? formatDuration(metrics.totalSeconds) : "—"} tooltip="Total active seconds across all sessions." />
+        <Metric label="Live now" value={liveNow} highlight={liveNow > 0} tooltip="Sessions that ticked in the last 90 seconds." />
       </div>
 
       {metrics?.daily?.length ? (
         <div style={{ marginBottom: 22 }}>
-          <ViewsByDayChart data={metrics.daily} />
+          <ViewsLineChart
+            data={metrics.daily}
+            selected={dayFilter}
+            onDayClick={(d) => setDayFilter((prev) => (prev === d ? null : d))}
+          />
         </div>
       ) : null}
 
-      <h2>Recent sessions</h2>
+      {deviceSplit.Mobile + deviceSplit.Desktop > 0 ? (
+        <div className="device-split">
+          <div className="device-split__label">Visitors by device</div>
+          <div className="device-split__bar">
+            <div
+              className="device-split__seg device-split__seg--desktop"
+              style={{ flex: deviceSplit.Desktop }}
+            >
+              <span>🖥 Desktop · {deviceSplit.Desktop}</span>
+            </div>
+            <div
+              className="device-split__seg device-split__seg--mobile"
+              style={{ flex: deviceSplit.Mobile }}
+            >
+              <span>📱 Mobile · {deviceSplit.Mobile}</span>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      <h2>Recent sessions {dayFilter ? <span className="row__muted" style={{ fontSize: 13, fontFamily: "var(--admin-font-sans)", fontWeight: 400 }}>· filtered</span> : null}</h2>
       {loading ? (
         <div className="empty-state">Loading…</div>
-      ) : sessions.length === 0 ? (
-        <div className="empty-state">No sessions in this window yet.</div>
+      ) : filteredSessions.length === 0 ? (
+        <div className="empty-state">
+          {dayFilter ? "No sessions on this day." : "No sessions in this window yet."}
+        </div>
       ) : (
         <>
-          <div className="table-head" style={{ gridTemplateColumns: "1.6fr 1fr 1fr 1fr 80px" }}>
+          <div className="table-head sessions-row" style={{ "--cols": "1.4fr 1fr 1fr 1fr" }}>
             <span>Visitor</span>
-            <span>City</span>
-            <span>Device</span>
-            <span>When</span>
-            <span style={{ textAlign: "right" }}>Time</span>
+            <span>Location</span>
+            <span>Visit time</span>
+            <span>Date / time</span>
           </div>
           <div className="row-list">
-            {sessions.map((s) => (
+            {filteredSessions.map((s) => (
               <button
                 key={s.id}
                 onClick={() => setOpenId(s.id)}
-                className="row"
-                style={{ gridTemplateColumns: "1.6fr 1fr 1fr 1fr 80px" }}
+                className="row sessions-row"
+                style={{ "--cols": "1.4fr 1fr 1fr 1fr", textAlign: "left" }}
               >
-                <span className="row__primary">
-                  {s.link?.name || s.viewer_email || "Anonymous session"}
-                </span>
-                <span className="row__muted">{s.geo?.city || "—"}</span>
-                <span className="row__muted">
-                  {s.device?.mobile ? "Mobile" : s.device?.browser || "—"}
-                </span>
-                <span className="row__muted">{formatRelative(s.started_at)}</span>
-                <span style={{ textAlign: "right" }}>{formatDuration(s.total_seconds)}</span>
+                <div style={{ display: "flex", flexDirection: "column", gap: 2, minWidth: 0 }}>
+                  <span className="row__primary" style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                    {s.link?.name || s.viewer_email || "Anonymous visitor"}
+                  </span>
+                  <span className="row__muted" style={{ fontSize: 11 }}>
+                    {s.device?.browser || "—"}{s.device?.mobile ? " · Mobile" : ""}
+                  </span>
+                </div>
+                <span className="row__muted" style={{ whiteSpace: "nowrap" }}>{s.geo?.city || "—"}</span>
+                <span style={{ whiteSpace: "nowrap" }}>{formatDuration(s.total_seconds)}</span>
+                <span className="row__muted" style={{ whiteSpace: "nowrap" }}>{formatExact(s.started_at)}</span>
               </button>
             ))}
           </div>
@@ -141,6 +180,16 @@ export default function ActivityFeed() {
       />
     </div>
   );
+}
+
+function formatExact(iso) {
+  if (!iso) return "—";
+  return new Date(iso).toLocaleString(undefined, {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
 }
 
 function Metric({ label, value, highlight, tooltip }) {

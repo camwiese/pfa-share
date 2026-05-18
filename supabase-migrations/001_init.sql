@@ -68,6 +68,7 @@ CREATE TABLE sessions (
   ended_at TIMESTAMPTZ,
   total_seconds INTEGER NOT NULL DEFAULT 0,
   slide_dwells JSONB NOT NULL DEFAULT '{}',
+  slide_visits JSONB NOT NULL DEFAULT '{}',  -- {"0": 1, "5": 3, ...} arrivals per slide
   max_slide_reached SMALLINT NOT NULL DEFAULT 0,
   device JSONB NOT NULL DEFAULT '{}',
   geo JSONB NOT NULL DEFAULT '{}',

@@ -21,6 +21,8 @@ export default function useSlideTracker({ endpoint, enabled = true }) {
     visibleMsThisSlide: 0,
     lastActivityAt: Date.now(),
     isVisible: typeof document !== "undefined" ? document.visibilityState === "visible" : true,
+    // Pending arrival count per slide, flushed alongside seconds.
+    pendingVisits: { 0: 1 },
   });
 
   useEffect(() => {
@@ -50,10 +52,13 @@ export default function useSlideTracker({ endpoint, enabled = true }) {
       }
 
       const seconds = Math.round(st.visibleMsThisSlide / 1000);
-      if (seconds < 1) return;
+      const visits = st.pendingVisits;
+      const hasVisits = Object.keys(visits).length > 0;
+      if (seconds < 1 && !hasVisits) return;
       st.visibleMsThisSlide = 0;
+      st.pendingVisits = {};
 
-      const payload = JSON.stringify({ slideIdx: st.currentSlide, seconds });
+      const payload = JSON.stringify({ slideIdx: st.currentSlide, seconds, slideVisits: visits });
       try {
         if (typeof navigator !== "undefined" && navigator.sendBeacon) {
           const blob = new Blob([payload], { type: "application/json" });
@@ -106,6 +111,7 @@ export default function useSlideTracker({ endpoint, enabled = true }) {
       st.slideEnteredAt = now();
       st.visibleMsThisSlide = 0;
       st.lastActivityAt = Date.now();
+      st.pendingVisits[slideIdx] = (st.pendingVisits[slideIdx] || 0) + 1;
     });
 
     const interval = setInterval(flush, 10_000);

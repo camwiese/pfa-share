@@ -140,7 +140,12 @@ export default function LinksTable() {
 
   return (
     <div>
-      <form onSubmit={createLink} className="section">
+      <form onSubmit={createLink} className="section" onKeyDown={(e) => {
+        if ((e.metaKey || e.ctrlKey) && e.key === "Enter" && name.trim()) {
+          e.preventDefault();
+          createLink(e);
+        }
+      }}>
         <div style={{ display: "grid", gap: 8 }}>
           <input
             ref={inputRef}
@@ -148,17 +153,20 @@ export default function LinksTable() {
             required
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="Recipient name… (press Enter to create)"
+            placeholder="Recipient name… (Enter to create)"
             className="input"
           />
           <textarea
             value={note}
             onChange={(e) => setNote(e.target.value)}
-            placeholder="Private note (optional)"
+            placeholder="Private note (optional · ⌘↵ to create from here)"
             rows={2}
             className="textarea"
           />
-          <div style={{ display: "flex", justifyContent: "flex-end" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <span className="row__muted" style={{ fontSize: 11 }}>
+              <kbd className="kbd">⌘</kbd> + <kbd className="kbd">↵</kbd> create &amp; copy
+            </span>
             <button type="submit" disabled={creating || !name.trim()} className="btn btn--primary">
               {creating ? "Creating…" : "Create link"}
             </button>

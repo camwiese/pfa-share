@@ -17,7 +17,10 @@ export async function POST(request) {
 
   const slideIdx = clampInt(body.slideIdx, 0, 200);
   const seconds = clampInt(body.seconds, 0, 24 * 3600);
-  if (seconds < 1) return NextResponse.json({ ok: true, skipped: true });
+  const slideVisits = sanitizeVisits(body.slideVisits);
+  if (seconds < 1 && Object.keys(slideVisits).length === 0) {
+    return NextResponse.json({ ok: true, skipped: true });
+  }
 
   let service;
   try { service = createServiceClient(); }
@@ -29,7 +32,7 @@ export async function POST(request) {
   // Upsert dwell. Use raw SQL via Postgres RPC if available; otherwise read-modify-write.
   const { data: existing, error: readErr } = await service
     .from("sessions")
-    .select("id, slide_dwells, total_seconds, max_slide_reached, ended_at, link_id")
+    .select("id, slide_dwells, slide_visits, total_seconds, max_slide_reached, ended_at, link_id")
     .eq("id", parsed.session_id)
     .maybeSingle();
 
@@ -41,8 +44,12 @@ export async function POST(request) {
   }
 
   const dwells = { ...(existing.slide_dwells || {}) };
+  const visits = { ...(existing.slide_visits || {}) };
   const key = String(slideIdx);
-  dwells[key] = (Number(dwells[key]) || 0) + seconds;
+  if (seconds > 0) dwells[key] = (Number(dwells[key]) || 0) + seconds;
+  for (const k of Object.keys(slideVisits)) {
+    visits[k] = (Number(visits[k]) || 0) + slideVisits[k];
+  }
   const total = (existing.total_seconds || 0) + seconds;
   const maxReached = Math.max(existing.max_slide_reached || 0, slideIdx);
 
@@ -50,6 +57,7 @@ export async function POST(request) {
     .from("sessions")
     .update({
       slide_dwells: dwells,
+      slide_visits: visits,
       total_seconds: total,
       max_slide_reached: maxReached,
       last_tick_at: new Date().toISOString(),
@@ -74,4 +82,17 @@ function clampInt(v, lo, hi) {
   const n = Math.round(Number(v));
   if (!Number.isFinite(n)) return 0;
   return Math.max(lo, Math.min(hi, n));
+}
+
+function sanitizeVisits(v) {
+  if (!v || typeof v !== "object") return {};
+  const out = {};
+  for (const k of Object.keys(v)) {
+    const idx = parseInt(k, 10);
+    const count = parseInt(v[k], 10);
+    if (Number.isFinite(idx) && idx >= 0 && idx < 200 && Number.isFinite(count) && count > 0 && count < 1000) {
+      out[String(idx)] = count;
+    }
+  }
+  return out;
 }
