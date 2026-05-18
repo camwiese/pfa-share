@@ -84,29 +84,55 @@ export default function LinksTable() {
     e.preventDefault();
     if (!name.trim()) return;
     setCreating(true);
-    try {
-      const res = await fetch("/api/admin/links", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: name.trim(), note: note.trim() || null }),
-      });
+
+    // We need to copy to the clipboard from inside the user-gesture handler
+    // for iOS Safari to allow it. The trick: pass clipboard.write() a Promise
+    // that resolves with the URL once the fetch returns. Safari + Chrome
+    // both honor this pattern; everything else falls back to the legacy
+    // writeText path.
+    const fetchPromise = fetch("/api/admin/links", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: name.trim(), note: note.trim() || null }),
+    }).then(async (res) => {
       const data = await res.json();
-      if (!res.ok) {
-        toast.error(data?.error || "Could not create link");
-        return;
-      }
+      if (!res.ok) throw new Error(data?.error || "Could not create link");
+      return data;
+    });
+
+    const blobPromise = fetchPromise.then((d) => new Blob([d.url], { type: "text/plain" }));
+
+    let clipboardWritten = false;
+    if (typeof ClipboardItem !== "undefined" && navigator.clipboard?.write) {
       try {
-        await navigator.clipboard.writeText(data.url);
-        toast.success(`Copied: ${data.url} · ${data.link.name}`);
+        await navigator.clipboard.write([new ClipboardItem({ "text/plain": blobPromise })]);
+        clipboardWritten = true;
       } catch {
-        toast.success(`Created. URL: ${data.url}`);
+        // fall through to writeText fallback below
       }
+    }
+
+    try {
+      const data = await fetchPromise;
+
+      if (!clipboardWritten) {
+        try {
+          await navigator.clipboard.writeText(data.url);
+          clipboardWritten = true;
+        } catch {}
+      }
+
+      toast.success(
+        clipboardWritten
+          ? `Copied: ${data.url} · ${data.link.name}`
+          : `Created. URL: ${data.url}`
+      );
       setName("");
       setNote("");
       inputRef.current?.focus();
       refresh();
-    } catch {
-      toast.error("Network error");
+    } catch (err) {
+      toast.error(err?.message || "Network error");
     } finally {
       setCreating(false);
     }

@@ -1000,6 +1000,28 @@
 
 @media (max-width: 768px) {
   .admin-content { padding: 20px 16px 40px; }
+  /* Belt-and-braces against any wide child causing the page to scroll
+     horizontally on mobile. The admin shell is the outer container; any
+     overflow gets clipped here. */
+  .admin-shell { overflow-x: hidden; }
+
+  /* Collapse the table-head and rows into a single column on narrow
+     screens. The table-head also has inline grid-template-columns that
+     would otherwise overflow — !important forces the collapse. */
   .row { grid-template-columns: 1fr !important; }
+  .table-head { display: none !important; }
+
+  /* Make rows readable when stacked: drop the alignment to start so each
+     "cell" sits on its own line and the row__primary stays at the top. */
+  .row, .row.sessions-row {
+    align-items: start;
+  }
+  .row > * { text-align: left !important; }
+
   .drawer { width: 100vw; }
+
+  /* Chips and metric tiles should always wrap, not overflow. */
+  .metrics { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .metric { padding: 12px; }
+  .metric__value { font-size: 22px; }
 }
