@@ -170,7 +170,8 @@ const PANELS = [
     key="3"
     idx={3}
     base="palace-only"
-    text="The last building standing from that fair is the Palace of Fine Arts."
+    textAbove="The last building standing from that fair is the Palace of Fine Arts."
+    textBelow="what happens to it next is up to us"
     alt="The Palace of Fine Arts today"
     dims={{ w: 2048, h: 816 }}
   />,
@@ -212,7 +213,7 @@ const PANELS = [
       <>
         Modeled after the great pavilions of the 1915 Exposition,
         <br />
-        Tour&nbsp;into&nbsp;Tomorrow lets you explore four visions of the future.
+        <span className="section-intro__name">Tour&nbsp;into&nbsp;Tomorrow</span> lets you explore four visions of the future.
       </>
     }
     base="map-exhibit"
@@ -225,7 +226,11 @@ const PANELS = [
   <SectionIntroPanel
     key="12"
     idx={12}
-    text="Future Lab is where inspiration becomes action. A hands-on STEM center where kids and adults alike can get involved in building the future."
+    text={
+      <>
+        <span className="section-intro__name">Future&nbsp;Lab</span> turns inspiration into action, connecting people of all ages with the scientists, engineers, and builders shaping what comes next.
+      </>
+    }
     base="map-futurelab"
     alt="Map of the Future Lab"
   />,
@@ -235,17 +240,25 @@ const PANELS = [
   <SectionIntroPanel
     key="16"
     idx={16}
-    text="At the heart of it all, a beautiful space celebrating the history of the Exposition, with dining experiences showcasing the Bay Area’s global culinary culture and the future of food."
+    text={
+      <>
+        The <span className="section-intro__name">Grand&nbsp;Hall</span> is the social heart of the Palace, showcasing the Bay Area’s culinary culture, from global dining to the future of food.
+      </>
+    }
     base="map-hall"
-    alt="Map of the Hall"
+    alt="Map of the Grand Hall"
   />,
-  <ImagePanel key="17" idx={17} base="fare-6" alt="World’s Fare food hall" dims={{ w: 1672, h: 941 }} />,
-  <ImagePanel key="18" idx={18} base="fare-1" alt="Mezzanine dining at the Palace" dims={{ w: 1681, h: 936 }} />,
-  <ImagePanel key="19" idx={19} base="fare-3" alt="Dining experience at the Palace" dims={{ w: 1672, h: 941 }} />,
+  <ImagePanel key="17" idx={17} base="fare-1" alt="The Grand Hall, looking out from the mezzanine" dims={{ w: 1672, h: 941 }} />,
+  <ImagePanel key="18" idx={18} base="fare-2" alt="Dining experience in the Grand Hall" dims={{ w: 1672, h: 941 }} />,
+  <ImagePanel key="19" idx={19} base="fare-3" alt="Evening in the Grand Hall" dims={{ w: 1672, h: 941 }} />,
   <SectionIntroPanel
     key="20"
     idx={20}
-    text="Every detail considered to create the most beautiful public space in the country. Open to all, from morning to night."
+    text={
+      <>
+        The <span className="section-intro__name">Grounds</span> are reimagined as the most beautiful public space in the country, open to all, from morning to night.
+      </>
+    }
     base="map-grounds"
     alt="Map of the Palace of Fine Arts grounds"
   />,

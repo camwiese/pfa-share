@@ -419,6 +419,16 @@ body :is(input, textarea) { cursor: auto; }
   text-align: center;
   margin: 0;
 }
+/* Slight visual emphasis on the section name (Tour into Tomorrow,
+   Future Lab, Grand Hall, Grounds). 500 reads as a hint of weight
+   above the 400 default without becoming a hard "bold". The nbsp
+   inside the span is what actually prevents mid-phrase wrapping —
+   we add white-space: nowrap as a belt-and-suspenders for browsers
+   that handle nbsp + balance text differently. */
+.section-intro__name {
+  font-weight: 500;
+  white-space: nowrap;
+}
 
 /* =============================================================
    IMAGE PANELS
