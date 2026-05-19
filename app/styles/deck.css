@@ -596,50 +596,47 @@ body :is(input, textarea) { cursor: auto; }
 
 /* =============================================================
    BURNHAM QUOTE (closing coda — panel 28)
+   No decorative glyphs; typography carries the slide. Everything
+   centered, with generous breathing room between the two clauses.
    ============================================================= */
 .panel--burnham { background: var(--paper); }
 .burnham__content {
   position: relative; z-index: 1;
   width: 100%;
-  max-width: min(78ch, 92vw);
+  max-width: min(72ch, 92vw);
   margin: 0 auto;
-  padding: 0 var(--gutter);
+  padding: clamp(3rem, 8vh, 6rem) var(--gutter);
   display: flex; flex-direction: column;
   align-items: center;
   text-align: center;
 }
-.burnham__quotes {
-  font-family: var(--font-display);
-  font-weight: 600;
-  color: var(--burnham-red);
-  font-size: clamp(2.2rem, 5vw, 3.4rem);
-  line-height: 1;
-  letter-spacing: 0.05em;
-  margin-bottom: clamp(1.25rem, 3vh, 2rem);
-}
 .burnham__text {
   font-family: var(--font-display);
   font-weight: 350;
-  font-size: clamp(0.95rem, 2vw, 1.25rem);
-  line-height: 1.6;
+  /* Slightly larger than the previous quote scale — reads as a
+     deliberate closing voice but still calmer than .prose__text. */
+  font-size: clamp(1.15rem, 2.6vw, 1.6rem);
+  line-height: 1.55;
   letter-spacing: -0.005em;
   color: var(--ink);
   text-wrap: balance;
-  margin: 0 0 clamp(0.9rem, 2vh, 1.4rem);
+  margin: 0;
 }
-.burnham__text:last-of-type { margin-bottom: 0; }
+/* Generous gap between the two distinct thoughts of the quote. */
+.burnham__text + .burnham__text {
+  margin-top: clamp(1.5rem, 4vh, 2.5rem);
+}
 .burnham__attribution {
-  margin-top: clamp(1.75rem, 4vh, 2.5rem);
-  align-self: flex-end;
-  text-align: right;
+  margin-top: clamp(2rem, 5vh, 3rem);
+  text-align: center;
   color: var(--burnham-red);
   font-family: var(--font-sans);
-  font-size: clamp(0.85rem, 1.5vw, 1rem);
-  line-height: 1.5;
+  font-size: clamp(0.9rem, 1.6vw, 1.05rem);
+  line-height: 1.55;
 }
 .burnham__attribution p { margin: 0; }
 .burnham__author { font-weight: 500; }
-.burnham__role  { font-weight: 400; opacity: 0.95; }
+.burnham__role   { font-weight: 400; opacity: 0.95; }
 .burnham__footer {
   position: absolute;
   left: 0; right: 0;
