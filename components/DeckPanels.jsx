@@ -212,7 +212,7 @@ const PANELS = [
       <>
         Modeled after the great pavilions of the 1915 Exposition,
         <br />
-        Tour&nbsp;into&nbsp;Tomorrow lets you walk through four visions of the future.
+        Tour&nbsp;into&nbsp;Tomorrow lets you explore four visions of the future.
       </>
     }
     base="map-exhibit"
