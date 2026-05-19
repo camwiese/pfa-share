@@ -265,11 +265,15 @@ const PANELS = [
   <ImagePanel key="21" idx={21} base="grounds-4-pop" alt="Palace grounds at golden hour" dims={{ w: 1672, h: 941 }} />,
   <ImagePanel key="22" idx={22} base="grounds-1" alt="Wandering the Palace grounds" dims={{ w: 1672, h: 941 }} />,
   <ImagePanel key="23" idx={23} base="grounds-0" alt="Palace of Fine Arts grounds" dims={{ w: 1672, h: 941 }} />,
-  <ImagePanel key="24" idx={24} base="grounds-3" alt="Evening fountain show on the lagoon" dims={{ w: 2750, h: 1536 }} />,
-  // 25 — Impact
-  <section className="panel panel--cream panel--impact" data-panel="25" key="25">
-    <div className="impact__content">
-      <p className="impact__text" data-animate="1">Every visit leaves you with a sense of wonder&nbsp;&mdash; and a reason to return.</p>
+  // 24 — Fountain (full bleed). Transparent panel; the actual image
+  // lives in the fixed `.fountain-fixed` background rendered once
+  // alongside the slice so slide 25 can fade in a blur over the same
+  // stationary image (mirrors the hero → tagline opening).
+  <section className="panel panel--fountain" data-panel="24" data-dark="" key="24" />,
+  // 25 — Impact (over blurred fountain, ivory type — mirrors tagline).
+  <section className="panel panel--fountain-tagline" data-panel="25" data-dark="" key="25">
+    <div className="tagline__content">
+      <p className="tagline__text" data-animate="1">Every visit leaves you with a sense of wonder&nbsp;&mdash; and a reason to return.</p>
     </div>
   </section>,
   // 26 — Call
@@ -316,6 +320,11 @@ export const PANEL_COUNT = PANELS.length;
 
 export default function DeckPanels({ start = 0, count = PANELS.length }) {
   const end = Math.min(PANELS.length, start + count);
+  // Slide 24 is the fountain. When this slice includes it, render the
+  // same fixed-image + blur-layer pattern used by the hero/tagline pair
+  // so slide 25 can sit over a blurred copy of the same image without a
+  // visible image re-mount (mirrors slides 0 → 1).
+  const includesFountain = start <= 24 && end > 24;
   return (
     <>
       {start === 0 ? (
@@ -359,6 +368,34 @@ export default function DeckPanels({ start = 0, count = PANELS.length }) {
             </picture>
           </div>
           <div className="hero-fixed__blur" aria-hidden="true" />
+        </>
+      ) : null}
+      {includesFountain ? (
+        <>
+          <div className="fountain-fixed is-hidden" aria-hidden="true">
+            <picture>
+              <source
+                type="image/avif"
+                srcSet="/images/opt/grounds-3-800.avif 800w, /images/opt/grounds-3-1280.avif 1280w, /images/opt/grounds-3-1672.avif 1672w"
+                sizes="100vw"
+              />
+              <source
+                type="image/webp"
+                srcSet="/images/opt/grounds-3-800.webp 800w, /images/opt/grounds-3-1280.webp 1280w, /images/opt/grounds-3-1672.webp 1672w"
+                sizes="100vw"
+              />
+              <img
+                src="/images/opt/grounds-3-1280.jpg"
+                srcSet="/images/opt/grounds-3-800.jpg 800w, /images/opt/grounds-3-1280.jpg 1280w, /images/opt/grounds-3-1672.jpg 1672w"
+                sizes="100vw"
+                alt=""
+                className="fountain-fixed__img"
+                decoding="async"
+                loading="lazy"
+              />
+            </picture>
+          </div>
+          <div className="fountain-fixed__blur is-hidden" aria-hidden="true" />
         </>
       ) : null}
       {PANELS.slice(start, end)}

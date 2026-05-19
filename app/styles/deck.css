@@ -161,7 +161,15 @@ body :is(input, textarea) { cursor: auto; }
   object-fit: cover;
   object-position: center 35%;
 }
-.hero-fixed.is-hidden { opacity: 0; pointer-events: none; }
+/* Snap together with .hero-fixed__blur.is-hidden — Deck.jsx delays the
+   add-`is-hidden` call until the incoming cream panel is fully covering,
+   so the snap is invisible to the user. See the matching fountain
+   pair's delay logic for the full rationale. */
+.hero-fixed.is-hidden {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0s;
+}
 
 .hero-fixed__blur {
   position: fixed;
@@ -193,6 +201,82 @@ body :is(input, textarea) { cursor: auto; }
   opacity: 0;
   pointer-events: none;
   transition: opacity 0s, -webkit-backdrop-filter 0s, backdrop-filter 0s, background-color 0s;
+}
+
+/* =============================================================
+   FIXED FOUNTAIN IMAGE — shared between slides 24 + 25 so the
+   "Every Visit a Reason to Return" line fades a blur over the
+   *same* stationary fountain image (mirrors slides 0 → 1).
+   Same mechanics as .hero-fixed / .hero-fixed__blur.
+   ============================================================= */
+.fountain-fixed {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background-color: #0c0a07;
+  will-change: opacity;
+  transition: opacity 0.8s ease;
+  overflow: hidden;
+}
+.fountain-fixed picture,
+.fountain-fixed__img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.fountain-fixed__img {
+  object-fit: cover;
+  object-position: center center;
+}
+/* Snap together with .fountain-fixed__blur.is-hidden — see comment
+   on .hero-fixed.is-hidden above. */
+.fountain-fixed.is-hidden {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0s;
+}
+
+.fountain-fixed__blur {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  -webkit-backdrop-filter: blur(0px);
+          backdrop-filter: blur(0px);
+  background-color: rgba(0, 0, 0, 0);
+  will-change: backdrop-filter, background-color;
+  transition:
+    opacity 0.6s ease,
+    -webkit-backdrop-filter 0.94s cubic-bezier(0.4, 0, 0.2, 1),
+    backdrop-filter 0.94s cubic-bezier(0.4, 0, 0.2, 1),
+    background-color 0.94s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.fountain-fixed__blur.is-blurred {
+  -webkit-backdrop-filter: blur(18px);
+          backdrop-filter: blur(18px);
+  background-color: rgba(0, 0, 0, 0.3);
+}
+.fountain-fixed__blur.is-hidden {
+  opacity: 0;
+  pointer-events: none;
+  /* Snap together with .fountain-fixed.is-hidden — see comment on
+     .hero-fixed__blur.is-hidden above. */
+  transition: opacity 0s, -webkit-backdrop-filter 0s, backdrop-filter 0s, background-color 0s;
+}
+
+/* Slide 24: full fountain. Transparent panel so the fixed bg shows. */
+.panel--fountain {
+  background: transparent;
+  z-index: 1;
+}
+/* Slide 25: "Every visit…" over the blurred fountain. Reuses the
+   .tagline__content / .tagline__text rules so the typography matches
+   the opening tagline exactly. */
+.panel--fountain-tagline {
+  background: transparent;
+  z-index: 1;
 }
 
 /* =============================================================
@@ -351,6 +435,20 @@ body :is(input, textarea) { cursor: auto; }
 }
 /* .ppie__line removed — PPIE now uses single <p class="ppie__text">
    elements that share the unified deck font scale. */
+
+/* Slide 2 (the deck's first PPIE) only, and only on forward entrance
+   from slide 1: hold the picture + text data-animate entrance until
+   the cream has fully covered the frozen blurred hero behind it.
+   Mirrors the calm two-beat of 25 → 26 — cream rises, then content
+   settles — instead of stacking three concurrent motions (cream
+   rising, picture sliding up, paragraphs sliding up) on top of the
+   substrate handoff, which reads as abrupt. Scoped to forward only
+   via the body[data-direction] flag Deck.jsx sets on each navigation,
+   so re-entering slide 2 from slide 3 (back-arrow) keeps its normal
+   snappier rhythm. */
+body[data-direction="forward"] .panel[data-panel="2"].is-active [data-animate="1"] {
+  transition-delay: 0.6s;
+}
 
 /* =============================================================
    WELCOME

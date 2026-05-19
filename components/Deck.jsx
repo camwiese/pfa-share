@@ -60,6 +60,16 @@ export default function Deck({ startIndex = 0, withGate = false, freeCount = 5, 
 
     let currentIndex = Math.min(Math.max(0, startIndex), panels.length - 1);
 
+    // Pending snap-off for the two fixed-image backgrounds (hero/tagline
+    // pair on slides 0/1, fountain pair on slides 24/25). We can't add
+    // `is-hidden` immediately on leaving either pair — the outgoing
+    // cream panel takes ~540ms to fully cover the screen, and removing
+    // the dark substrate mid-cross-fade reads as a hard cut. Delay the
+    // snap until cream is fully covering, so the snap is invisible.
+    let heroHideTimer = null;
+    let fountainHideTimer = null;
+    const BG_HIDE_DELAY_MS = 580; // panel opacity transition (540ms) + safety margin
+
     function applyClasses(target) {
       panels.forEach((p, i) => {
         p.classList.remove("is-active", "is-past");
@@ -68,19 +78,64 @@ export default function Deck({ startIndex = 0, withGate = false, freeCount = 5, 
       });
     }
 
-    function applyBackgroundForIndex(i) {
-      if (!heroFixed || !heroBlur) return;
-      if (i === 0) {
-        heroFixed.classList.remove("is-hidden");
-        heroBlur.classList.remove("is-hidden", "is-blurred");
-      } else if (i === 1) {
-        heroFixed.classList.remove("is-hidden");
-        heroBlur.classList.remove("is-hidden");
-        heroBlur.classList.add("is-blurred");
-      } else {
-        heroFixed.classList.add("is-hidden");
-        heroBlur.classList.add("is-hidden");
+    // Drives one fixed-image + blur pair (hero or fountain). `unblurred`
+    // and `blurred` are the slide indexes where the pair is the substrate
+    // for the live panel; anywhere else, we defer the snap-off until the
+    // incoming panel has fully covered (see BG_HIDE_DELAY_MS).
+    function applyBgPair({ i, image, blur, unblurredIdx, blurredIdx, timerRef }) {
+      if (!image || !blur) return;
+      // Always clear any pending snap-off — re-entering the pair or
+      // jumping further away supersedes a prior hide.
+      if (timerRef.value) {
+        clearTimeout(timerRef.value);
+        timerRef.value = null;
       }
+      if (i === unblurredIdx) {
+        image.classList.remove("is-hidden");
+        blur.classList.remove("is-hidden", "is-blurred");
+      } else if (i === blurredIdx) {
+        image.classList.remove("is-hidden");
+        blur.classList.remove("is-hidden");
+        blur.classList.add("is-blurred");
+      } else {
+        // Leaving the range. Defer the snap until the incoming panel
+        // has fully covered the screen, so the user only ever sees the
+        // cream sliding up over the still-visible dark substrate — never
+        // a hard cut from "dark blurred image" to "cream."
+        timerRef.value = setTimeout(() => {
+          image.classList.add("is-hidden");
+          blur.classList.add("is-hidden");
+          timerRef.value = null;
+        }, BG_HIDE_DELAY_MS);
+      }
+    }
+
+    // Tiny mutable refs so the helper can read+write each pair's timer
+    // without reaching across closures.
+    const heroTimerRef = { get value() { return heroHideTimer; }, set value(v) { heroHideTimer = v; } };
+    const fountainTimerRef = { get value() { return fountainHideTimer; }, set value(v) { fountainHideTimer = v; } };
+
+    function applyBackgroundForIndex(i) {
+      applyBgPair({
+        i,
+        image: heroFixed,
+        blur: heroBlur,
+        unblurredIdx: 0,
+        blurredIdx: 1,
+        timerRef: heroTimerRef,
+      });
+
+      // Fountain elements may not exist at mount time (they arrive with
+      // the gated splice on the public path) — re-query each time so we
+      // pick them up after refresh().
+      applyBgPair({
+        i,
+        image: document.querySelector(".fountain-fixed"),
+        blur: document.querySelector(".fountain-fixed__blur"),
+        unblurredIdx: 24,
+        blurredIdx: 25,
+        timerRef: fountainTimerRef,
+      });
     }
 
     function preloadNearby(i) {
@@ -254,6 +309,8 @@ export default function Deck({ startIndex = 0, withGate = false, freeCount = 5, 
       document.removeEventListener("wheel", onWheel);
       document.removeEventListener("touchstart", onTouchStart);
       document.removeEventListener("touchend", onTouchEnd);
+      if (heroHideTimer) clearTimeout(heroHideTimer);
+      if (fountainHideTimer) clearTimeout(fountainHideTimer);
       if (progressNav) progressNav.innerHTML = "";
       delete window.__pfaDeck;
     };
