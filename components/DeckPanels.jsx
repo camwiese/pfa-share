@@ -242,7 +242,13 @@ const PANELS = [
   <ImagePanel key="17" idx={17} base="fare-6" alt="World’s Fare food hall" dims={{ w: 1672, h: 941 }} />,
   <ImagePanel key="18" idx={18} base="fare-1" alt="Mezzanine dining at the Palace" dims={{ w: 1681, h: 936 }} />,
   <ImagePanel key="19" idx={19} base="fare-3" alt="Dining experience at the Palace" dims={{ w: 1672, h: 941 }} />,
-  <ProsePanel key="20" idx={20} text="Every detail considered to create the most beautiful public space in the country. Open to all, from morning to night." />,
+  <SectionIntroPanel
+    key="20"
+    idx={20}
+    text="Every detail considered to create the most beautiful public space in the country. Open to all, from morning to night."
+    base="map-grounds"
+    alt="Map of the Palace of Fine Arts grounds"
+  />,
   <ImagePanel key="21" idx={21} base="grounds-4-pop" alt="Palace grounds at golden hour" dims={{ w: 1672, h: 941 }} />,
   <ImagePanel key="22" idx={22} base="grounds-1" alt="Wandering the Palace grounds" dims={{ w: 1672, h: 941 }} />,
   <ImagePanel key="23" idx={23} base="grounds-0" alt="Palace of Fine Arts grounds" dims={{ w: 1672, h: 941 }} />,
