@@ -100,6 +100,37 @@ function ProsePanel({ idx, text, follow }) {
   );
 }
 
+// Section-intro panel — visually mirrors the Welcome slide (centered cream
+// content, prose-style text, map image directly below). Used for the
+// "Tour into Tomorrow", "Future Lab", and "Hall" title pages so each
+// section opens with a consistent map-anchored layout.
+function SectionIntroPanel({ idx, text, base, alt, dims = { w: 1672, h: 941 } }) {
+  return (
+    <section className="panel panel--cream panel--section-intro" data-panel={idx}>
+      <div className="welcome__content">
+        <p className="section-intro__text" data-animate="1">{text}</p>
+        <figure className="welcome__figure" data-animate="1">
+          <picture>
+            <source type="image/avif" srcSet={`/images/opt/${base}-800.avif 800w, /images/opt/${base}-1280.avif 1280w, /images/opt/${base}-1672.avif 1672w`} sizes="(max-width: 860px) 90vw, 760px" />
+            <source type="image/webp" srcSet={`/images/opt/${base}-800.webp 800w, /images/opt/${base}-1280.webp 1280w, /images/opt/${base}-1672.webp 1672w`} sizes="(max-width: 860px) 90vw, 760px" />
+            <img
+              src={`/images/opt/${base}-1280.jpg`}
+              srcSet={`/images/opt/${base}-800.jpg 800w, /images/opt/${base}-1280.jpg 1280w, /images/opt/${base}-1672.jpg 1672w`}
+              sizes="(max-width: 860px) 90vw, 760px"
+              alt={alt}
+              className="welcome__image"
+              loading="lazy"
+              decoding="async"
+              width={dims.w}
+              height={dims.h}
+            />
+          </picture>
+        </figure>
+      </div>
+    </section>
+  );
+}
+
 function ImagePanel({ idx, base, alt, dims, sizes = "100vw" }) {
   return (
     <section className="panel panel--image" data-panel={idx}>
@@ -156,11 +187,11 @@ const PANELS = [
       <p className="welcome__year" data-animate="1">Palace of Fine Arts &middot; 2030</p>
       <figure className="welcome__figure" data-animate="1">
         <picture>
-          <source type="image/avif" srcSet="/images/opt/Park-Lagoon-2-800.avif 800w, /images/opt/Park-Lagoon-2-1280.avif 1280w, /images/opt/Park-Lagoon-2-1672.avif 1672w" sizes="(max-width: 860px) 90vw, 760px" />
-          <source type="image/webp" srcSet="/images/opt/Park-Lagoon-2-800.webp 800w, /images/opt/Park-Lagoon-2-1280.webp 1280w, /images/opt/Park-Lagoon-2-1672.webp 1672w" sizes="(max-width: 860px) 90vw, 760px" />
+          <source type="image/avif" srcSet="/images/opt/map-new-800.avif 800w, /images/opt/map-new-1280.avif 1280w, /images/opt/map-new-1672.avif 1672w" sizes="(max-width: 860px) 90vw, 760px" />
+          <source type="image/webp" srcSet="/images/opt/map-new-800.webp 800w, /images/opt/map-new-1280.webp 1280w, /images/opt/map-new-1672.webp 1672w" sizes="(max-width: 860px) 90vw, 760px" />
           <img
-            src="/images/opt/Park-Lagoon-2-1280.jpg"
-            srcSet="/images/opt/Park-Lagoon-2-800.jpg 800w, /images/opt/Park-Lagoon-2-1280.jpg 1280w, /images/opt/Park-Lagoon-2-1672.jpg 1672w"
+            src="/images/opt/map-new-1280.jpg"
+            srcSet="/images/opt/map-new-800.jpg 800w, /images/opt/map-new-1280.jpg 1280w, /images/opt/map-new-1672.jpg 1672w"
             sizes="(max-width: 860px) 90vw, 760px"
             alt="The Palace of Fine Arts and lagoon, reimagined"
             className="welcome__image"
@@ -174,28 +205,40 @@ const PANELS = [
     </div>
   </section>,
   <ProsePanel key="6" idx={6} text="The Palace of Fine Arts, reimagined to capture our spirit of innovation and celebrate the best San Francisco has to offer the world." />,
-  <ProsePanel
+  <SectionIntroPanel
     key="7"
     idx={7}
     text={
       <>
         Modeled after the great pavilions of the 1915 Exposition,
         <br />
-        Tour&nbsp;into&nbsp;Tomorrow
-        <br />
-        lets you walk through four visions of the future.
+        Tour&nbsp;into&nbsp;Tomorrow lets you walk through four visions of the future.
       </>
     }
+    base="map-exhibit"
+    alt="Map of the Tour into Tomorrow exhibits"
   />,
   <ImagePanel key="8" idx={8} base="exhibit-1" alt="Clean energy facility" dims={{ w: 1683, h: 934 }} />,
   <ImagePanel key="9" idx={9} base="exhibit-2" alt="Tour into Tomorrow exhibit" dims={{ w: 1672, h: 941 }} />,
   <ImagePanel key="10" idx={10} base="exhibit-3" alt="Tour into Tomorrow exhibit" dims={{ w: 1672, h: 941 }} />,
   <ImagePanel key="11" idx={11} base="exhibit-4" alt="Tour into Tomorrow exhibit" dims={{ w: 1672, h: 941 }} />,
-  <ProsePanel key="12" idx={12} text="Future Lab is where inspiration becomes action. A hands-on STEM center where kids and adults alike can get involved in building the future." />,
+  <SectionIntroPanel
+    key="12"
+    idx={12}
+    text="Future Lab is where inspiration becomes action. A hands-on STEM center where kids and adults alike can get involved in building the future."
+    base="map-futurelab"
+    alt="Map of the Future Lab"
+  />,
   <ImagePanel key="13" idx={13} base="lab-1" alt="Future Lab hands-on STEM" dims={{ w: 1672, h: 941 }} />,
   <ImagePanel key="14" idx={14} base="lab-2" alt="Scientists at work in the Future Lab" dims={{ w: 1672, h: 941 }} />,
   <ImagePanel key="15" idx={15} base="lab-3" alt="Kids and adults learning with scientists" dims={{ w: 1672, h: 941 }} />,
-  <ProsePanel key="16" idx={16} text="At the heart of it all, a beautiful space celebrating the history of the Exposition, with dining experiences showcasing the Bay Area’s global culinary culture and the future of food." />,
+  <SectionIntroPanel
+    key="16"
+    idx={16}
+    text="At the heart of it all, a beautiful space celebrating the history of the Exposition, with dining experiences showcasing the Bay Area’s global culinary culture and the future of food."
+    base="map-hall"
+    alt="Map of the Hall"
+  />,
   <ImagePanel key="17" idx={17} base="fare-6" alt="World’s Fare food hall" dims={{ w: 1672, h: 941 }} />,
   <ImagePanel key="18" idx={18} base="fare-1" alt="Mezzanine dining at the Palace" dims={{ w: 1681, h: 936 }} />,
   <ImagePanel key="19" idx={19} base="fare-3" alt="Dining experience at the Palace" dims={{ w: 1672, h: 941 }} />,
