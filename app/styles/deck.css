@@ -603,7 +603,9 @@ body :is(input, textarea) { cursor: auto; }
 .burnham__content {
   position: relative; z-index: 1;
   width: 100%;
-  max-width: min(72ch, 92vw);
+  /* Widened so each clause lands on fewer lines — pairs with the
+     italic display face below, which sets more compactly. */
+  max-width: min(98ch, 96vw);
   margin: 0 auto;
   padding: clamp(3rem, 8vh, 6rem) var(--gutter);
   display: flex; flex-direction: column;
@@ -612,6 +614,7 @@ body :is(input, textarea) { cursor: auto; }
 }
 .burnham__text {
   font-family: var(--font-display);
+  font-style: italic;
   font-weight: 350;
   /* Slightly larger than the previous quote scale — reads as a
      deliberate closing voice but still calmer than .prose__text. */
