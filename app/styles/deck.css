@@ -614,7 +614,6 @@ body :is(input, textarea) { cursor: auto; }
 }
 .burnham__text {
   font-family: var(--font-display);
-  font-style: italic;
   font-weight: 350;
   /* Slightly larger than the previous quote scale — reads as a
      deliberate closing voice but still calmer than .prose__text. */

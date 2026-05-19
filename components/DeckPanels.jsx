@@ -298,10 +298,10 @@ const PANELS = [
   <section className="panel panel--cream panel--burnham" data-panel="28" key="28">
     <div className="burnham__content">
       <p className="burnham__text" data-animate="1">
-        Make no little plans. They have no magic to stir men&rsquo;s blood and probably themselves will not be realized. Make big plans; aim high in hope and work&hellip;
+        &ldquo;Make no little plans. They have no magic to stir men&rsquo;s blood and probably themselves will not be realized. Make big plans; aim high in hope and work&hellip;
       </p>
       <p className="burnham__text" data-animate="1">
-        Let your watchword be order and your beacon beauty. Think big.
+        Let your watchword be order and your beacon beauty. Think big.&rdquo;
       </p>
       <div className="burnham__attribution" data-animate="2">
         <p className="burnham__author">Daniel Burnham</p>
