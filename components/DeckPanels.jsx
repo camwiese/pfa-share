@@ -211,7 +211,7 @@ const PANELS = [
     idx={7}
     text={
       <>
-        Modeled after the great pavilions of the 1915 Exposition,
+        Modeled after the pavilions of the 1915 Exposition,
         <br />
         <span className="section-intro__name">Tour&nbsp;into&nbsp;Tomorrow</span> lets you explore four visions of the future.
       </>
