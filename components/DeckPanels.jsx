@@ -171,7 +171,7 @@ const PANELS = [
     idx={3}
     base="palace-only"
     textAbove="The last building standing from that fair is the Palace of Fine Arts."
-    textBelow="what happens to it next is up to us"
+    textBelow="What happens to the building next is up to us."
     alt="The Palace of Fine Arts today"
     dims={{ w: 2048, h: 816 }}
   />,
@@ -275,7 +275,7 @@ const PANELS = [
   // 26 — Call
   <section className="panel panel--cream panel--call" data-panel="26" key="26">
     <div className="call__content">
-      <p className="call__text" data-animate="1">If you&rsquo;re reading this, we&rsquo;d love your help bringing it to life.</p>
+      <p className="call__text" data-animate="1">If you&rsquo;re reading this, we&rsquo;d love your help bringing this vision to life.</p>
     </div>
   </section>,
   // 27 — Letter
