@@ -245,7 +245,7 @@ const PANELS = [
         The <span className="section-intro__name">Grand&nbsp;Hall</span> is the social heart of the Palace, showcasing the Bay Area’s culinary culture, from global dining to the future of food.
       </>
     }
-    base="map-hall"
+    base="map-hall-v2"
     alt="Map of the Grand Hall"
   />,
   <ImagePanel key="17" idx={17} base="fare-0-hall" alt="The entrance to the Grand Hall" dims={{ w: 1672, h: 941 }} />,
@@ -259,7 +259,7 @@ const PANELS = [
         The <span className="section-intro__name">Grounds</span> are reimagined as the most beautiful public space in the country, open to all, from morning to night.
       </>
     }
-    base="map-grounds"
+    base="map-grounds-v2"
     alt="Map of the Palace of Fine Arts grounds"
   />,
   <ImagePanel key="21" idx={21} base="grounds-4-pop" alt="Palace grounds at golden hour" dims={{ w: 1672, h: 941 }} />,

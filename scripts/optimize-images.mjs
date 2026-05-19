@@ -44,8 +44,8 @@ const SOURCES = [
   'map-new.png',
   'map-exhibit.png',
   'map-futurelab.png',
-  'map-hall.png',
-  'map-grounds.png',
+  'map-hall-v2.png',
+  'map-grounds-v2.png',
 ];
 
 function fmtBytes(n) {
