@@ -294,6 +294,23 @@ const PANELS = [
     </div>
     <p className="letter__footer" data-animate="3">Confidential &middot; World&rsquo;s Fair Co.</p>
   </section>,
+  // 28 — Burnham quote (closing coda)
+  <section className="panel panel--cream panel--burnham" data-panel="28" key="28">
+    <div className="burnham__content">
+      <div className="burnham__quotes" aria-hidden="true" data-animate="1">&ldquo;&nbsp;&rdquo;</div>
+      <p className="burnham__text" data-animate="1">
+        Make no little plans. They have no magic to stir men&rsquo;s blood and probably themselves will not be realized. Make big plans; aim high in hope and work&hellip;
+      </p>
+      <p className="burnham__text" data-animate="1">
+        Let your watchword be order and your beacon beauty. Think big.
+      </p>
+      <div className="burnham__attribution" data-animate="2">
+        <p className="burnham__author">&mdash; Daniel Burnham</p>
+        <p className="burnham__role">Chief Architect; 1893 Chicago World&rsquo;s Fair</p>
+      </div>
+    </div>
+    <p className="burnham__footer" data-animate="3">Confidential &middot; World&rsquo;s Fair Co.</p>
+  </section>,
 ];
 
 export const PANEL_COUNT = PANELS.length;

@@ -13,6 +13,10 @@
   --ivory:        #f1ece1;
   --ivory-soft:   rgba(241, 236, 225, 0.78);
   --accent:       #8e2832;
+  /* Warm brick red used for the Burnham closing slide — pairs with
+     the cream paper and the deck's serif voice. Slightly oranger and
+     more "fair-poster" than --accent (which leans crimson). */
+  --burnham-red:  #c14431;
   --font-display: 'Fraunces', 'Cormorant Garamond', Georgia, serif;
   --font-sans:    'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --gutter:       clamp(1.25rem, 4vw, 2.5rem);
@@ -591,6 +595,66 @@ body :is(input, textarea) { cursor: auto; }
 }
 
 /* =============================================================
+   BURNHAM QUOTE (closing coda — panel 28)
+   ============================================================= */
+.panel--burnham { background: var(--paper); }
+.burnham__content {
+  position: relative; z-index: 1;
+  width: 100%;
+  max-width: min(78ch, 92vw);
+  margin: 0 auto;
+  padding: 0 var(--gutter);
+  display: flex; flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+.burnham__quotes {
+  font-family: var(--font-display);
+  font-weight: 600;
+  color: var(--burnham-red);
+  font-size: clamp(2.2rem, 5vw, 3.4rem);
+  line-height: 1;
+  letter-spacing: 0.05em;
+  margin-bottom: clamp(1.25rem, 3vh, 2rem);
+}
+.burnham__text {
+  font-family: var(--font-display);
+  font-weight: 350;
+  font-size: clamp(0.95rem, 2vw, 1.25rem);
+  line-height: 1.6;
+  letter-spacing: -0.005em;
+  color: var(--ink);
+  text-wrap: balance;
+  margin: 0 0 clamp(0.9rem, 2vh, 1.4rem);
+}
+.burnham__text:last-of-type { margin-bottom: 0; }
+.burnham__attribution {
+  margin-top: clamp(1.75rem, 4vh, 2.5rem);
+  align-self: flex-end;
+  text-align: right;
+  color: var(--burnham-red);
+  font-family: var(--font-sans);
+  font-size: clamp(0.85rem, 1.5vw, 1rem);
+  line-height: 1.5;
+}
+.burnham__attribution p { margin: 0; }
+.burnham__author { font-weight: 500; }
+.burnham__role  { font-weight: 400; opacity: 0.95; }
+.burnham__footer {
+  position: absolute;
+  left: 0; right: 0;
+  bottom: clamp(1.25rem, 3vh, 2rem);
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: 0.68rem;
+  font-weight: 400;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  text-align: center;
+}
+
+/* =============================================================
    PROGRESS DOTS
    ============================================================= */
 .progress {
@@ -680,7 +744,8 @@ body :is(input, textarea) { cursor: auto; }
   .panel--ppie,
   .panel--letter,
   .panel--welcome,
-  .panel--section-intro {
+  .panel--section-intro,
+  .panel--burnham {
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     touch-action: pan-y;
@@ -711,7 +776,8 @@ body :is(input, textarea) { cursor: auto; }
   .panel--ppie,
   .panel--letter,
   .panel--welcome,
-  .panel--section-intro {
+  .panel--section-intro,
+  .panel--burnham {
     overflow: hidden;
     align-items: center;
     touch-action: none;

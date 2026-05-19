@@ -15,10 +15,10 @@ export const SLIDE_TITLES = {
   13: "Future Lab — hands-on",
   14: "Future Lab — scientists",
   15: "Future Lab — learning",
-  16: "Heart of it all — intro",
-  17: "Food hall — overview",
-  18: "Mezzanine dining",
-  19: "Dining experience",
+  16: "Grand Hall — intro",
+  17: "Grand Hall — entrance",
+  18: "Grand Hall — dining",
+  19: "Grand Hall — evening",
   20: "Grounds — intro",
   21: "Grounds — golden hour",
   22: "Grounds — wandering",
@@ -27,6 +27,7 @@ export const SLIDE_TITLES = {
   25: "Sense of wonder",
   26: "Call to build",
   27: "Letter — sign-off",
+  28: "Burnham — closing quote",
 };
 
-export const SLIDE_COUNT = 28;
+export const SLIDE_COUNT = 29;
