@@ -31,7 +31,7 @@ const SOURCES = [
   'grounds-1.png',
   'grounds-3.png',
   'grounds-4-pop.png',
-  'fare-1.png',
+  'fare-0-hall.png',
   'fare-2.png',
   'fare-3.png',
   'exhibit-1.png',

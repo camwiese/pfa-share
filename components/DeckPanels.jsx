@@ -248,7 +248,7 @@ const PANELS = [
     base="map-hall"
     alt="Map of the Grand Hall"
   />,
-  <ImagePanel key="17" idx={17} base="fare-1" alt="The Grand Hall, looking out from the mezzanine" dims={{ w: 1672, h: 941 }} />,
+  <ImagePanel key="17" idx={17} base="fare-0-hall" alt="The entrance to the Grand Hall" dims={{ w: 1672, h: 941 }} />,
   <ImagePanel key="18" idx={18} base="fare-2" alt="Dining experience in the Grand Hall" dims={{ w: 1672, h: 941 }} />,
   <ImagePanel key="19" idx={19} base="fare-3" alt="Evening in the Grand Hall" dims={{ w: 1672, h: 941 }} />,
   <SectionIntroPanel
