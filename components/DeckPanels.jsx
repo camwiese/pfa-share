@@ -256,7 +256,7 @@ const PANELS = [
     idx={20}
     text={
       <>
-        The <span className="section-intro__name">Grounds</span> are reimagined as the most beautiful public space in the country, open to all, from morning to night.
+        The <span className="section-intro__name">Grounds</span> are the most beautiful public space in the country, open to all, from morning to night.
       </>
     }
     base="map-grounds-v2"
