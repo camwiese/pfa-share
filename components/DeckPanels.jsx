@@ -177,7 +177,15 @@ const PANELS = [
   <ProsePanel
     key="7"
     idx={7}
-    text="Modeled after the great pavilions of the 1915 Exposition, Tour into Tomorrow lets you walk through four visions of the future."
+    text={
+      <>
+        Modeled after the great pavilions of the 1915 Exposition,
+        <br />
+        Tour&nbsp;into&nbsp;Tomorrow
+        <br />
+        lets you walk through four visions of the future.
+      </>
+    }
   />,
   <ImagePanel key="8" idx={8} base="exhibit-1" alt="Clean energy facility" dims={{ w: 1683, h: 934 }} />,
   <ImagePanel key="9" idx={9} base="exhibit-2" alt="Tour into Tomorrow exhibit" dims={{ w: 1672, h: 941 }} />,
