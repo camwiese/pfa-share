@@ -36,21 +36,44 @@ export default function ActivityFeed() {
   }, [days]);
 
   useEffect(() => {
+    // Polling cadence: 8s when the tab is visible, paused entirely when
+    // hidden. Previous version kept the interval ticking every 5s and
+    // bailed inside the callback — same DB savings but unnecessary CPU
+    // wakeups on the laptop. When the tab becomes visible after being
+    // hidden, we poll once immediately so "live now" updates without
+    // having to wait for the next tick.
     let mounted = true;
+    let handle = null;
+    const ACTIVE_INTERVAL_MS = 8000;
+
     function poll() {
-      if (document.visibilityState !== "visible") return;
+      if (!mounted) return;
       fetch("/api/admin/activity?live=1")
         .then((r) => r.json())
         .then((d) => { if (mounted) setLiveNow(d.liveNowCount || 0); })
         .catch(() => {});
     }
-    poll();
-    const handle = setInterval(poll, 5000);
-    document.addEventListener("visibilitychange", poll);
+    function startPolling() {
+      if (handle) return;
+      poll();
+      handle = setInterval(poll, ACTIVE_INTERVAL_MS);
+    }
+    function stopPolling() {
+      if (!handle) return;
+      clearInterval(handle);
+      handle = null;
+    }
+    function onVisibility() {
+      if (document.visibilityState === "visible") startPolling();
+      else stopPolling();
+    }
+
+    if (document.visibilityState === "visible") startPolling();
+    document.addEventListener("visibilitychange", onVisibility);
     return () => {
       mounted = false;
-      clearInterval(handle);
-      document.removeEventListener("visibilitychange", poll);
+      stopPolling();
+      document.removeEventListener("visibilitychange", onVisibility);
     };
   }, []);
 

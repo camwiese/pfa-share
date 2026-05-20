@@ -149,8 +149,24 @@ async function createSession({ service, link, request, ua, incomingFp, body, rea
 async function isAdminVisitor() {
   const admins = getAdminEmails();
   if (admins.length === 0) return false;
+
+  // Cheap path first: dummy-auth cookie is an HMAC-verified local read.
   const dummy = await getDummyAuthEmail();
   if (dummy && admins.includes(dummy)) return true;
+
+  // Skip the expensive Supabase Auth round-trip for visitors who aren't
+  // even carrying a Supabase session cookie. 99%+ of /d/<token> traffic
+  // is anonymous — this short-circuit saves ~50–100ms per public open.
+  const { cookies } = await import("next/headers");
+  try {
+    const store = await cookies();
+    const hasSupabaseSession = store.getAll().some((c) => c.name.startsWith("sb-"));
+    if (!hasSupabaseSession) return false;
+  } catch {
+    // If we can't read cookies for some reason, fall through to the
+    // full check rather than incorrectly counting an admin as anon.
+  }
+
   try {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
