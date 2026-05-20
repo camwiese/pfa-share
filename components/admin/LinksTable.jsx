@@ -41,19 +41,27 @@ export default function LinksTable() {
     if (links.length === 0) return;
     let mounted = true;
     (async () => {
+      // Fire all per-link session fetches in parallel. Was sequential
+      // before — 20 links × ~200ms each was 4s of "stuck" loading.
+      // Parallel collapses that to ~1 round-trip.
       const sig = {};
       const stats = {};
-      for (const l of links.slice(0, 20)) {
-        const res = await fetch(`/api/admin/sessions?link_id=${l.id}&limit=50&days=365`).then((r) => r.ok ? r.json() : null);
-        if (!res || !mounted) continue;
-        const ss = res.sessions || [];
-        sig[l.id] = sharingSignal(ss);
-        const real = ss.filter((s) => !s.is_bot);
-        stats[l.id] = {
-          totalSeconds: real.reduce((a, s) => a + (Number(s.total_seconds) || 0), 0),
-          visitors: new Set(real.map((s) => s.fp_hash).filter(Boolean)).size,
-        };
-      }
+      const subset = links.slice(0, 20);
+      await Promise.all(subset.map(async (l) => {
+        try {
+          const r = await fetch(`/api/admin/sessions?link_id=${l.id}&limit=50&days=365`);
+          if (!r.ok || !mounted) return;
+          const ss = (await r.json()).sessions || [];
+          sig[l.id] = sharingSignal(ss);
+          const real = ss.filter((s) => !s.is_bot);
+          stats[l.id] = {
+            totalSeconds: real.reduce((a, s) => a + (Number(s.total_seconds) || 0), 0),
+            visitors: new Set(real.map((s) => s.fp_hash).filter(Boolean)).size,
+          };
+        } catch {
+          // Skip; an individual link's stats failing shouldn't block the others.
+        }
+      }));
       if (mounted) {
         setSignalsByLink(sig);
         setStatsByLink(stats);

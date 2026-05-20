@@ -107,6 +107,7 @@ export async function GET(request) {
     notifyNewEmail,
     notifyLinkOpened,
     notifySessionSummary,
+    maybeNotifyHeatingUp,
   } = await import("../../../../../lib/notifications");
 
   let result;
@@ -120,6 +121,18 @@ export async function GET(request) {
       session: { id: "test-session", geo: { city: "San Francisco", country: "US" } },
       firstSession: true,
     });
+  } else if (kind === "heating_up") {
+    // Direct call to the real notify path with a guaranteed-fresh
+    // dedup key (random link id), so the test bypasses the
+    // already-sent check. The wired heating-up flow lives in
+    // /api/d/[token]/track + closeIdle and dedupes per real link id.
+    result = await maybeNotifyHeatingUp(auth.service, {
+      link: { id: `test-${Date.now()}`, token: "PREVIEW", name: "Diagnostic Link (heating up)" },
+    });
+    result = {
+      ...result,
+      note: "Real flow needs sessions in the DB to cross the threshold; this preview won't find any and will return underThreshold. To see the email, spend 5 min on a real /d/<token>.",
+    };
   } else if (kind === "session_summary") {
     const dwells = { "0": 8, "1": 12, "2": 30, "3": 18, "4": 22, "5": 6 };
     result = await notifySessionSummary({

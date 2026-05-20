@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createServiceClient } from "../../../../../lib/supabase/server";
 import { verifySessionCookie, SESSION_COOKIE_NAME } from "../../../../../lib/sessionCookie";
 import { maybeLazyCloseIdle } from "../../../../../lib/closeIdle";
+import { maybeNotifyHeatingUp } from "../../../../../lib/notifications";
 
 export async function POST(request, { params }) {
   const { token } = await params;
@@ -76,6 +77,11 @@ export async function POST(request, { params }) {
   // Lazy fallback: sweep any other idle sessions and fire their summary
   // emails. Throttled per-instance to once every 30s so this is cheap.
   maybeLazyCloseIdle(service);
+
+  // Heating-up: check if this link has crossed the engagement threshold
+  // (5 min view-time or 5 sessions). Fire-and-forget; the function itself
+  // is idempotent + dedup'd via the events log.
+  maybeNotifyHeatingUp(service, { linkId: link.id }).catch(() => {});
 
   return NextResponse.json({ ok: true });
 }
