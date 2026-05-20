@@ -28,14 +28,6 @@ export async function POST(request, { params }) {
   let body = {};
   try { body = await request.json(); } catch {}
 
-  // Admin previewing one of their own links — skip the whole session
-  // bootstrap so we don't pollute analytics with our own opens. Checks both
-  // the dummy-auth cookie (current production state) and any real Supabase
-  // session (post-Resend).
-  if (await isAdminVisitor()) {
-    return NextResponse.json({ skip: true, reason: "admin_preview" });
-  }
-
   let service;
   try {
     service = createServiceClient();
@@ -52,6 +44,21 @@ export async function POST(request, { params }) {
   if (!link || !link.is_active) return NextResponse.json({ error: "Gone" }, { status: 410 });
   if (link.expires_at && new Date(link.expires_at).getTime() < Date.now()) {
     return NextResponse.json({ error: "Gone" }, { status: 410 });
+  }
+
+  // Admin previewing one of their own links — still fire the "link opened"
+  // notification so we can confirm the pipeline is working, then return
+  // before any session/event rows get written. Keeps the admin preview
+  // out of analytics while preserving the email ping.
+  if (await isAdminVisitor()) {
+    const geo = geoFromHeaders(request.headers);
+    notifyLinkOpened({
+      link,
+      session: { id: null, geo },
+      firstSession: true,
+      adminPreview: true,
+    }).catch(() => {});
+    return NextResponse.json({ skip: true, reason: "admin_preview", notified: true });
   }
 
   const ua = request.headers.get("user-agent") || "";
