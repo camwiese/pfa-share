@@ -722,9 +722,11 @@ body[data-direction="forward"] .panel[data-panel="2"].is-active [data-animate="1
   text-wrap: balance;
   margin: 0;
 }
-/* Generous gap between the two distinct thoughts of the quote. */
+/* Tight gap between the two clauses of the quote — small enough to
+   read as one continuous passage, just enough to mark the paragraph
+   break. */
 .burnham__text + .burnham__text {
-  margin-top: clamp(1.5rem, 4vh, 2.5rem);
+  margin-top: clamp(0.4rem, 1vh, 0.7rem);
 }
 .burnham__attribution {
   margin-top: clamp(2rem, 5vh, 3rem);
