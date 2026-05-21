@@ -17,7 +17,7 @@
      the cream paper and the deck's serif voice. Slightly oranger and
      more "fair-poster" than --accent (which leans crimson). */
   --burnham-red:  #c14431;
-  --font-display: 'Fraunces', 'Cormorant Garamond', Georgia, serif;
+  --font-display: 'Crimson Pro', Georgia, serif;
   --font-sans:    'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --gutter:       clamp(1.25rem, 4vw, 2.5rem);
   --vh: 1vh;
