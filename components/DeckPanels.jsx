@@ -188,11 +188,11 @@ const PANELS = [
       <p className="welcome__year" data-animate="1">Palace of Fine Arts &middot; 2030</p>
       <figure className="welcome__figure" data-animate="1">
         <picture>
-          <source type="image/avif" srcSet="/images/opt/map-grounds-v3-800.avif 800w, /images/opt/map-grounds-v3-1280.avif 1280w, /images/opt/map-grounds-v3-1672.avif 1672w" sizes="(max-width: 860px) 90vw, 760px" />
-          <source type="image/webp" srcSet="/images/opt/map-grounds-v3-800.webp 800w, /images/opt/map-grounds-v3-1280.webp 1280w, /images/opt/map-grounds-v3-1672.webp 1672w" sizes="(max-width: 860px) 90vw, 760px" />
+          <source type="image/avif" srcSet="/images/opt/map-grounds-v1-bg-800.avif 800w, /images/opt/map-grounds-v1-bg-1280.avif 1280w, /images/opt/map-grounds-v1-bg-1672.avif 1672w" sizes="(max-width: 860px) 90vw, 760px" />
+          <source type="image/webp" srcSet="/images/opt/map-grounds-v1-bg-800.webp 800w, /images/opt/map-grounds-v1-bg-1280.webp 1280w, /images/opt/map-grounds-v1-bg-1672.webp 1672w" sizes="(max-width: 860px) 90vw, 760px" />
           <img
-            src="/images/opt/map-grounds-v3-1280.jpg"
-            srcSet="/images/opt/map-grounds-v3-800.jpg 800w, /images/opt/map-grounds-v3-1280.jpg 1280w, /images/opt/map-grounds-v3-1672.jpg 1672w"
+            src="/images/opt/map-grounds-v1-bg-1280.jpg"
+            srcSet="/images/opt/map-grounds-v1-bg-800.jpg 800w, /images/opt/map-grounds-v1-bg-1280.jpg 1280w, /images/opt/map-grounds-v1-bg-1672.jpg 1672w"
             sizes="(max-width: 860px) 90vw, 760px"
             alt="The Palace of Fine Arts and lagoon, reimagined"
             className="welcome__image"
