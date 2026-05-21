@@ -46,6 +46,7 @@ const SOURCES = [
   'map-futurelab.png',
   'map-hall-v2.png',
   'map-grounds-v2.png',
+  'map-grounds-v3.png',
 ];
 
 function fmtBytes(n) {

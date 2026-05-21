@@ -847,6 +847,26 @@ body[data-direction="forward"] .panel[data-panel="2"].is-active [data-animate="1
     -webkit-overflow-scrolling: touch;
     touch-action: pan-y;
   }
+
+  /* Mobile bumps for the closing-coda and section-intro slides.
+     Default clamp lower bounds (1.15rem / 1.05rem) read tight on
+     phones; nudge them up so the quote and section-intro prose are
+     comfortably readable without scrolling at one-handed distance. */
+  .burnham__text { font-size: clamp(1.35rem, 4.2vw, 1.6rem); line-height: 1.5; }
+  .section-intro__text { font-size: clamp(1.2rem, 4.5vw, 1.55rem); }
+
+  /* Disable the fade-in entrance transitions on mobile for the closing
+     slides (the letter + Burnham coda). Looked right on a desktop
+     browser scrolling through the deck but read as a beat of jank on
+     phone swipes for the two slides we most-recently changed.
+     Earlier panels keep their animations intact. */
+  .panel--letter [data-animate],
+  .panel--burnham [data-animate] {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+
   /* .section-intro__text intentionally inherits the unified clamp from
      its base rule (matches .prose__text / .ppie__text behavior). */
   .letter__sign { margin-top: clamp(1.5rem, 4vh, 2rem); }
