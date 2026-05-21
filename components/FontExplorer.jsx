@@ -24,13 +24,17 @@
 import { useEffect } from "react";
 
 const FONT_MAP = {
-  fraunces:   "'Fraunces', 'Cormorant Garamond', Georgia, serif",
-  newsreader: "'Newsreader', Georgia, serif",
-  lora:       "'Lora', Georgia, serif",
-  spectral:   "'Spectral', Georgia, serif",
-  playfair:   "'Playfair Display', Georgia, serif",
-  cardo:      "'Cardo', Georgia, serif",
-  cormorant:  "'Cormorant Garamond', Georgia, serif",
+  fraunces:      "'Fraunces', 'Cormorant Garamond', Georgia, serif",
+  newsreader:    "'Newsreader', Georgia, serif",
+  petrona:       "'Petrona', Georgia, serif",
+  "source-serif": "'Source Serif 4', Georgia, serif",
+  crimson:       "'Crimson Pro', Georgia, serif",
+  vollkorn:      "'Vollkorn', Georgia, serif",
+  lora:          "'Lora', Georgia, serif",
+  spectral:      "'Spectral', Georgia, serif",
+  playfair:      "'Playfair Display', Georgia, serif",
+  cardo:         "'Cardo', Georgia, serif",
+  cormorant:     "'Cormorant Garamond', Georgia, serif",
 };
 
 export default function FontExplorer() {
