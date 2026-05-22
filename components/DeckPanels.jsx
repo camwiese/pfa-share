@@ -307,6 +307,10 @@ const PANELS = [
       <p className="burnham__text" data-animate="1">
         Let your watchword be order and your beacon beauty. Think big.&rdquo;
       </p>
+      <div className="burnham__attribution" data-animate="2">
+        <p className="burnham__author">Daniel Burnham</p>
+        <p className="burnham__role">Chief Architect, 1893 Chicago World&rsquo;s Fair</p>
+      </div>
     </div>
     <p className="burnham__footer" data-animate="3">Confidential &middot; World&rsquo;s Fair Co.</p>
   </section>,

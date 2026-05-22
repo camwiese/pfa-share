@@ -697,7 +697,17 @@ body[data-direction="forward"] .panel[data-panel="2"].is-active [data-animate="1
    No decorative glyphs; typography carries the slide. Everything
    centered, with generous breathing room between the two clauses.
    ============================================================= */
-.panel--burnham { background: var(--paper); }
+.panel--burnham {
+  background: var(--paper);
+  /* Snap, don't fade. The closing slide reads as a "drop the
+     mic" beat — animating in undercuts the rhetorical landing.
+     Overrides the default .panel transition for this slide only. */
+  transition: none;
+}
+.panel--burnham.is-active,
+.panel--burnham.is-past {
+  transition: none;
+}
 .burnham__content {
   position: relative; z-index: 1;
   width: 100%;
@@ -823,16 +833,23 @@ body[data-direction="forward"] .panel[data-panel="2"].is-active [data-animate="1
   /* .ppie__text inherits the unified clamp from the mobile rule
      below; image keeps its intrinsic aspect with max-height cap. */
   .welcome__heading { font-size: clamp(1.6rem, 7vw, 2.2rem); }
-  .welcome__sub { font-size: clamp(0.95rem, 4vw, 1.1rem); }
-  /* .prose__text + .impact__text intentionally use the unified
-     clamp(1.05rem, 4vw, 2.4rem) from their base rules — no mobile
-     override, so they match .letter__heading at every viewport. */
+  .welcome__sub { font-size: clamp(1.1rem, 4.2vw, 1.3rem); }
+  /* Body-prose family bumped on mobile. Base clamp's lower bound
+     (1.05rem ≈ 17px) read too small at one-handed phone distance,
+     especially on text-heavy slides like the PPIE history pair. */
+  .ppie__text,
+  .prose__text,
+  .impact__text,
+  .call__text {
+    font-size: clamp(1.3rem, 5vw, 1.8rem);
+    line-height: 1.3;
+  }
   .letter__heading {
-    font-size: clamp(1.05rem, 4.5vw, 1.5rem);
+    font-size: clamp(1.25rem, 5vw, 1.7rem);
     margin-bottom: clamp(1.5rem, 3.5vh, 2rem);
   }
-  .letter__body p { font-size: clamp(0.95rem, 3.8vw, 1.05rem); }
-  .letter__ctas { font-size: 0.66rem; }
+  .letter__body p { font-size: clamp(1.05rem, 4vw, 1.15rem); }
+  .letter__ctas { font-size: 0.72rem; }
 
   /* Keep these panels flex-centered like everything else; the sizing
      above (clamped fonts, capped image heights) keeps their content
