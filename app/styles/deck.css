@@ -739,7 +739,10 @@ body[data-direction="forward"] .panel[data-panel="2"].is-active [data-animate="1
   margin-top: clamp(0.4rem, 1vh, 0.7rem);
 }
 .burnham__attribution {
-  margin-top: clamp(2rem, 5vh, 3rem);
+  /* Close to the quote — feels like a continuation, not a separate
+     block. The condensed paragraph break above makes the previous
+     wider gap here read awkwardly. */
+  margin-top: clamp(0.9rem, 2.5vh, 1.4rem);
   text-align: center;
   color: var(--burnham-red);
   font-family: var(--font-sans);
