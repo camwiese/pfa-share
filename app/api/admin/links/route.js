@@ -32,6 +32,31 @@ export async function GET(request) {
     ? (data || []).filter((l) => l.name?.toLowerCase().includes(q) || l.token?.toLowerCase().includes(q))
     : (data || []);
 
+  const linkIds = filtered.map((l) => l.id);
+  if (linkIds.length > 0) {
+    const { data: sessions } = await auth.service
+      .from("sessions")
+      .select("link_id, fp_hash, total_seconds, is_bot")
+      .in("link_id", linkIds)
+      .limit(5000);
+
+    const byLink = {};
+    for (const s of sessions || []) {
+      if (s.is_bot) continue;
+      if (!byLink[s.link_id]) byLink[s.link_id] = { totalSeconds: 0, fps: new Set() };
+      byLink[s.link_id].totalSeconds += Number(s.total_seconds) || 0;
+      if (s.fp_hash) byLink[s.link_id].fps.add(s.fp_hash);
+    }
+
+    for (const link of filtered) {
+      const agg = byLink[link.id];
+      link.stats = {
+        totalSeconds: agg?.totalSeconds || 0,
+        visitors: agg?.fps?.size || 0,
+      };
+    }
+  }
+
   return NextResponse.json({ links: filtered });
 }
 

@@ -16,8 +16,6 @@ export default function LinksTable() {
   const [creating, setCreating] = useState(false);
   const [name, setName] = useState("");
   const [note, setNote] = useState("");
-  const [signalsByLink, setSignalsByLink] = useState({});
-  const [statsByLink, setStatsByLink] = useState({});
   const inputRef = useRef(null);
 
   const refresh = useCallback(() => {
@@ -36,39 +34,6 @@ export default function LinksTable() {
   useEffect(() => {
     inputRef.current?.focus();
   }, []);
-
-  useEffect(() => {
-    if (links.length === 0) return;
-    let mounted = true;
-    (async () => {
-      // Fire all per-link session fetches in parallel. Was sequential
-      // before — 20 links × ~200ms each was 4s of "stuck" loading.
-      // Parallel collapses that to ~1 round-trip.
-      const sig = {};
-      const stats = {};
-      const subset = links.slice(0, 20);
-      await Promise.all(subset.map(async (l) => {
-        try {
-          const r = await fetch(`/api/admin/sessions?link_id=${l.id}&limit=50&days=365`);
-          if (!r.ok || !mounted) return;
-          const ss = (await r.json()).sessions || [];
-          sig[l.id] = sharingSignal(ss);
-          const real = ss.filter((s) => !s.is_bot);
-          stats[l.id] = {
-            totalSeconds: real.reduce((a, s) => a + (Number(s.total_seconds) || 0), 0),
-            visitors: new Set(real.map((s) => s.fp_hash).filter(Boolean)).size,
-          };
-        } catch {
-          // Skip; an individual link's stats failing shouldn't block the others.
-        }
-      }));
-      if (mounted) {
-        setSignalsByLink(sig);
-        setStatsByLink(stats);
-      }
-    })();
-    return () => { mounted = false; };
-  }, [links]);
 
   useEffect(() => {
     function onKey(e) {
@@ -248,9 +213,13 @@ export default function LinksTable() {
       ) : (
         <div className="row-list">
           {links.map((l) => {
-              const stats = statsByLink[l.id];
+              const stats = l.stats;
               const visitorCount = stats?.visitors ?? 0;
               const sessionCount = l.view_count || 0;
+              const signal = sharingSignal({
+                viewed: !!l.last_viewed_at,
+                uniqueDevices: visitorCount,
+              });
               return (
                 <div
                   key={l.id}
@@ -261,7 +230,7 @@ export default function LinksTable() {
                   {/* Mobile-only structured summary. Hidden on desktop. */}
                   <div className="link-row__mobile">
                     <div className="link-row__mobile-head">
-                      <SharingDot signal={signalsByLink[l.id]} />
+                      <SharingDot signal={signal} />
                       <div className="link-row__mobile-name">
                         <div className="row__primary">{l.name}</div>
                         {l.note ? <div className="row__muted" style={{ fontSize: 11 }}>{l.note}</div> : null}
@@ -304,7 +273,7 @@ export default function LinksTable() {
                   </div>
 
                   {/* Desktop grid cells. Hidden on mobile. */}
-                  <SharingDot signal={signalsByLink[l.id]} />
+                  <SharingDot signal={signal} />
                   <div>
                     <div className="row__primary">{l.name}</div>
                     {l.note ? <div className="row__muted" style={{ fontSize: 11, marginTop: 2 }}>{l.note}</div> : null}
