@@ -48,6 +48,8 @@ const SOURCES = [
   'map-grounds-v2.png',
   'map-grounds-v3.png',
   'map-grounds-v1-bg.png',
+  'preview-center.jpeg',
+  'preview-model.jpg',
 ];
 
 function fmtBytes(n) {

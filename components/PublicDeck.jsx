@@ -4,8 +4,9 @@ import { useEffect, useState } from "react";
 import Deck from "./Deck";
 import GateModal from "./GateModal";
 import TrackerMount from "./TrackerMount";
+import { FULL_VARIANT } from "../constants/variants";
 
-export default function PublicDeck({ freeCount = 5 }) {
+export default function PublicDeck({ freeCount = 5, variant = FULL_VARIANT }) {
   const [modalOpen, setModalOpen] = useState(false);
   const [gateBlocked, setGateBlocked] = useState(false);
   const [verified, setVerified] = useState(false);
@@ -18,13 +19,13 @@ export default function PublicDeck({ freeCount = 5 }) {
       .then(async (d) => {
         if (cancelled) return;
         if (d?.verified) {
-          await injectGatedPanels(freeCount);
+          await injectGatedPanels(freeCount, variant);
           if (!cancelled) setVerified(true);
         }
       })
       .catch(() => {});
     return () => { cancelled = true; };
-  }, [freeCount]);
+  }, [freeCount, variant]);
 
   async function handleGateRequest() {
     setGateBlocked(true);
@@ -32,7 +33,7 @@ export default function PublicDeck({ freeCount = 5 }) {
   }
 
   async function handleVerified() {
-    const ok = await injectGatedPanels(freeCount);
+    const ok = await injectGatedPanels(freeCount, variant);
     if (!ok) {
       // The cookie from /api/auth/verify-otp couldn't be read back in time.
       // A hard reload is the cleanest recovery — the auth-check on mount
@@ -72,14 +73,18 @@ export default function PublicDeck({ freeCount = 5 }) {
   );
 }
 
-async function injectGatedPanels(start) {
+async function injectGatedPanels(start, variant) {
   // The pfa_dummy_auth cookie set by verify-otp can lag a few ms before
   // it's readable by the next fetch (Safari + Firefox especially). Retry
   // a couple of times before giving up so the caller can decide to reload.
+  // `variant` flows through so the gated splice matches the variant the
+  // page rendered above the gate (otherwise we'd inject art-heavy panels
+  // beneath a lite preview, etc.).
+  const variantQs = variant && variant !== "full" ? `&v=${encodeURIComponent(variant)}` : "";
   let res = null;
   for (let attempt = 0; attempt < 4; attempt++) {
     try {
-      res = await fetch(`/api/deck/gated?start=${start}`, { cache: "no-store" });
+      res = await fetch(`/api/deck/gated?start=${start}${variantQs}`, { cache: "no-store" });
       if (res.ok) break;
     } catch {}
     await new Promise((r) => setTimeout(r, 200));

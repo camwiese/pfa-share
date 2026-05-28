@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import DeckPanels, { PANEL_COUNT } from "../../components/DeckPanels";
 import Deck from "../../components/Deck";
 import TrackerMount from "../../components/TrackerMount";
+import { parseVariant, LITE_SLIDE_INDEXES, LITE_VARIANT } from "../../constants/variants";
 import "../styles/deck.css";
 
 export const dynamic = "force-dynamic";
@@ -41,13 +42,18 @@ export default async function DeckPage({ searchParams }) {
   if (!email) redirect("/");
 
   const sp = await searchParams;
+  const variant = parseVariant(sp?.v);
   const startRaw = Number.parseInt(sp?.slide ?? "0", 10);
-  const startIndex = Number.isFinite(startRaw) ? Math.max(0, Math.min(PANEL_COUNT - 1, startRaw)) : 0;
+  // Clamp `?slide=` against the *rendered* deck length, which differs
+  // between full and lite. Otherwise a lite URL with ?slide=29 (out of
+  // range for lite's 15-panel set) would jump nowhere visible.
+  const renderedLength = variant === LITE_VARIANT ? LITE_SLIDE_INDEXES.length : PANEL_COUNT;
+  const startIndex = Number.isFinite(startRaw) ? Math.max(0, Math.min(renderedLength - 1, startRaw)) : 0;
 
   return (
     <>
       <main>
-        <DeckPanels />
+        <DeckPanels variant={variant} />
       </main>
       <Deck startIndex={startIndex} />
       <TrackerMount initEndpoint="/api/track/init" trackEndpoint="/api/track" />

@@ -3,6 +3,7 @@ import { createServiceClient } from "../../../lib/supabase/server";
 import DeckPanels from "../../../components/DeckPanels";
 import Deck from "../../../components/Deck";
 import TrackerMount from "../../../components/TrackerMount";
+import { parseVariant } from "../../../constants/variants";
 import "../../styles/deck.css";
 
 export const dynamic = "force-dynamic";
@@ -12,8 +13,10 @@ export const dynamic = "force-dynamic";
 // Route Handler — Next.js 16 disallows cookies().set() from a Server Component,
 // so any cookie-writing side effect has to live there.
 
-export default async function PersonalLinkPage({ params }) {
+export default async function PersonalLinkPage({ params, searchParams }) {
   const { token } = await params;
+  const sp = await searchParams;
+  const variant = parseVariant(sp?.v);
   // Stale, missing, inactive, or expired tokens fall through to the public
   // preview deck instead of a hard "disabled" page.
   if (!token) redirect("/");
@@ -40,7 +43,7 @@ export default async function PersonalLinkPage({ params }) {
   return (
     <>
       <main>
-        <DeckPanels />
+        <DeckPanels variant={variant} />
       </main>
       <Deck startIndex={0} />
       <TrackerMount

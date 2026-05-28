@@ -3,6 +3,7 @@ import { createClient, createServiceClient } from "../../../../lib/supabase/serv
 import { getAdminEmails } from "../../../../lib/admin";
 import { getDummyAuthEmail } from "../../../../lib/dummyAuth";
 import { getPanelsHtml, TOTAL_PANELS } from "../../../../lib/panelHtml";
+import { parseVariant } from "../../../../constants/variants";
 
 export async function GET(request) {
   const bypass =
@@ -47,7 +48,9 @@ export async function GET(request) {
 
   const url = new URL(request.url);
   const start = Math.max(0, Math.min(TOTAL_PANELS - 1, Number(url.searchParams.get("start") || 5)));
-  const count = TOTAL_PANELS - start;
-  const html = getPanelsHtml(start, count);
-  return NextResponse.json({ html, start, count });
+  const variant = parseVariant(url.searchParams.get("v"));
+  // Pass no `count` — getPanelsHtml will return everything from `start`
+  // to the end of the (already variant-filtered) panel set.
+  const html = getPanelsHtml(start, undefined, variant);
+  return NextResponse.json({ html, start, variant });
 }

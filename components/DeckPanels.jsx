@@ -4,7 +4,14 @@
 //
 // We split the panels into a flat array so callers can request a partial deck
 // for the free preview (count=5) and a separate "gated" slice for the OTP
-// splice-in (count=28 starting at 5).
+// splice-in (the remaining panels starting at index 5).
+//
+// `variant`: "full" (default) renders the whole deck; "lite" filters via
+// LITE_SLIDE_INDEXES to a 15-slide preview that drops most in-section art.
+// See constants/variants.js — the same filter is mirrored in lib/panelHtml.js
+// so the gated splice on the public path stays in sync.
+
+import { filterPanels, FULL_VARIANT } from "../constants/variants";
 
 const HERO_HTML = (
   <section className="panel panel--hero is-active" data-panel="0" data-dark="">
@@ -276,30 +283,77 @@ const PANELS = [
       <p className="tagline__text" data-animate="1">Every visit leaves you with a sense of wonder&nbsp;&mdash; and a reason to return.</p>
     </div>
   </section>,
-  // 26 — Call
-  <section className="panel panel--cream panel--call" data-panel="26" key="26">
-    <div className="call__content">
-      <p className="call__text" data-animate="1">If you&rsquo;re reading this, we&rsquo;d love your help bringing this vision to life.</p>
-    </div>
-  </section>,
-  // 27 — Letter
+  // 26 — Letter (standalone statement, no signature) — was slide 27;
+  // the old "Call" bridge slide (data-panel="26") was removed because
+  // it carried the exact same sentence this heading now does.
+  // data-panel="27" is preserved so the canonical slide identifier
+  // stays meaningful even though the array index has shifted up by 1.
   <section className="panel panel--cream panel--letter" data-panel="27" key="27">
     <div className="letter__content">
-      <h2 className="letter__heading" data-animate="1">Join us in writing the next chapter<br />in the story of San&nbsp;Francisco.</h2>
-      <div className="letter__sign" data-animate="2">
-        <img className="letter__signature" src="/images/cameron-wiese-signature.png" alt="Cameron Wiese" width={932} height={630} />
-        <p className="letter__name">Cameron Wiese</p>
-        <p className="letter__contact">
-          <a href="tel:+13603184480">360-318-4480</a>
-          <span className="letter__sep" aria-hidden="true">|</span>
-          <a href="mailto:cam@worldsfair.co">cam@worldsfair.co</a>
-        </p>
-      </div>
+      <h2 className="letter__heading" data-animate="1">If you&rsquo;re reading this, we&rsquo;d love your help bringing the vision to life.</h2>
     </div>
     <p className="letter__footer" data-animate="3">Confidential &middot; World&rsquo;s Fair Co.</p>
   </section>,
-  // 28 — Burnham quote (closing coda)
-  <section className="panel panel--cream panel--burnham" data-panel="28" key="28">
+  // 28 — Preview Center CTA (merged with closing ask + signature)
+  <section className="panel panel--cream panel--cta" data-panel="28" key="28">
+    <div className="cta__content">
+      <div className="cta__text">
+        <h2 className="cta__heading" data-animate="1">Join us</h2>
+        <p className="cta__body" data-animate="1">
+          We&rsquo;re assembling a coalition of founders, funders, and builders to write the next chapter in the story of San&nbsp;Francisco.
+        </p>
+        <p className="cta__body" data-animate="1">
+          I&rsquo;d love to host you at our Preview Room in the Design District to share the full vision in person.
+        </p>
+        <div className="cta__signature" data-animate="2">
+          <img className="cta__signature-img" src="/images/cameron-wiese-signature.png" alt="Cameron Wiese" width={932} height={630} />
+          <p className="cta__signature-name">Cameron Wiese</p>
+        </div>
+        {/* The deck's tap-to-advance listener already short-circuits on
+            `<a>` via isInteractive() in Deck.jsx, so a real user click
+            here lands in a new tab without flipping the slide. */}
+        <a
+          className="cta__button"
+          href="https://cal.com/wiese/preview-center-tour?overlayCalendar=true"
+          target="_blank"
+          rel="noopener noreferrer"
+          role="button"
+          data-animate="2"
+        >
+          <span className="cta__button-label">Schedule a time</span>
+          <span className="cta__button-arrow" aria-hidden="true">&rarr;</span>
+        </a>
+        <p className="cta__contact-alt" data-animate="2">
+          If none of these times work or you&rsquo;d like to meet at your office, please contact me.
+          <span className="cta__contact-info">
+            <a href="tel:+13603184480">360-318-4480</a>
+            <span className="cta__sep" aria-hidden="true">&middot;</span>
+            <a href="mailto:cam@worldsfair.co?subject=I%27d%20love%20to%20visit%20the%20Preview%20Room&body=Hi%20Cameron%2C%0A%0AI%27d%20love%20to%20visit%20the%20Preview%20Room.%20When%20might%20be%20a%20good%20time%3F%0A%0AThanks!">cam@worldsfair.co</a>
+          </span>
+        </p>
+      </div>
+      <figure className="cta__figure" data-animate="1">
+        <picture>
+          <source type="image/avif" srcSet="/images/opt/preview-model-800.avif 800w, /images/opt/preview-model-1280.avif 1280w, /images/opt/preview-model-1672.avif 1672w" sizes="(max-width: 860px) 92vw, 560px" />
+          <source type="image/webp" srcSet="/images/opt/preview-model-800.webp 800w, /images/opt/preview-model-1280.webp 1280w, /images/opt/preview-model-1672.webp 1672w" sizes="(max-width: 860px) 92vw, 560px" />
+          <img
+            src="/images/opt/preview-model-1280.jpg"
+            srcSet="/images/opt/preview-model-800.jpg 800w, /images/opt/preview-model-1280.jpg 1280w, /images/opt/preview-model-1672.jpg 1672w"
+            sizes="(max-width: 860px) 92vw, 560px"
+            alt="The Preview Room — scale model of the renewed Palace of Fine Arts"
+            className="cta__image"
+            loading="lazy"
+            decoding="async"
+            width={1920}
+            height={1280}
+          />
+        </picture>
+      </figure>
+    </div>
+    <p className="cta__footer" data-animate="3">Confidential &middot; World&rsquo;s Fair Co.</p>
+  </section>,
+  // 29 — Burnham quote (closing coda)
+  <section className="panel panel--cream panel--burnham" data-panel="29" key="29">
     <div className="burnham__content">
       <p className="burnham__text" data-animate="1">
         &ldquo;Make no little plans. They have no magic to stir men&rsquo;s blood and probably themselves will not be realized. Make big plans; aim high in hope and work&hellip;
@@ -318,13 +372,18 @@ const PANELS = [
 
 export const PANEL_COUNT = PANELS.length;
 
-export default function DeckPanels({ start = 0, count = PANELS.length }) {
-  const end = Math.min(PANELS.length, start + count);
-  // Slide 24 is the fountain. When this slice includes it, render the
-  // same fixed-image + blur-layer pattern used by the hero/tagline pair
-  // so slide 25 can sit over a blurred copy of the same image without a
-  // visible image re-mount (mirrors slides 0 → 1).
-  const includesFountain = start <= 24 && end > 24;
+export default function DeckPanels({ start = 0, count, variant = FULL_VARIANT }) {
+  // Pick the panel set first (full vs lite) so `start` / `count` always
+  // index into the variant the caller will actually navigate through.
+  const variantPanels = filterPanels(PANELS, variant);
+  const effectiveCount = count ?? variantPanels.length;
+  const end = Math.min(variantPanels.length, start + effectiveCount);
+  // Slide 24 (the fountain) only exists in the full deck. Even in lite
+  // mode, the substrate `<picture>` is gated on whether any rendered
+  // panel still has data-panel="24" — but lite drops it, so this is
+  // always false there. Kept array-index-aware so future variants that
+  // include 24 still get the fixed substrate.
+  const includesFountain = variant === FULL_VARIANT && start <= 24 && end > 24;
   return (
     <>
       {start === 0 ? (
@@ -398,7 +457,7 @@ export default function DeckPanels({ start = 0, count = PANELS.length }) {
           <div className="fountain-fixed__blur is-hidden" aria-hidden="true" />
         </>
       ) : null}
-      {PANELS.slice(start, end)}
+      {variantPanels.slice(start, end)}
     </>
   );
 }

@@ -25,8 +25,9 @@ export const SLIDE_TITLES = {
   23: "Grounds — wide",
   24: "Evening fountain show",
   25: "Sense of wonder",
-  26: "Call to build",
-  27: "Letter — sign-off",
+  // 26 (Call to build) removed — its text duplicated the Letter heading.
+  26: "Letter — sign-off",
+  27: "Preview Center — CTA",
   28: "Burnham — closing quote",
 };
 

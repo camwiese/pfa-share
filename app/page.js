@@ -1,6 +1,7 @@
 import DeckPanels from "../components/DeckPanels";
 import PublicDeck from "../components/PublicDeck";
 import { createServiceClient } from "../lib/supabase/server";
+import { parseVariant } from "../constants/variants";
 import "./styles/deck.css";
 
 export const dynamic = "force-dynamic";
@@ -19,15 +20,17 @@ async function getFreeSlideCount() {
   }
 }
 
-export default async function HomePage() {
+export default async function HomePage({ searchParams }) {
+  const sp = await searchParams;
+  const variant = parseVariant(sp?.v);
   const freeCount = await getFreeSlideCount();
   return (
     <>
       <main>
-        <DeckPanels count={freeCount} />
+        <DeckPanels count={freeCount} variant={variant} />
         <div id="gated-mount" />
       </main>
-      <PublicDeck freeCount={freeCount} />
+      <PublicDeck freeCount={freeCount} variant={variant} />
     </>
   );
 }
